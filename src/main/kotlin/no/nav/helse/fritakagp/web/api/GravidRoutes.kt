@@ -67,7 +67,7 @@ fun Route.gravidRoutes(
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(application.environment.config, call.request)
                 val request = call.receive<GravidSoknadRequest>()
 
-                val isVirksomhet = if(application.environment.config.property("koin.profile").getString() == "PREPROD") true else breegClient.erVirksomhet(request.virksomhetsnummer)
+                val isVirksomhet = breegClient.erVirksomhet(request.virksomhetsnummer)
                 request.validate(isVirksomhet)
 
                 val sendtAvNavn = pdlService.finnNavn(innloggetFnr)
