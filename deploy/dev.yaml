@@ -53,6 +53,7 @@ spec:
         - host: tt02.altinn.no
         - host: kafka-schema-registry.nais-q.adeo.no
         - host: data.brreg.no
+        - host: api-gw-q1.oera.no
 
       rules:
         - application: helsearbeidsgiver-proxy
