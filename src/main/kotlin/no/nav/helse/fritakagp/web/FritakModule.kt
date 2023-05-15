@@ -67,7 +67,7 @@ private fun Application.configureCORSAccess(config: ApplicationConfig) {
 
         when (config.getEnvironment()) {
             AppEnv.PROD -> host("arbeidsgiver.nav.no", schemes = listOf("https"))
-            AppEnv.PREPROD -> host("arbeidsgiver.dev.nav.no", schemes = listOf("https"))
+            AppEnv.PREPROD -> host("arbeidsgiver.intern.dev.nav.no", schemes = listOf("https"))
             else -> anyHost()
         }
 
