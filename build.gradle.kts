@@ -142,7 +142,7 @@ dependencies {
     val valiktorVersion: String by project
     val maskinportenClientVersion: String by project
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
