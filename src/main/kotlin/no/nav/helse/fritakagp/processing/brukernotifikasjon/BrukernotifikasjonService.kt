@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.hag.utils.bakgrunnsjobb.Bakgrunnsjobb
 import no.nav.helsearbeidsgiver.utils.log.logger
+import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.action.Tekst
 import no.nav.tms.varsel.action.Varseltype
@@ -31,6 +32,9 @@ class BrukernotifikasjonService(
             )
             link = frontendAppBaseUrl + jobbData.hentLenke()
             aktivFremTil = ZonedDateTime.now().plusDays(31)
+            eksternVarsling {
+                preferertKanal = EksternKanal.SMS
+            }
         }
     }
 }
