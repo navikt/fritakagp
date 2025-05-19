@@ -41,6 +41,10 @@ spec:
   azure:
     application:
       enabled: true
+  observability:
+    logging:
+      destinations:
+        - id: secure_logs
   secureLogs:
     enabled: true
   prometheus:
