@@ -18,13 +18,8 @@ application {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_21)
     }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -47,16 +42,18 @@ repositories {
 }
 
 tasks.named<Jar>("jar") {
+    val dependencies = configurations.runtimeClasspath.get()
+
     archiveBaseName.set("app")
+
     manifest {
         attributes["Main-Class"] = mainClassFritakAgp
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-            it.name
-        }
+        attributes["Class-Path"] = dependencies.joinToString(separator = " ") { it.name }
     }
+
     doLast {
-        configurations.runtimeClasspath.get().forEach {
-            val file = File("$buildDir/libs/${it.name}")
+        dependencies.forEach {
+            val file = layout.buildDirectory.file("libs/${it.name}").get().asFile
             if (!file.exists()) {
                 it.copyTo(file)
             }
@@ -78,7 +75,7 @@ tasks.named<Test>("test") {
     exclude("no/nav/helse/slowtests/**")
 }
 
-task<Test>("slowTests") {
+tasks.register<Test>("slowTests") {
     include("no/nav/helse/slowtests/**")
     outputs.upToDateWhen { false }
     group = "verification"
