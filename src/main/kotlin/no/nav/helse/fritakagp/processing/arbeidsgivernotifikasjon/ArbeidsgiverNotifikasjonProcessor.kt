@@ -8,8 +8,11 @@ import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
+import no.nav.helsearbeidsgiver.arbeidsgivernotifkasjon.graphql.generated.enums.SaksStatus
 import no.nav.helsearbeidsgiver.utils.log.logger
 import java.util.UUID
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 
 class ArbeidsgiverNotifikasjonProcessor(
     private val gravidKravRepo: GravidKravRepository,
@@ -32,13 +35,15 @@ class ArbeidsgiverNotifikasjonProcessor(
         val sak = map(jobbData)
         val resultat = runBlocking {
             arbeidsgiverNotifikasjonKlient.opprettNySak(
+                virksomhetsnummer = sak.virkomhetsnummer,
                 grupperingsid = sak.id.toString(),
                 merkelapp = "Fritak arbeidsgiverperiode",
-                virksomhetsnummer = sak.virkomhetsnummer,
-                tittel = sak.tittel,
                 lenke = sak.lenke,
-                harddeleteOm = sak.harddeleteOm,
-                statusTekst = "Mottatt"
+                tittel = sak.tittel,
+                statusTekst = "Mottatt",
+                tilleggsinfo = null,
+                initiellStatus = SaksStatus.UNDER_BEHANDLING,
+                hardDeleteOm = sak.hardDeleteOm
             )
         }
         updateSaksId(jobbData, resultat)
@@ -71,7 +76,7 @@ class ArbeidsgiverNotifikasjonProcessor(
                 skjema.virksomhetsnummer,
                 genererTittel(skjema.navn, skjema.identitetsnummer),
                 "$frontendAppBaseUrl/nb/kronisk/krav/${skjema.id}",
-                "P3Y"
+                (3 * 365).days
             )
         } else {
             val skjema = gravidKravRepo.getById(jobbData.skjemaId)
@@ -81,7 +86,7 @@ class ArbeidsgiverNotifikasjonProcessor(
                 skjema.virksomhetsnummer,
                 genererTittel(skjema.navn, skjema.identitetsnummer),
                 "$frontendAppBaseUrl/nb/gravid/krav/${skjema.id}",
-                "P1Y"
+                365.days
             )
         }
     }
@@ -91,7 +96,7 @@ class ArbeidsgiverNotifikasjonProcessor(
         val virkomhetsnummer: String,
         val tittel: String,
         val lenke: String,
-        val harddeleteOm: String
+        val hardDeleteOm: Duration
     )
 
     data class JobbData(

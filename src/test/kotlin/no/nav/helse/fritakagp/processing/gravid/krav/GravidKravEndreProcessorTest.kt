@@ -56,7 +56,7 @@ class GravidKravEndreProcessorTest {
         every { repositoryMock.getById(endretKrav.endretTilId!!) } returns oppdatertKrav
         every { bucketStorageMock.getDocAsString(any()) } returns null
         every { pdlServiceMock.hentAktoerId(endretKrav.identitetsnummer) } returns "aktør-id"
-        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
+        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns GravidTestData.gravidOpprettOppgaveResponse.copy(id = oppgaveId)
         coEvery { berregServiceMock.getVirksomhetsNavn(endretKrav.virksomhetsnummer) } returns "Stark Industries"
     }
@@ -68,7 +68,7 @@ class GravidKravEndreProcessorTest {
         assertThat(oppdatertKrav.journalpostId).isEqualTo(arkivReferanse)
         assertThat(oppdatertKrav.oppgaveId).isEqualTo(oppgaveId.toString())
 
-        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) {
             oppgaveMock.opprettOppgave(
                 withArg {
@@ -90,7 +90,7 @@ class GravidKravEndreProcessorTest {
         assertThat(oppdatertKrav.journalpostId).isEqualTo(arkivReferanse)
         assertThat(oppdatertKrav.oppgaveId).isNull()
 
-        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { oppgaveMock.opprettOppgave(any(), any()) }
         verify(exactly = 1) { repositoryMock.update(oppdatertKrav) }
     }

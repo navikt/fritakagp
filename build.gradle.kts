@@ -41,69 +41,68 @@ repositories {
     }
 }
 
-tasks.named<Jar>("jar") {
-    val dependencies = configurations.runtimeClasspath.get()
+tasks {
+    named<Jar>("jar") {
+        val dependencies = configurations.runtimeClasspath.get()
 
-    archiveBaseName.set("app")
+        archiveBaseName.set("app")
 
-    manifest {
-        attributes["Main-Class"] = mainClassFritakAgp
-        attributes["Class-Path"] = dependencies.joinToString(separator = " ") { it.name }
-    }
+        manifest {
+            attributes["Main-Class"] = mainClassFritakAgp
+            attributes["Class-Path"] = dependencies.joinToString(separator = " ") { it.name }
+        }
 
-    doLast {
-        dependencies.forEach {
-            val file = layout.buildDirectory.file("libs/${it.name}").get().asFile
-            if (!file.exists()) {
-                it.copyTo(file)
+        doLast {
+            dependencies.forEach {
+                val file = layout.buildDirectory.file("libs/${it.name}").get().asFile
+                if (!file.exists()) {
+                    it.copyTo(file)
+                }
             }
         }
     }
-}
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-        showStackTraces = true
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+            showStackTraces = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
     }
-}
 
-tasks.named<Test>("test") {
-    include("no/nav/helse/**")
-    exclude("no/nav/helse/slowtests/**")
-}
-
-tasks.register<Test>("slowTests") {
-    include("no/nav/helse/slowtests/**")
-    outputs.upToDateWhen { false }
-    group = "verification"
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports {
-        xml.required.set(true)
-        csv.required.set(false)
-        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    named<Test>("test") {
+        include("no/nav/helse/**")
+        exclude("no/nav/helse/slowtests/**")
     }
-}
 
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
+    register<Test>("slowTests") {
+        include("no/nav/helse/slowtests/**")
+        outputs.upToDateWhen { false }
+        group = "verification"
+    }
 
-tasks.withType<Wrapper> {
-    gradleVersion = "8.3"
+    jacocoTestReport {
+        dependsOn(test)
+        reports {
+            xml.required.set(true)
+            csv.required.set(false)
+            html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+        }
+    }
+
+    test {
+        finalizedBy(jacocoTestReport)
+    }
 }
 
 dependencies {
+    val aaregClientVersion: String by project
     val altinnClientVersion: String by project
     val altinnCorrespondenceAgencyVersion: String by project
     val arbeidsgiverNotifikasjonKlientVersion: String by project
-    val bakgrunnsjobbVersion: String by project
     val assertJVersion: String by project
+    val bakgrunnsjobbVersion: String by project
     val brukernotifikasjonSchemasVersion: String by project
     val confluentVersion: String by project
     val coroutinesVersion: String by project
@@ -123,23 +122,22 @@ dependencies {
     val kafkaClient: String by project
     val kformatVersion: String by project
     val koinVersion: String by project
+    val kotlinxSerializationVersion: String by project
     val ktorVersion: String by project
     val logbackEncoderVersion: String by project
     val logback_version: String by project
-    val mockkVersion: String by project
     val mockOAuth2ServerVersion: String by project
+    val mockkVersion: String by project
     val pdfboxVersion: String by project
     val pdlClientVersion: String by project
-    val aaregClientVersion: String by project
     val postgresqlVersion: String by project
     val prometheusVersion: String by project
     val slf4jVersion: String by project
+    val tmsVarselKotlinBuilderVersion: String by project
     val tokenSupportVersion: String by project
     val utilsVersion: String by project
     val valiktorVersion: String by project
-    val tmsVarselKotlinBuilderVersion: String by project
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
@@ -157,21 +155,17 @@ dependencies {
     implementation("io.insert-koin:koin-core-jvm:$koinVersion")
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
-    implementation("io.ktor:ktor-server:$ktorVersion")
-    implementation("io.ktor:ktor-server-cors:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth:$ktorVersion")
-    implementation("io.ktor:ktor-client-apache:$ktorVersion")
-    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-client-json:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-server-locations:$ktorVersion")
+    implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
-    implementation("io.ktor:ktor-network-tls-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server:$ktorVersion")
+    implementation("io.mockk:mockk:$mockkVersion") // Brukes til å mocke eksterne avhengigheter under lokal kjøring
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
@@ -187,30 +181,29 @@ dependencies {
         exclude(group = "org.slf4j", module = "slf4j-api")
         exclude(group = "io.netty", module = "netty-all")
     }
-    implementation("no.nav.helsearbeidsgiver:pdl-client:$pdlClientVersion")
     implementation("no.nav.helsearbeidsgiver:aareg-client:$aaregClientVersion")
-    implementation("no.nav.security:token-validation-ktor-v2:$tokenSupportVersion")
     implementation("no.nav.helsearbeidsgiver:altinn-client:$altinnClientVersion")
+    implementation("no.nav.helsearbeidsgiver:pdl-client:$pdlClientVersion")
+    implementation("no.nav.security:token-validation-ktor-v3:$tokenSupportVersion")
     implementation("no.nav.tjenestespesifikasjoner:altinn-correspondence-agency-external-basic:$altinnCorrespondenceAgencyVersion")
+    implementation("no.nav.tms.varsel:kotlin-builder:$tmsVarselKotlinBuilderVersion")
     implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-transports-http:$cxfVersion")
-    implementation("org.codehaus.janino:janino:$janinoVersion")
     implementation("org.apache.kafka:kafka-clients:$kafkaClient")
     implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
-
+    implementation("org.codehaus.janino:janino:$janinoVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
     implementation("org.postgresql:postgresql:$postgresqlVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.valiktor:valiktor-core:$valiktorVersion")
     implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
-    implementation("io.mockk:mockk:$mockkVersion") // Brukes til å mocke eksterne avhengigheter under lokal kjøring
-    implementation("no.nav.tms.varsel:kotlin-builder:$tmsVarselKotlinBuilderVersion")
 
+    testImplementation(testFixtures("no.nav.helsearbeidsgiver:utils:$utilsVersion"))
     testImplementation("io.insert-koin:koin-test:$koinVersion")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
@@ -218,4 +211,5 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

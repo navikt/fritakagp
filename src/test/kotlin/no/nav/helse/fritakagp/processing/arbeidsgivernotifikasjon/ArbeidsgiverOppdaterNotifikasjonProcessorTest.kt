@@ -56,12 +56,12 @@ class ArbeidsgiverOppdaterNotifikasjonProcessorTest {
     @Test
     fun `Oppdaterer sak mot arbeidsgiver-notifikasjoner for gravidKrav`() {
         prosessor.prosesser(gravidJobb)
-        coVerify(exactly = 1) { arbeidsgiverNotifikasjonKlient.nyStatusSakByGrupperingsid(gravidKrav.id.toString(), any(), SaksStatus.MOTTATT, "2023-12-24T10:00:00+01:00") }
+        coVerify(exactly = 1) { arbeidsgiverNotifikasjonKlient.nyStatusSakByGrupperingsid(gravidKrav.id.toString(), any(), SaksStatus.MOTTATT, any(), any(), "2023-12-24T10:00:00+01:00") }
     }
 
     @Test
     fun `Oppdaterer sak mot arbeidsgiver-notifikasjoner for kroniskKrav`() {
         prosessor.prosesser(kroniskJobb)
-        coVerify(exactly = 1) { arbeidsgiverNotifikasjonKlient.nyStatusSakByGrupperingsid(kroniskKrav.id.toString(), any(), SaksStatus.MOTTATT, "2023-12-24T10:00:00+01:00") }
+        coVerify(exactly = 1) { arbeidsgiverNotifikasjonKlient.nyStatusSakByGrupperingsid(kroniskKrav.id.toString(), any(), SaksStatus.MOTTATT, any(), any(), "2023-12-24T10:00:00+01:00") }
     }
 }

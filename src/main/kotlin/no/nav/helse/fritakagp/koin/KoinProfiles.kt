@@ -2,7 +2,7 @@ package no.nav.helse.fritakagp.koin
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
@@ -26,7 +26,7 @@ private val common = module {
     single { customObjectMapper() }
 
     single {
-        HttpClient(Apache) {
+        HttpClient(Apache5) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, JacksonConverter(customObjectMapper()))
                 jackson {

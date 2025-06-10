@@ -4,10 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -24,11 +20,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverNotifikasjonProcessorTest {
-    private fun getResourceAsText(filename: String) =
-        this::class.java.classLoader.getResource("responses/$filename")!!.readText()
-
-    val response = getResourceAsText("opprettNySak/gyldig.json")
-    val arbeidsgiverNotifikasjonKlient = mockClientArbeidsgiverNotifikasjonKlient(response)
+    val arbeidsgiverNotifikasjonKlient = mockClientArbeidsgiverNotifikasjonKlient()
     val gravidKravRepositoryMock = mockk<GravidKravRepository>(relaxed = true)
     val kroniskKravRepositoryMock = mockk<KroniskKravRepository>(relaxed = true)
     val objectMapper = ObjectMapper().registerModule(
@@ -81,12 +73,8 @@ internal class ArbeidsgiverNotifikasjonProcessorTest {
     }
 }
 
-fun mockClientArbeidsgiverNotifikasjonKlient(
-    response: String,
-    status: HttpStatusCode = HttpStatusCode.OK,
-    headers: Headers = headersOf(HttpHeaders.ContentType, "application/json")
-): ArbeidsgiverNotifikasjonKlient {
+fun mockClientArbeidsgiverNotifikasjonKlient(): ArbeidsgiverNotifikasjonKlient {
     val klient = mockk<ArbeidsgiverNotifikasjonKlient>(relaxed = true)
-    coEvery { klient.opprettNySak(any(), any(), any(), any(), any(), any(), any()) } returns "1"
+    coEvery { klient.opprettNySak(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns "1"
     return klient
 }

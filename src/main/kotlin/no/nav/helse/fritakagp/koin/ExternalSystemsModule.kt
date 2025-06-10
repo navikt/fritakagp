@@ -16,22 +16,21 @@ import no.nav.helse.fritakagp.integration.virusscan.ClamavVirusScannerImp
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
-import no.nav.helsearbeidsgiver.altinn.CacheConfig
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.pdl.Behandlingsgrunnlag
 import no.nav.helsearbeidsgiver.pdl.PdlClient
+import no.nav.helsearbeidsgiver.utils.cache.LocalCache
 import org.koin.core.module.Module
 import org.koin.dsl.bind
-import java.time.Duration
-import kotlin.time.toKotlinDuration
+import kotlin.time.Duration.Companion.minutes
 
 fun Module.externalSystemClients(env: Env) {
     single {
         Altinn3OBOClient(
             baseUrl = env.altinnTilgangerBaseUrl,
             serviceCode = env.altinnServiceOwnerServiceId,
-            cacheConfig = CacheConfig(Duration.ofMinutes(60).toKotlinDuration(), 100)
+            cacheConfig = LocalCache.Config(60.minutes, 100)
         )
     } bind Altinn3OBOClient::class
 
