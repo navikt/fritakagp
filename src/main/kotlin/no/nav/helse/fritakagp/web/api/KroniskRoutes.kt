@@ -41,7 +41,6 @@ import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.utils.log.logger
-import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDateTime
 import java.util.UUID
@@ -157,7 +156,7 @@ fun Route.kroniskRoutes(
 
                 logger.info("KKPo: Hent ansettelsesperioder fra aareg.")
                 val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(Fnr(request.identitetsnummer), UUID.randomUUID().toString())
+                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
                     .get(Orgnr(request.virksomhetsnummer))
                     .orEmpty()
 
@@ -206,7 +205,7 @@ fun Route.kroniskRoutes(
 
                 logger.info("KKPa: Hent ansettelsesperioder fra aareg.")
                 val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(Fnr(request.identitetsnummer), UUID.randomUUID().toString())
+                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
                     .get(Orgnr(request.virksomhetsnummer))
                     .orEmpty()
 

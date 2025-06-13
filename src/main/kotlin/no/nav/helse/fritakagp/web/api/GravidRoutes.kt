@@ -43,7 +43,6 @@ import no.nav.helse.fritakagp.web.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
-import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.valiktor.ConstraintViolationException
 import org.valiktor.DefaultConstraintViolation
@@ -134,7 +133,7 @@ fun Route.gravidRoutes(
                 val request = call.receive<GravidKravRequest>()
                 authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
                 val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(Fnr(request.identitetsnummer), UUID.randomUUID().toString())
+                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
                     .get(Orgnr(request.virksomhetsnummer))
                     .orEmpty()
 
@@ -175,7 +174,7 @@ fun Route.gravidRoutes(
                 val navn = pdlService.hentNavn(request.identitetsnummer)
 
                 val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(Fnr(request.identitetsnummer), UUID.randomUUID().toString())
+                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
                     .get(Orgnr(request.virksomhetsnummer))
                     .orEmpty()
 
