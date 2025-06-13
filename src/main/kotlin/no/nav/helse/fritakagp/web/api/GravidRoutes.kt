@@ -3,7 +3,6 @@ package no.nav.helse.fritakagp.web.api
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.application
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -44,6 +43,8 @@ import no.nav.helse.fritakagp.web.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
+import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.valiktor.ConstraintViolationException
 import org.valiktor.DefaultConstraintViolation
 import java.time.LocalDateTime
@@ -132,11 +133,12 @@ fun Route.gravidRoutes(
             post {
                 val request = call.receive<GravidKravRequest>()
                 authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
-                val arbeidsforhold = aaregClient
-                    .hentArbeidsforhold(request.identitetsnummer, UUID.randomUUID().toString())
-                    .filter { it.arbeidsgiver.organisasjonsnummer == request.virksomhetsnummer }
+                val ansettelsesperioder = aaregClient
+                    .hentAnsettelsesperioder(Fnr(request.identitetsnummer), UUID.randomUUID().toString())
+                    .get(Orgnr(request.virksomhetsnummer))
+                    .orEmpty()
 
-                request.validate(arbeidsforhold)
+                request.validate(ansettelsesperioder)
 
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
                 val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
@@ -172,11 +174,12 @@ fun Route.gravidRoutes(
                 val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
                 val navn = pdlService.hentNavn(request.identitetsnummer)
 
-                val arbeidsforhold = aaregClient
-                    .hentArbeidsforhold(request.identitetsnummer, UUID.randomUUID().toString())
-                    .filter { it.arbeidsgiver.organisasjonsnummer == request.virksomhetsnummer }
+                val ansettelsesperioder = aaregClient
+                    .hentAnsettelsesperioder(Fnr(request.identitetsnummer), UUID.randomUUID().toString())
+                    .get(Orgnr(request.virksomhetsnummer))
+                    .orEmpty()
 
-                request.validate(arbeidsforhold)
+                request.validate(ansettelsesperioder)
 
                 val kravId = UUID.fromString(call.parameters["id"])
                 val forrigeKrav = gravidKravRepo.getById(kravId)

@@ -24,10 +24,6 @@ import no.nav.helse.fritakagp.integration.virusscan.MockVirusScanner
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOppdaterNotifikasjonProcessor
 import no.nav.helsearbeidsgiver.aareg.AaregClient
-import no.nav.helsearbeidsgiver.aareg.Ansettelsesperiode
-import no.nav.helsearbeidsgiver.aareg.Arbeidsforhold
-import no.nav.helsearbeidsgiver.aareg.Arbeidsgiver
-import no.nav.helsearbeidsgiver.aareg.Opplysningspliktig
 import no.nav.helsearbeidsgiver.aareg.Periode
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.altinn.AltinnTilgangRespons
@@ -35,6 +31,7 @@ import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.pdl.PdlClient
 import no.nav.helsearbeidsgiver.pdl.domene.FullPerson
 import no.nav.helsearbeidsgiver.pdl.domene.PersonNavn
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.koin.core.module.Module
 import org.koin.dsl.bind
@@ -81,40 +78,10 @@ fun Module.mockExternalDependecies() {
     single { MockBrukernotifikasjonBeskjedSender() } bind BrukernotifikasjonSender::class
     single {
         mockk<AaregClient> {
-            coEvery { hentArbeidsforhold(any(), any()) } returns listOf(
-                Arbeidsforhold(
-                    Arbeidsgiver("test", "810007842"),
-                    Opplysningspliktig("Juice", "810007702"),
-                    emptyList(),
-                    Ansettelsesperiode(
-                        Periode(LocalDate.MIN, null)
-                    ),
-                    LocalDate.MIN.atStartOfDay()
-                ),
-                Arbeidsforhold(
-                    Arbeidsgiver("test", "910098896"),
-                    Opplysningspliktig("Juice", "910098896"),
-                    emptyList(),
-                    Ansettelsesperiode(
-                        Periode(
-                            LocalDate.MIN,
-                            null
-                        )
-                    ),
-                    LocalDate.MIN.atStartOfDay()
-                ),
-                Arbeidsforhold(
-                    Arbeidsgiver("test", "917404437"),
-                    Opplysningspliktig("Juice", "910098896"),
-                    emptyList(),
-                    Ansettelsesperiode(
-                        Periode(
-                            LocalDate.MIN,
-                            null
-                        )
-                    ),
-                    LocalDate.MIN.atStartOfDay()
-                )
+            coEvery { hentAnsettelsesperioder(any(), any()) } returns mapOf(
+                Orgnr("810007842") to setOf(Periode(LocalDate.MIN, null)),
+                Orgnr("910098896") to setOf(Periode(LocalDate.MIN, null)),
+                Orgnr("917404437") to setOf(Periode(LocalDate.MIN, null))
             )
         }
     }

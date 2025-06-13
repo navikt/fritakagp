@@ -1,32 +1,31 @@
 package no.nav.helse.fritakagp.web.api.resreq.validation
 
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
-import no.nav.helsearbeidsgiver.aareg.Arbeidsforhold
 import org.valiktor.Validator
 import java.time.LocalDate
 import no.nav.helsearbeidsgiver.aareg.Periode as AaregPeriode
 
 class ArbeidsforholdConstraint : CustomConstraint
-val MAKS_DAGER_OPPHOLD = 3L
 
-fun <E> Validator<E>.Property<LocalDate?>.måHaAktivtArbeidsforhold(agp: Arbeidsgiverperiode, aaregData: List<Arbeidsforhold>) =
+private const val MAKS_DAGER_OPPHOLD = 3L
+
+fun <E> Validator<E>.Property<LocalDate?>.maaHaAktivtAnsettelsesperiode(agp: Arbeidsgiverperiode, ansettelsesperioder: Set<AaregPeriode>) =
     this.validate(ArbeidsforholdConstraint()) {
-        val ansattPerioder = slåSammenPerioder(aaregData.map { it.ansettelsesperiode.periode })
+        val ansattPerioder = slaaSammenPerioder(ansettelsesperioder)
         return@validate agp.innenforArbeidsforhold(ansattPerioder) ||
-            agp.innenforArbeidsforhold(aaregData.map { it.ansettelsesperiode.periode })
+            agp.innenforArbeidsforhold(ansettelsesperioder)
     }
 
-fun Arbeidsgiverperiode.innenforArbeidsforhold(ansattPerioder: List<AaregPeriode>): Boolean {
-    return ansattPerioder.any { ansPeriode ->
-        (ansPeriode.tom == null || this.tom.isBefore(ansPeriode.tom) || this.tom == ansPeriode.tom) &&
-            (ansPeriode.fom!!.isBefore(this.fom) || ansPeriode.fom!!.isEqual(this.fom))
+fun Arbeidsgiverperiode.innenforArbeidsforhold(ansattPerioder: Set<AaregPeriode>): Boolean =
+    ansattPerioder.any { ansPeriode ->
+        !fom.isBefore(ansPeriode.fom) &&
+            (ansPeriode.tom == null || !tom.isAfter(ansPeriode.tom))
     }
-}
 
-fun slåSammenPerioder(list: List<AaregPeriode>): List<AaregPeriode> {
-    if (list.size < 2) return list
+fun slaaSammenPerioder(ansettelsesperioder: Set<AaregPeriode>): Set<AaregPeriode> {
+    if (ansettelsesperioder.size <= 1) return ansettelsesperioder
 
-    val remainingPeriods = list
+    val remainingPeriods = ansettelsesperioder
         .sortedBy { it.fom }
         .toMutableList()
 
@@ -38,7 +37,7 @@ fun slåSammenPerioder(list: List<AaregPeriode>): List<AaregPeriode> {
 
         do {
             val connectedPeriod = remainingPeriods
-                .find { !oppholdMellomPerioderOverstigerDager(currentPeriod, it, MAKS_DAGER_OPPHOLD) }
+                .find { !oppholdMellomPerioderOverstigerDager(currentPeriod, it) }
             if (connectedPeriod != null) {
                 currentPeriod = AaregPeriode(currentPeriod.fom, connectedPeriod.tom)
                 remainingPeriods.remove(connectedPeriod)
@@ -48,13 +47,12 @@ fun slåSammenPerioder(list: List<AaregPeriode>): List<AaregPeriode> {
         merged.add(currentPeriod)
     } while (remainingPeriods.isNotEmpty())
 
-    return merged
+    return merged.toSet()
 }
 
 fun oppholdMellomPerioderOverstigerDager(
     a1: AaregPeriode,
-    a2: AaregPeriode,
-    dager: Long
+    a2: AaregPeriode
 ): Boolean {
-    return a1.tom?.plusDays(dager)?.isBefore(a2.fom) ?: true
+    return a1.tom?.plusDays(MAKS_DAGER_OPPHOLD)?.isBefore(a2.fom) ?: true
 }
