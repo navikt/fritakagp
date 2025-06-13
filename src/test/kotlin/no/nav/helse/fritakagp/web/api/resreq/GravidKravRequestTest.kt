@@ -18,38 +18,38 @@ class GravidKravRequestTest {
     @Test
     internal fun `Antall dager kan ikke være mer enn dager i året`() {
         validationShouldFailFor(GravidKravRequest::antallDager) {
-            GravidTestData.gravidKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigArbeidsForholdListe)
+            GravidTestData.gravidKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Antall dager kan ikke være negativt`() {
         validationShouldFailFor(GravidKravRequest::antallDager) {
-            GravidTestData.gravidKravRequestValid.copy(antallDager = -1).validate(AaregTestData.evigArbeidsForholdListe)
+            GravidTestData.gravidKravRequestValid.copy(antallDager = -1).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Antall dager må være 1-366`() {
         validationShouldFailFor(GravidKravRequest::antallDager) {
-            GravidTestData.gravidKravRequestValid.copy(antallDager = 0).validate(AaregTestData.evigArbeidsForholdListe)
+            GravidTestData.gravidKravRequestValid.copy(antallDager = 0).validate(AaregTestData.evigAnsettelsesperiode)
         }
         validationShouldFailFor(GravidKravRequest::antallDager) {
-            GravidTestData.gravidKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigArbeidsForholdListe)
+            GravidTestData.gravidKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Gyldig FNR er påkrevd`() {
         validationShouldFailFor(GravidKravRequest::identitetsnummer) {
-            GravidTestData.gravidKravRequestValid.copy(identitetsnummer = "01020312345").validate(AaregTestData.evigArbeidsForholdListe)
+            GravidTestData.gravidKravRequestValid.copy(identitetsnummer = "01020312345").validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Gyldig OrgNr er påkrevd dersom det er oppgitt`() {
         validationShouldFailFor(GravidKravRequest::virksomhetsnummer) {
-            GravidTestData.gravidKravRequestValid.copy(virksomhetsnummer = "098765432").validate(AaregTestData.evigArbeidsForholdListe)
+            GravidTestData.gravidKravRequestValid.copy(virksomhetsnummer = "098765432").validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -58,20 +58,20 @@ class GravidKravRequestTest {
         validationShouldFailFor("perioder[0].gradering") {
             GravidTestData.gravidKravRequestValid.copy(
                 perioder = listOf(GravidTestData.gravidKravRequestValid.perioder.first().copy(gradering = 1.1))
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
 
         validationShouldFailFor("perioder[0].gradering") {
             GravidTestData.gravidKravRequestValid.copy(
                 perioder = listOf(GravidTestData.gravidKravRequestValid.perioder.first().copy(gradering = 0.1))
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Bekreftelse av egenerklæring er påkrevd`() {
         validationShouldFailFor(GravidKravRequest::bekreftet) {
-            GravidTestData.gravidKravRequestValid.copy(bekreftet = false).validate(AaregTestData.evigArbeidsForholdListe)
+            GravidTestData.gravidKravRequestValid.copy(bekreftet = false).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -85,7 +85,7 @@ class GravidKravRequestTest {
         validationShouldFailFor("perioder[0].antallDagerMedRefusjon") {
             GravidTestData.gravidKravRequestValid.copy(
                 perioder = listOf(GravidTestData.gravidKravRequestValid.perioder.first().copy(antallDagerMedRefusjon = 21))
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -100,7 +100,7 @@ class GravidKravRequestTest {
                         antallDagerMedRefusjon = -5
                     )
                 ) // slik at validationShouldFailFor() kaster ikke to unntak
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 

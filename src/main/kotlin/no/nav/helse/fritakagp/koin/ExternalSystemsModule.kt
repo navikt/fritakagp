@@ -23,6 +23,7 @@ import no.nav.helsearbeidsgiver.pdl.PdlClient
 import no.nav.helsearbeidsgiver.utils.cache.LocalCache
 import org.koin.core.module.Module
 import org.koin.dsl.bind
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 fun Module.externalSystemClients(env: Env) {
@@ -43,7 +44,11 @@ fun Module.externalSystemClients(env: Env) {
 
     single {
         val azureAuthClient: AuthClient = get()
-        AaregClient(env.aaregUrl, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeAareg))
+        AaregClient(
+            url = env.aaregUrl,
+            cacheConfig = LocalCache.Config(7.days, 500),
+            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeAareg)
+        )
     } bind AaregClient::class
 
     single {

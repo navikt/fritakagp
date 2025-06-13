@@ -1,268 +1,98 @@
 package no.nav.helse
 
-import no.nav.helsearbeidsgiver.aareg.Ansettelsesperiode
-import no.nav.helsearbeidsgiver.aareg.Arbeidsforhold
-import no.nav.helsearbeidsgiver.aareg.Arbeidsgiver
-import no.nav.helsearbeidsgiver.aareg.Opplysningspliktig
 import no.nav.helsearbeidsgiver.aareg.Periode
+import no.nav.helsearbeidsgiver.utils.test.date.april
+import no.nav.helsearbeidsgiver.utils.test.date.august
+import no.nav.helsearbeidsgiver.utils.test.date.desember
+import no.nav.helsearbeidsgiver.utils.test.date.februar
+import no.nav.helsearbeidsgiver.utils.test.date.januar
+import no.nav.helsearbeidsgiver.utils.test.date.juni
+import no.nav.helsearbeidsgiver.utils.test.date.mai
+import no.nav.helsearbeidsgiver.utils.test.date.mars
+import no.nav.helsearbeidsgiver.utils.test.date.november
+import no.nav.helsearbeidsgiver.utils.test.date.september
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 object AaregTestData {
-    val arbeidsgiver = Arbeidsgiver("AS", "1232242423")
-    val opplysningspliktig = Opplysningspliktig("AS", "1212121212")
-
-    val evigArbeidsForholdListe = listOf(
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.MIN,
-                    LocalDate.MAX
-                )
-            ),
-            LocalDateTime.now()
+    val evigAnsettelsesperiode = setOf(
+        Periode(
+            LocalDate.MIN,
+            LocalDate.MAX
         )
     )
-    val avsluttetArbeidsforholdListe = listOf(
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.MIN,
-                    LocalDate.of(2021, 2, 5)
-                )
-            ),
-            LocalDateTime.now()
+    val avsluttetAnsettelsesperiode = setOf(
+        Periode(
+            LocalDate.MIN,
+            5.februar(2021)
         )
     )
 
-    val pågåendeArbeidsforholdListe = listOf(
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2021, 2, 5),
-                    null
-                )
-            ),
-            LocalDateTime.now()
+    val paagaaendeAnsettelsesperiode = setOf(
+        Periode(
+            5.februar(2021),
+            null
         )
     )
-    val arbeidsforholdMedSluttDato = listOf(
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2004, 6, 1),
-                    LocalDate.of(2004, 6, 30)
-                )
-            ),
-            LocalDateTime.now()
+    val ansettelsesperioderMedSluttDato = setOf(
+        Periode(
+            1.juni(2004),
+            30.juni(2004)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2004, 9, 1),
-                    LocalDate.of(2004, 9, 30)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            1.september(2004),
+            30.september(2004)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2005, 1, 1),
-                    LocalDate.of(2005, 2, 28)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            1.januar(2005),
+            28.februar(2005)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2005, 9, 6),
-                    LocalDate.of(2007, 12, 31)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            6.september(2005),
+            31.desember(2007)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2008, 6, 16),
-                    LocalDate.of(2008, 8, 3)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            16.juni(2008),
+            3.august(2008)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2009, 3, 5),
-                    LocalDate.of(2010, 8, 30)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            5.mars(2009),
+            30.august(2010)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2010, 11, 26),
-                    LocalDate.of(2011, 9, 4)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            26.november(2010),
+            4.september(2011)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2011, 9, 5),
-                    LocalDate.of(2013, 3, 30)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            5.september(2011),
+            30.mars(2013)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2013, 3, 31),
-                    LocalDate.of(2014, 1, 1)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            31.mars(2013),
+            1.januar(2014)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2013, 3, 31),
-                    LocalDate.of(2013, 3, 31)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            31.mars(2013),
+            31.mars(2013)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2014, 2, 24),
-                    LocalDate.of(2014, 2, 24)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            24.februar(2014),
+            24.februar(2014)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2014, 3, 28),
-                    LocalDate.of(2014, 5, 31)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            28.mars(2014),
+            31.mai(2014)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2014, 6, 1),
-                    LocalDate.of(2022, 4, 30)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            1.juni(2014),
+            30.april(2022)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2014, 6, 1),
-                    LocalDate.of(2014, 12, 31)
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            1.juni(2014),
+            31.desember(2014)
         ),
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2022, 5, 1),
-                    null
-                )
-            ),
-            LocalDateTime.now()
-        )
-    )
-
-    val listeMedEttArbeidsforhold = listOf(
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2019, 1, 1),
-                    LocalDate.of(2021, 2, 28)
-                )
-            ),
-            LocalDateTime.now()
-        ),
-
-        Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2021, 3, 1),
-                    null
-                )
-            ),
-            LocalDateTime.now()
+        Periode(
+            1.mai(2022),
+            null
         )
     )
 }
