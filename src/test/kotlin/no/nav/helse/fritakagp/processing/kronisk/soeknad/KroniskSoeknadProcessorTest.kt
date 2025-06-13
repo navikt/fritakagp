@@ -70,7 +70,7 @@ class KroniskSoeknadProcessorTest {
         every { repositoryMock.getById(soeknad.id) } returns soeknad
         every { bucketStorageMock.getDocAsString(any()) } returns null
         every { pdlServiceMock.hentAktoerId(soeknad.identitetsnummer) } returns "aktør-id"
-        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
+        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns KroniskTestData.kroniskOpprettOppgaveResponse.copy(id = oppgaveId)
         coEvery { berregServiceMock.getVirksomhetsNavn(soeknad.virksomhetsnummer) } returns "Stark Industries"
     }
@@ -80,7 +80,7 @@ class KroniskSoeknadProcessorTest {
         soeknad.journalpostId = "joark"
         prosessor.prosesser(jobb)
 
-        coVerify(exactly = 0) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         verify(exactly = 1) { bucketStorageMock.deleteDoc(soeknad.id) }
     }
 
@@ -100,7 +100,7 @@ class KroniskSoeknadProcessorTest {
         val filtypeArkiv = "pdf"
         every { bucketStorageMock.getDocAsString(soeknad.id) } returns BucketDocument(dokumentData, filtypeArkiv)
 
-        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
+        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
 
         Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(soeknad))
         prosessor.prosesser(jobb)
@@ -125,6 +125,7 @@ class KroniskSoeknadProcessorTest {
                     assertEquals("ORIGINAL", it[1].dokumentVarianter[1].variantFormat)
                 },
                 any(),
+                any(),
                 any()
             )
         }
@@ -144,7 +145,7 @@ class KroniskSoeknadProcessorTest {
         assertThat(soeknad.journalpostId).isEqualTo(arkivReferanse)
         assertThat(soeknad.oppgaveId).isEqualTo(oppgaveId.toString())
 
-        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { oppgaveMock.opprettOppgave(any(), any()) }
         verify(exactly = 1) { repositoryMock.update(soeknad) }
     }
@@ -173,7 +174,7 @@ class KroniskSoeknadProcessorTest {
         assertThat(soeknad.journalpostId).isEqualTo(arkivReferanse)
         assertThat(soeknad.oppgaveId).isNull()
 
-        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { oppgaveMock.opprettOppgave(any(), any()) }
         verify(exactly = 1) { repositoryMock.update(soeknad) }
     }

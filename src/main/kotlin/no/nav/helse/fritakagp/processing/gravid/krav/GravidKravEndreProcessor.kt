@@ -24,6 +24,7 @@ import no.nav.helsearbeidsgiver.dokarkiv.domene.Avsender
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Dokument
 import no.nav.helsearbeidsgiver.dokarkiv.domene.DokumentVariant
 import no.nav.helsearbeidsgiver.dokarkiv.domene.GjelderPerson
+import no.nav.helsearbeidsgiver.dokarkiv.domene.Kanal
 import no.nav.helsearbeidsgiver.utils.log.logger
 import java.time.LocalDate
 import java.util.Base64
@@ -112,7 +113,8 @@ class GravidKravEndreProcessor(
                 datoMottatt = oppdatertKrav.opprettet.toLocalDate(),
                 dokumenter = createDocuments(oppdatertKrav, forrigeKrav, journalfoeringsTittel),
                 eksternReferanseId = "${oppdatertKrav.id}-endring",
-                callId = UUID.randomUUID().toString()
+                callId = UUID.randomUUID().toString(),
+                kanal = Kanal.NAV_NO
             )
             logger.debug("Journalført ${oppdatertKrav.id} med ref $journalpostId")
             return@runBlocking journalpostId.journalpostId

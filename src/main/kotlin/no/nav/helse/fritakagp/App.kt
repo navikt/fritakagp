@@ -2,7 +2,8 @@ package no.nav.helse.fritakagp
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.applicationEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -41,7 +42,7 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
     private val appConfig = HoconApplicationConfig(ConfigFactory.load())
     private val env = readEnv(appConfig)
 
-    private val webserver: NettyApplicationEngine
+    private val webserver: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>
 
     init {
         if (env is Env.Preprod || env is Env.Prod) {
@@ -65,22 +66,23 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
         stopKoin()
     }
 
-    private fun createWebserver(): NettyApplicationEngine =
+    private fun createWebserver(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
         embeddedServer(
-            Netty,
-            applicationEngineEnvironment {
+            factory = Netty,
+            environment = applicationEnvironment {
                 config = appConfig
+            },
+            configure = {
                 connector {
                     port = this@FritakAgpApplication.port
                 }
-
-                module {
-                    if (env is Env.Local) {
-                        localAuthTokenDispenser(env)
-                    }
-                    nais()
-                    fritakModule(env)
+            },
+            module = {
+                if (env is Env.Local) {
+                    localAuthTokenDispenser(env)
                 }
+                nais()
+                fritakModule(env)
             }
         )
 

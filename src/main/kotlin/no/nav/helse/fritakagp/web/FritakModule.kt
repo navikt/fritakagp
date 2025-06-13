@@ -10,7 +10,7 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.cors.CORS
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -24,7 +24,7 @@ import no.nav.helse.fritakagp.web.api.kroniskRoutes
 import no.nav.helse.fritakagp.web.api.swaggerRoutes
 import no.nav.helse.fritakagp.web.api.systemRoutes
 import no.nav.helse.fritakagp.web.auth.containsPid
-import no.nav.security.token.support.v2.tokenValidationSupport
+import no.nav.security.token.support.v3.tokenValidationSupport
 import org.koin.ktor.ext.get
 
 fun Application.fritakModule(env: Env) {

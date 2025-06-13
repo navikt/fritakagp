@@ -25,6 +25,7 @@ import no.nav.helsearbeidsgiver.dokarkiv.domene.Avsender
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Dokument
 import no.nav.helsearbeidsgiver.dokarkiv.domene.DokumentVariant
 import no.nav.helsearbeidsgiver.dokarkiv.domene.GjelderPerson
+import no.nav.helsearbeidsgiver.dokarkiv.domene.Kanal
 import no.nav.helsearbeidsgiver.utils.log.logger
 import java.time.LocalDate
 import java.util.Base64
@@ -126,8 +127,9 @@ class KroniskKravProcessor(
                 avsender = Avsender.Organisasjon(krav.virksomhetsnummer, krav.virksomhetsnavn ?: "Ukjent arbeidsgiver"),
                 datoMottatt = krav.opprettet.toLocalDate(),
                 dokumenter = createDocuments(krav, KroniskKrav.tittel),
-                krav.id.toString(),
-                UUID.randomUUID().toString()
+                eksternReferanseId = krav.id.toString(),
+                callId = UUID.randomUUID().toString(),
+                kanal = Kanal.NAV_NO
             )
             logger.info("Journalført ${krav.id} med ref $journalpostId")
             return@runBlocking journalpostId.journalpostId

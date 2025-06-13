@@ -73,7 +73,7 @@ class GravidSoeknadProcessorTest {
         every { repositoryMock.getById(soeknad.id) } returns soeknad
         every { bucketStorageMock.getDocAsString(any()) } returns null
         every { pdlServiceMock.hentAktoerId(soeknad.identitetsnummer) } returns "aktør-id"
-        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
+        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns gravidOpprettOppgaveResponse.copy(id = oppgaveId)
         coEvery { berregServiceMock.getVirksomhetsNavn(soeknad.virksomhetsnummer) } returns "Stark Industries"
     }
@@ -83,7 +83,7 @@ class GravidSoeknadProcessorTest {
         soeknad.journalpostId = "joark"
         prosessor.prosesser(jobb)
 
-        coVerify(exactly = 0) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         verify(exactly = 1) { bucketStorageMock.deleteDoc(soeknad.id) }
     }
 
@@ -93,7 +93,7 @@ class GravidSoeknadProcessorTest {
         val filtypeArkiv = "pdf"
         every { bucketStorageMock.getDocAsString(soeknad.id) } returns BucketDocument(dokumentData, filtypeArkiv)
 
-        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, "M", emptyList())
+        coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, "M", emptyList())
 
         Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(soeknad))
         prosessor.prosesser(jobb)
@@ -116,6 +116,7 @@ class GravidSoeknadProcessorTest {
                     assertEquals("ARKIV", it[1].dokumentVarianter[0].variantFormat)
                     assertEquals("ORIGINAL", it[1].dokumentVarianter[1].variantFormat)
                 },
+                any(),
                 any(),
                 any()
             )
@@ -147,7 +148,7 @@ class GravidSoeknadProcessorTest {
         assertThat(soeknad.oppgaveId).isEqualTo(oppgaveId.toString())
         assertThat(soeknad.virksomhetsnavn).isEqualTo("Stark Industries")
 
-        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { oppgaveMock.opprettOppgave(any(), any()) }
         verify(exactly = 1) { repositoryMock.update(soeknad) }
         coVerify(exactly = 1) { berregServiceMock.getVirksomhetsNavn(soeknad.virksomhetsnummer) }
@@ -179,7 +180,7 @@ class GravidSoeknadProcessorTest {
         assertThat(soeknad.journalpostId).isEqualTo(arkivReferanse)
         assertThat(soeknad.oppgaveId).isNull()
 
-        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { oppgaveMock.opprettOppgave(any(), any()) }
         verify(exactly = 1) { repositoryMock.update(soeknad) }
     }

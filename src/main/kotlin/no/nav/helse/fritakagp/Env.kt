@@ -1,8 +1,8 @@
 package no.nav.helse.fritakagp
 
 import io.ktor.server.config.ApplicationConfig
-import no.nav.security.token.support.v2.IssuerConfig
-import no.nav.security.token.support.v2.TokenSupportConfig
+import no.nav.security.token.support.v3.IssuerConfig
+import no.nav.security.token.support.v3.TokenSupportConfig
 
 object Issuers {
     const val TOKENX = "tokenx-issuer"
