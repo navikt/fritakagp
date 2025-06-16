@@ -31,7 +31,7 @@ class AaregConstraintsKtTest {
         )
 
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).maaHaAktivtAnsettelsesperiode(periode, AaregTestData.ansettelsesperioderMedSluttDato)
+            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.ansettelsesperioderMedSluttDato)
         }
     }
 
@@ -45,7 +45,7 @@ class AaregConstraintsKtTest {
         )
 
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).maaHaAktivtAnsettelsesperiode(periode, AaregTestData.evigAnsettelsesperiode)
+            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -80,7 +80,7 @@ class AaregConstraintsKtTest {
         )
         validate(gravidKravRequest) {
             validate(GravidKravRequest::perioder).validateForEach {
-                validate(Arbeidsgiverperiode::fom).maaHaAktivtAnsettelsesperiode(it, ansettelsesperioder)
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
             }
         }
     }
@@ -95,7 +95,7 @@ class AaregConstraintsKtTest {
         )
         validationShouldFailFor(Arbeidsgiverperiode::fom) {
             validate(periode) {
-                validate(Arbeidsgiverperiode::fom).maaHaAktivtAnsettelsesperiode(
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
                     periode,
                     AaregTestData.paagaaendeAnsettelsesperiode
                 )
@@ -112,7 +112,7 @@ class AaregConstraintsKtTest {
             månedsinntekt = 2590.8
         )
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).maaHaAktivtAnsettelsesperiode(
+            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
                 periode,
                 AaregTestData.paagaaendeAnsettelsesperiode
             )
@@ -130,7 +130,7 @@ class AaregConstraintsKtTest {
 
         validationShouldFailFor(Arbeidsgiverperiode::fom) {
             validate(periode) {
-                validate(Arbeidsgiverperiode::fom).maaHaAktivtAnsettelsesperiode(
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
                     periode,
                     AaregTestData.avsluttetAnsettelsesperiode
                 )

@@ -9,7 +9,7 @@ class ArbeidsforholdConstraint : CustomConstraint
 
 private const val MAKS_DAGER_OPPHOLD = 3L
 
-fun <E> Validator<E>.Property<LocalDate?>.maaHaAktivtAnsettelsesperiode(agp: Arbeidsgiverperiode, ansettelsesperioder: Set<AaregPeriode>) =
+fun <E> Validator<E>.Property<LocalDate?>.maaHaAktivAnsettelsesperiode(agp: Arbeidsgiverperiode, ansettelsesperioder: Set<AaregPeriode>) =
     this.validate(ArbeidsforholdConstraint()) {
         val ansattPerioder = slaaSammenPerioder(ansettelsesperioder)
         return@validate agp.innenforArbeidsforhold(ansattPerioder) ||

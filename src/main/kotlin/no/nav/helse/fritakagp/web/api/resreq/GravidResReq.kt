@@ -12,7 +12,7 @@ import no.nav.helse.fritakagp.web.api.resreq.validation.isGodkjentFiltype
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidIdentitetsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidOrganisasjonsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isVirksomhet
-import no.nav.helse.fritakagp.web.api.resreq.validation.maaHaAktivtAnsettelsesperiode
+import no.nav.helse.fritakagp.web.api.resreq.validation.maaHaAktivAnsettelsesperiode
 import no.nav.helse.fritakagp.web.api.resreq.validation.maanedsInntektErMellomNullOgTiMil
 import no.nav.helse.fritakagp.web.api.resreq.validation.refusjonsDagerIkkeOverstigerPeriodelengde
 import no.nav.helsearbeidsgiver.aareg.Periode
@@ -105,7 +105,7 @@ data class GravidKravRequest(
                 validate(Arbeidsgiverperiode::fom).datoerHarRiktigRekkefolge(it.tom)
                 validate(Arbeidsgiverperiode::antallDagerMedRefusjon).refusjonsDagerIkkeOverstigerPeriodelengde(it)
                 validate(Arbeidsgiverperiode::månedsinntekt).maanedsInntektErMellomNullOgTiMil()
-                validate(Arbeidsgiverperiode::fom).maaHaAktivtAnsettelsesperiode(it, ansettelsesperioder)
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
                 validate(Arbeidsgiverperiode::gradering).isLessThanOrEqualTo(1.0)
                 validate(Arbeidsgiverperiode::gradering).isGreaterThanOrEqualTo(0.2)
             }
