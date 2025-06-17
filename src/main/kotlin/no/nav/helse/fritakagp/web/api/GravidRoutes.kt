@@ -2,8 +2,6 @@ package no.nav.helse.fritakagp.web.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.application
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -143,7 +141,7 @@ fun Route.gravidRoutes(
                 val navn = pdlService.hentNavn(request.identitetsnummer)
 
                 val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeløpGravid(krav)
+                belopBeregning.beregnBeloepGravid(krav)
 
                 gravidKravRepo.insert(krav)
                 bakgunnsjobbService.opprettJobb<GravidKravProcessor>(
@@ -187,7 +185,7 @@ fun Route.gravidRoutes(
                 }
 
                 val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeløpGravid(kravTilOppdatering)
+                belopBeregning.beregnBeloepGravid(kravTilOppdatering)
 
                 if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                     return@patch call.respond(HttpStatusCode.Conflict)
