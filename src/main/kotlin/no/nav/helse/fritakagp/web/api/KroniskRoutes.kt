@@ -169,7 +169,7 @@ fun Route.kroniskRoutes(
                 val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
 
                 logger.info("KKPo: Hent grunnbeløp.")
-                belopBeregning.beregnBeløpKronisk(krav)
+                belopBeregning.beregnBeloepKronisk(krav)
 
                 logger.info("KKPo: Legg til krav i db.")
                 kroniskKravRepo.insert(krav)
@@ -220,7 +220,7 @@ fun Route.kroniskRoutes(
                 }
 
                 val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeløpKronisk(kravTilOppdatering)
+                belopBeregning.beregnBeloepKronisk(kravTilOppdatering)
                 if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                     return@patch call.respond(HttpStatusCode.Conflict)
                 }

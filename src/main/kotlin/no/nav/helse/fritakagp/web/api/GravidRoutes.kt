@@ -143,7 +143,7 @@ fun Route.gravidRoutes(
                 val navn = pdlService.hentNavn(request.identitetsnummer)
 
                 val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeløpGravid(krav)
+                belopBeregning.beregnBeloepGravid(krav)
 
                 gravidKravRepo.insert(krav)
                 bakgunnsjobbService.opprettJobb<GravidKravProcessor>(
@@ -188,7 +188,7 @@ fun Route.gravidRoutes(
                 }
 
                 val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeløpGravid(kravTilOppdatering)
+                belopBeregning.beregnBeloepGravid(kravTilOppdatering)
 
                 if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                     return@patch call.respond(HttpStatusCode.Conflict)
