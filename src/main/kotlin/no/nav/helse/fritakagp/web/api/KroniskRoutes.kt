@@ -2,8 +2,6 @@ package no.nav.helse.fritakagp.web.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.application
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -169,7 +167,7 @@ fun Route.kroniskRoutes(
                 val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
 
                 logger.info("KKPo: Hent grunnbeløp.")
-                belopBeregning.beregnBeløpKronisk(krav)
+                belopBeregning.beregnBeloepKronisk(krav)
 
                 logger.info("KKPo: Legg til krav i db.")
                 kroniskKravRepo.insert(krav)
@@ -219,7 +217,7 @@ fun Route.kroniskRoutes(
                 }
 
                 val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeløpKronisk(kravTilOppdatering)
+                belopBeregning.beregnBeloepKronisk(kravTilOppdatering)
                 if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                     return@patch call.respond(HttpStatusCode.Conflict)
                 }
