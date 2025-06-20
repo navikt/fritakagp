@@ -14,45 +14,45 @@ class KroniskKravRequestTest {
     @Test
     internal fun `Antall dager kan ikke være mer enn dager i året`() {
         validationShouldFailFor(KroniskKravRequest::antallDager) {
-            KroniskTestData.kroniskKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigArbeidsForholdListe)
+            KroniskTestData.kroniskKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Antall dager kan ikke være negativt`() {
         validationShouldFailFor(KroniskKravRequest::antallDager) {
-            KroniskTestData.kroniskKravRequestValid.copy(antallDager = -1).validate(AaregTestData.evigArbeidsForholdListe)
+            KroniskTestData.kroniskKravRequestValid.copy(antallDager = -1).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Antall dager må være 1-366`() {
         validationShouldFailFor(KroniskKravRequest::antallDager) {
-            KroniskTestData.kroniskKravRequestValid.copy(antallDager = 0).validate(AaregTestData.evigArbeidsForholdListe)
+            KroniskTestData.kroniskKravRequestValid.copy(antallDager = 0).validate(AaregTestData.evigAnsettelsesperiode)
         }
         validationShouldFailFor(KroniskKravRequest::antallDager) {
-            KroniskTestData.kroniskKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigArbeidsForholdListe)
+            KroniskTestData.kroniskKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Gyldig FNR er påkrevd`() {
         validationShouldFailFor(KroniskKravRequest::identitetsnummer) {
-            KroniskTestData.kroniskKravRequestValid.copy(identitetsnummer = "01020312345").validate(AaregTestData.evigArbeidsForholdListe)
+            KroniskTestData.kroniskKravRequestValid.copy(identitetsnummer = "01020312345").validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Gyldig OrgNr er påkrevd dersom det er oppgitt`() {
         validationShouldFailFor(KroniskKravRequest::virksomhetsnummer) {
-            KroniskTestData.kroniskKravRequestValid.copy(virksomhetsnummer = "098765432").validate(AaregTestData.evigArbeidsForholdListe)
+            KroniskTestData.kroniskKravRequestValid.copy(virksomhetsnummer = "098765432").validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Bekreftelse av egenerklæring er påkrevd`() {
         validationShouldFailFor(KroniskKravRequest::bekreftet) {
-            KroniskTestData.kroniskKravRequestValid.copy(bekreftet = false).validate(AaregTestData.evigArbeidsForholdListe)
+            KroniskTestData.kroniskKravRequestValid.copy(bekreftet = false).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -66,7 +66,7 @@ class KroniskKravRequestTest {
         validationShouldFailFor("perioder[0].antallDagerMedRefusjon") {
             KroniskTestData.kroniskKravRequestValid.copy(
                 perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(antallDagerMedRefusjon = 21))
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -81,7 +81,7 @@ class KroniskKravRequestTest {
                         antallDagerMedRefusjon = -5
                     )
                 ) // slik at validationShouldFailFor() kaster ikke to unntak
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -90,13 +90,13 @@ class KroniskKravRequestTest {
         validationShouldFailFor("perioder[0].gradering") {
             KroniskTestData.kroniskKravRequestValid.copy(
                 perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(gradering = 1.1))
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
 
         validationShouldFailFor("perioder[0].gradering") {
             KroniskTestData.kroniskKravRequestValid.copy(
                 perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(gradering = 0.1))
-            ).validate(AaregTestData.evigArbeidsForholdListe)
+            ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 }

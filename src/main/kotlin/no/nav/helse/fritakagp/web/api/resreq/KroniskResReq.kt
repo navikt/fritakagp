@@ -13,10 +13,10 @@ import no.nav.helse.fritakagp.web.api.resreq.validation.isGodkjentFiltype
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidIdentitetsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidOrganisasjonsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isVirksomhet
+import no.nav.helse.fritakagp.web.api.resreq.validation.maaHaAktivAnsettelsesperiode
 import no.nav.helse.fritakagp.web.api.resreq.validation.maanedsInntektErMellomNullOgTiMil
-import no.nav.helse.fritakagp.web.api.resreq.validation.måHaAktivtArbeidsforhold
 import no.nav.helse.fritakagp.web.api.resreq.validation.refusjonsDagerIkkeOverstigerPeriodelengde
-import no.nav.helsearbeidsgiver.aareg.Arbeidsforhold
+import no.nav.helsearbeidsgiver.aareg.Periode
 import org.valiktor.functions.isBetween
 import org.valiktor.functions.isEmpty
 import org.valiktor.functions.isEqualTo
@@ -86,7 +86,7 @@ data class KroniskKravRequest(
     val kontrollDager: Int?,
     val antallDager: Int
 ) {
-    fun validate(aktuelleArbeidsforhold: List<Arbeidsforhold>) {
+    fun validate(ansettelsesperioder: Set<Periode>) {
         validate(this) {
             validate(KroniskKravRequest::antallDager).isGreaterThan(0)
             validate(KroniskKravRequest::antallDager).isLessThanOrEqualTo(366)
@@ -97,7 +97,7 @@ data class KroniskKravRequest(
                 validate(Arbeidsgiverperiode::fom).datoerHarRiktigRekkefolge(it.tom)
                 validate(Arbeidsgiverperiode::antallDagerMedRefusjon).refusjonsDagerIkkeOverstigerPeriodelengde(it)
                 validate(Arbeidsgiverperiode::månedsinntekt).maanedsInntektErMellomNullOgTiMil()
-                validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(it, aktuelleArbeidsforhold)
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
                 validate(Arbeidsgiverperiode::gradering).isLessThanOrEqualTo(1.0)
                 validate(Arbeidsgiverperiode::gradering).isGreaterThanOrEqualTo(0.2)
             }

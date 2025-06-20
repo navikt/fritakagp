@@ -1,122 +1,78 @@
-package no.nav.helse.fritakagp.web.dto.validation
+package no.nav.helse.fritakagp.web.api.resreq.validation
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.AaregTestData
 import no.nav.helse.GravidTestData
-import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
-import no.nav.helse.fritakagp.koin.loadFromResources
 import no.nav.helse.fritakagp.web.api.resreq.GravidKravRequest
-import no.nav.helse.fritakagp.web.api.resreq.validation.måHaAktivtArbeidsforhold
-import no.nav.helse.fritakagp.web.api.resreq.validation.slåSammenPerioder
 import no.nav.helse.fritakagp.web.api.resreq.validationShouldFailFor
-import no.nav.helsearbeidsgiver.aareg.Ansettelsesperiode
-import no.nav.helsearbeidsgiver.aareg.Arbeidsforhold
-import no.nav.helsearbeidsgiver.aareg.Arbeidsgiver
-import no.nav.helsearbeidsgiver.aareg.Opplysningspliktig
 import no.nav.helsearbeidsgiver.aareg.Periode
+import no.nav.helsearbeidsgiver.utils.test.date.april
+import no.nav.helsearbeidsgiver.utils.test.date.august
+import no.nav.helsearbeidsgiver.utils.test.date.februar
+import no.nav.helsearbeidsgiver.utils.test.date.januar
+import no.nav.helsearbeidsgiver.utils.test.date.juli
+import no.nav.helsearbeidsgiver.utils.test.date.mai
+import no.nav.helsearbeidsgiver.utils.test.date.mars
+import no.nav.helsearbeidsgiver.utils.test.date.september
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.valiktor.functions.validateForEach
 import org.valiktor.validate
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 class AaregConstraintsKtTest {
 
     @Test
-    @Disabled
-    fun `Rådata fra aareg (Brukes for å feilsøke med respons fra AA-reg)`() {
-        val objectMapper = customObjectMapper()
-
-        // Legg aareg JSON-respons i src/test/resources/aareg.json
-        val aaregFile = "aareg.json".loadFromResources()
-        val arbeidsforhold = objectMapper.readValue<List<Arbeidsforhold>>(aaregFile)
-            // Legg inn organisasjonsnummer
-            .filter { it.arbeidsgiver.organisasjonsnummer == "XXXXXXXX" }
-        // Endre til perioden kravet gjelder
-        val arbeidsgiverPeriode = Arbeidsgiverperiode(
-            LocalDate.of(2021, 1, 15),
-            LocalDate.of(2021, 1, 20),
-            4,
-            månedsinntekt = 2590.8
-        )
-
-        validate(arbeidsgiverPeriode) {
-            validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(arbeidsgiverPeriode, arbeidsforhold)
-        }
-    }
-
-    @Test
     fun `Ansatt slutter fram i tid`() {
         val periode = Arbeidsgiverperiode(
-            LocalDate.of(2021, 1, 15),
-            LocalDate.of(2021, 1, 20),
+            15.januar(2021),
+            20.januar(2021),
             4,
             månedsinntekt = 2590.8
         )
 
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(periode, AaregTestData.arbeidsforholdMedSluttDato)
+            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.ansettelsesperioderMedSluttDato)
         }
     }
 
     @Test
     fun `Refusjonskravet er innenfor Arbeidsforholdet`() {
         val periode = Arbeidsgiverperiode(
-            LocalDate.of(2021, 1, 15),
-            LocalDate.of(2021, 1, 18),
+            15.januar(2021),
+            18.januar(2021),
             2,
             månedsinntekt = 2590.8
         )
 
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(periode, AaregTestData.evigArbeidsForholdListe)
+            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     fun `Sammenehengende arbeidsforhold slås sammen til en periode`() {
-        val arbeidsgiver = Arbeidsgiver("AS", "1232242423")
-        val opplysningspliktig = Opplysningspliktig("AS", "1212121212")
-        val arbeidsForhold1 = Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2019, 1, 1),
-                    LocalDate.of(2021, 2, 28)
-                )
+        val ansettelsesperioder = setOf(
+            Periode(
+                1.januar(2019),
+                28.februar(2021)
             ),
-            LocalDateTime.now()
-        )
-
-        val arbeidsForhold2 = Arbeidsforhold(
-            arbeidsgiver,
-            opplysningspliktig,
-            emptyList(),
-            Ansettelsesperiode(
-                Periode(
-                    LocalDate.of(2021, 3, 1),
-                    null
-                )
-            ),
-            LocalDateTime.now()
+            Periode(
+                1.mars(2021),
+                null
+            )
         )
 
         val gravidKravRequest = GravidTestData.gravidKravRequestInValid.copy(
             perioder = listOf(
                 Arbeidsgiverperiode(
-                    LocalDate.of(2021, 1, 15),
-                    LocalDate.of(2021, 1, 18),
+                    15.januar(2021),
+                    18.januar(2021),
                     2,
                     månedsinntekt = 2590.8
                 ),
                 Arbeidsgiverperiode(
-                    LocalDate.of(2021, 2, 26),
-                    LocalDate.of(2021, 3, 10),
+                    26.februar(2021),
+                    10.mars(2021),
                     12,
                     månedsinntekt = 2590.8
                 )
@@ -124,10 +80,7 @@ class AaregConstraintsKtTest {
         )
         validate(gravidKravRequest) {
             validate(GravidKravRequest::perioder).validateForEach {
-                validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(
-                    it,
-                    listOf(arbeidsForhold1, arbeidsForhold2)
-                )
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
             }
         }
     }
@@ -135,16 +88,16 @@ class AaregConstraintsKtTest {
     @Test
     fun `Refusjonsdato er før Arbeidsforhold har begynt`() {
         val periode = Arbeidsgiverperiode(
-            LocalDate.of(2021, 1, 1),
-            LocalDate.of(2021, 1, 5),
+            1.januar(2021),
+            5.januar(2021),
             2,
             månedsinntekt = 2590.8
         )
         validationShouldFailFor(Arbeidsgiverperiode::fom) {
             validate(periode) {
-                validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
                     periode,
-                    AaregTestData.pågåendeArbeidsforholdListe
+                    AaregTestData.paagaaendeAnsettelsesperiode
                 )
             }
         }
@@ -153,15 +106,15 @@ class AaregConstraintsKtTest {
     @Test
     fun `Refusjonsdato begynner samtidig som Arbeidsforhold skal ikke feile`() {
         val periode = Arbeidsgiverperiode(
-            LocalDate.of(2021, 2, 5),
-            LocalDate.of(2021, 2, 9),
+            5.februar(2021),
+            9.februar(2021),
             2,
             månedsinntekt = 2590.8
         )
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(
+            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
                 periode,
-                AaregTestData.pågåendeArbeidsforholdListe
+                AaregTestData.paagaaendeAnsettelsesperiode
             )
         }
     }
@@ -169,17 +122,17 @@ class AaregConstraintsKtTest {
     @Test
     fun `Refusjonsdato etter Arbeidsforhold er avsluttet`() {
         val periode = Arbeidsgiverperiode(
-            LocalDate.of(2021, 5, 15),
-            LocalDate.of(2021, 5, 18),
+            15.mai(2021),
+            18.mai(2021),
             2,
             månedsinntekt = 2590.8
         )
 
         validationShouldFailFor(Arbeidsgiverperiode::fom) {
             validate(periode) {
-                validate(Arbeidsgiverperiode::fom).måHaAktivtArbeidsforhold(
+                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
                     periode,
-                    AaregTestData.avsluttetArbeidsforholdListe
+                    AaregTestData.avsluttetAnsettelsesperiode
                 )
             }
         }
@@ -188,37 +141,64 @@ class AaregConstraintsKtTest {
     @Test
     fun `merge fragmented periods`() {
         assertThat(
-            slåSammenPerioder(
-                listOf(
+            slaaSammenPerioder(
+                setOf(
                     // skal ble merget til 1 periode fra 1.1.21 til 28.2.21
-                    Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 29)),
-                    Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 13)),
-                    Periode(LocalDate.of(2021, 2, 15), LocalDate.of(2021, 2, 28)),
+                    Periode(
+                        1.januar(2021),
+                        29.januar(2021)
+                    ),
+                    Periode(
+                        1.februar(2021),
+                        13.februar(2021)
+                    ),
+                    Periode(
+                        15.februar(2021),
+                        28.februar(2021)
+                    ),
 
                     // skal bli merget til 1
-                    Periode(LocalDate.of(2021, 3, 20), LocalDate.of(2021, 3, 31)),
-                    Periode(LocalDate.of(2021, 4, 2), LocalDate.of(2021, 4, 30)),
+                    Periode(
+                        20.mars(2021),
+                        31.mars(2021)
+                    ),
+                    Periode(
+                        2.april(2021),
+                        30.april(2021)
+                    ),
 
                     // skal bli merget til 1
-                    Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 8, 30)),
-                    Periode(LocalDate.of(2021, 9, 1), null)
+                    Periode(
+                        1.juli(2021),
+                        30.august(2021)
+                    ),
+                    Periode(
+                        1.september(2021),
+                        null
+                    )
                 )
             )
         ).hasSize(3)
 
         assertThat(
-            slåSammenPerioder(
-                listOf(
-                    Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 29)),
-                    Periode(LocalDate.of(2021, 9, 1), null)
+            slaaSammenPerioder(
+                setOf(
+                    Periode(
+                        1.januar(2021),
+                        29.januar(2021)
+                    ),
+                    Periode(
+                        1.september(2021),
+                        null
+                    )
                 )
             )
         ).hasSize(2)
 
         assertThat(
-            slåSammenPerioder(
-                listOf(
-                    Periode(LocalDate.of(2021, 9, 1), null)
+            slaaSammenPerioder(
+                setOf(
+                    Periode(1.september(2021), null)
                 )
             )
         ).hasSize(1)
