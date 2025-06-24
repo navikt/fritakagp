@@ -63,7 +63,7 @@ env:
   - name: PDL_URL
     value: https://pdl-api.dev-fss-pub.nais.io/graphql
   - name: AAREG_URL
-    value: https://aareg-services.dev-fss-pub.nais.io/api/v1/arbeidstaker/arbeidsforhold?sporingsinformasjon=false&historikk=false
+    value: https://aareg-services.dev-fss-pub.nais.io
   - name: ALTINN_SERVICE_OWNER_URL
     value: https://tt02.altinn.no/api/serviceowner
   - name: ALTINN_ENDPOINT
