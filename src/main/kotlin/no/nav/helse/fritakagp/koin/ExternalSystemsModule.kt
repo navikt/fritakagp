@@ -52,7 +52,7 @@ fun Module.externalSystemClients(env: Env) {
 
     single {
         val azureAuthClient: AuthClient = get()
-        DokArkivClient(env.dokarkivUrl, 3, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeDokarkiv))
+        DokArkivClient(env.dokarkivUrl, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeDokarkiv))
     }
 
     single {
