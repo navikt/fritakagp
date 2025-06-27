@@ -88,7 +88,7 @@ fun Module.mockExternalDependecies() {
 
     single {
         val authClient: AuthClient = get()
-        DokArkivClient("url", 3, authClient.fetchToken(IdentityProvider.AZURE_AD, "dokarkiv"))
+        DokArkivClient("url", authClient.fetchToken(IdentityProvider.AZURE_AD, "dokarkiv"))
     } bind DokArkivClient::class
 
     single {
