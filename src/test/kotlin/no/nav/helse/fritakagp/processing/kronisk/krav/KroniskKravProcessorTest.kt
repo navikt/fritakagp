@@ -25,7 +25,6 @@ import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.testJob
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
 import no.nav.helse.fritakagp.readToObjectNode
-import no.nav.helse.fritakagp.service.GeografiskTilknytning
 import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
@@ -63,7 +62,6 @@ class KroniskKravProcessorTest {
         every { repositoryMock.getById(krav.id) } returns krav
         every { bucketStorageMock.getDocAsString(any()) } returns null
         every { pdlServiceMock.hentAktoerId(krav.identitetsnummer) } returns "aktør-id"
-        every { pdlServiceMock.hentGeografiskTilknytning(krav.identitetsnummer) } returns GeografiskTilknytning(diskresjonskode = null, geografiskTilknytning = "SWE")
         coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns KroniskTestData.kroniskOpprettOppgaveResponse.copy(id = oppgaveId)
         coEvery { berregServiceMock.getVirksomhetsNavn(krav.virksomhetsnummer) } returns "Stark Industries"

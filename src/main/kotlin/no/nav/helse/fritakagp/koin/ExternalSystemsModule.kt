@@ -23,6 +23,7 @@ import no.nav.helsearbeidsgiver.pdl.PdlClient
 import no.nav.helsearbeidsgiver.utils.cache.LocalCache
 import org.koin.core.module.Module
 import org.koin.dsl.bind
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 fun Module.externalSystemClients(env: Env) {
@@ -38,7 +39,12 @@ fun Module.externalSystemClients(env: Env) {
 
     single {
         val azureAuthClient: AuthClient = get()
-        PdlClient(env.pdlUrl, Behandlingsgrunnlag.FRITAKAGP, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopePdl))
+        PdlClient(
+            url = env.pdlUrl,
+            behandlingsgrunnlag = Behandlingsgrunnlag.FRITAKAGP,
+            cacheConfig = LocalCache.Config(1.days, 10_000),
+            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopePdl)
+        )
     } bind PdlClient::class
 
     single {
