@@ -1,8 +1,5 @@
 package no.nav.helse.fritakagp.auth
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter
-import com.fasterxml.jackson.annotation.JsonAnySetter
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -24,7 +21,6 @@ import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 enum class IdentityProvider(@JsonValue val alias: String) {
     MASKINPORTEN("maskinporten"),
     AZURE_AD("azuread"),
-    IDPORTEN("idporten"),
     TOKEN_X("tokenx")
 }
 
@@ -46,14 +42,6 @@ data class TokenErrorResponse(
     val error: String,
     @JsonProperty("error_description")
     val errorDescription: String
-)
-
-data class TokenIntrospectionResponse(
-    val active: Boolean,
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    val error: String?,
-    @JsonAnySetter @get:JsonAnyGetter
-    val other: Map<String, Any?> = mutableMapOf()
 )
 
 class AuthClient(
@@ -87,15 +75,6 @@ class AuthClient(
     } catch (e: ResponseException) {
         TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
     }
-
-    suspend fun introspect(provider: IdentityProvider, accessToken: String): TokenIntrospectionResponse =
-        httpClient.submitForm(
-            tokenIntrospectionEndpoint,
-            parameters {
-                set("token", accessToken)
-                set("identity_provider", provider.alias)
-            }
-        ).body()
 }
 
 fun AuthClient.fetchToken(identityProvider: IdentityProvider, target: String): () -> String = {

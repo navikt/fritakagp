@@ -13,7 +13,7 @@ import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.KroniskKrav
-import no.nav.helse.fritakagp.web.api.resreq.ValidationProblem
+import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.koin.test.inject

@@ -15,10 +15,10 @@ import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 object KroniskTestData {
-    val validIdentitetsnummer = "20015001543"
-    val validOrgNr = "917404437"
-    val validSendtAvNavn = "Ola M Avsender"
-    val antallPerioder = 3
+    const val validIdentitetsnummer = "20015001543"
+    const val validOrgNr = "917404437"
+    const val validSendtAvNavn = "Ola M Avsender"
+    const val antallPerioder = 3
 
     val soeknadKronisk = KroniskSoeknad(
         virksomhetsnummer = validOrgNr,
@@ -182,4 +182,4 @@ private fun generateFravaersdata() = (0..24L)
     .map { FravaerData(LocalDate.now().minusMonths(it).toYearMonthString(), Random.nextFloat() * 28) }
     .toMutableSet()
 
-fun LocalDate.toYearMonthString() = this.format(DateTimeFormatter.ofPattern("yyyy-MM"))
+fun LocalDate.toYearMonthString(): String = this.format(DateTimeFormatter.ofPattern("yyyy-MM"))

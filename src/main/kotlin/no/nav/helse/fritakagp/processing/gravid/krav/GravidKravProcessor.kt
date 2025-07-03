@@ -44,9 +44,9 @@ class GravidKravProcessor(
 
 ) : BakgrunnsjobbProsesserer {
     companion object {
-        val JOB_TYPE = "gravid-krav-formidling"
-        val brevkode = "krav_om_fritak_fra_agp_gravid"
-        val dokumentasjonBrevkode = "krav_om_fritak_fra_agp_dokumentasjon"
+        const val JOB_TYPE = "gravid-krav-formidling"
+        const val brevkode = "krav_om_fritak_fra_agp_gravid"
+        const val dokumentasjonBrevkode = "krav_om_fritak_fra_agp_dokumentasjon"
     }
 
     override val type: String get() = JOB_TYPE
@@ -95,7 +95,7 @@ class GravidKravProcessor(
     private fun getOrThrow(jobb: Bakgrunnsjobb): GravidKrav {
         val jobbData = om.readValue<JobbData>(jobb.data)
         val krav = gravidKravRepo.getById(jobbData.id)
-        requireNotNull(krav, { "Jobben indikerte et krav med id ${jobb.data} men den kunne ikke finnes" })
+        requireNotNull(krav) { "Jobben indikerte et krav med id ${jobb.data} men den kunne ikke finnes" }
         return krav
     }
 

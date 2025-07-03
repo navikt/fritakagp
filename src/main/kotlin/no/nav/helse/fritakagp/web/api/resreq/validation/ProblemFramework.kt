@@ -1,4 +1,4 @@
-package no.nav.helse.fritakagp.web.dto.validation
+package no.nav.helse.fritakagp.web.api.resreq.validation
 
 import org.valiktor.ConstraintViolation
 import org.valiktor.i18n.toMessage

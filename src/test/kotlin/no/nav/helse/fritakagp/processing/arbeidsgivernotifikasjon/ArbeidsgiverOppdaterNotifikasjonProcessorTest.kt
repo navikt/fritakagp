@@ -21,7 +21,7 @@ class ArbeidsgiverOppdaterNotifikasjonProcessorTest {
     val arbeidsgiverNotifikasjonKlient = mockk<ArbeidsgiverNotifikasjonKlient>(relaxed = true)
     val gravidKravRepositoryMock = mockk<GravidKravRepository>(relaxed = true)
     val kroniskKravRepositoryMock = mockk<KroniskKravRepository>(relaxed = true)
-    val objectMapper = ObjectMapper().registerModule(
+    val objectMapper: ObjectMapper = ObjectMapper().registerModule(
         KotlinModule.Builder()
             .withReflectionCacheSize(512)
             .configure(KotlinFeature.NullToEmptyCollection, false)

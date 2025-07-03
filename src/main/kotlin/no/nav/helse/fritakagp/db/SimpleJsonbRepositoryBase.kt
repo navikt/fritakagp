@@ -27,7 +27,7 @@ interface SimpleJsonbRepository<T : SimpleJsonbEntity> {
  *  CREATE TABLE $tableName (data jsonb not null);
  */
 abstract class SimpleJsonbRepositoryBase<T : SimpleJsonbEntity>(
-    val tableName: String,
+    tableName: String,
     val ds: DataSource,
     val mapper: ObjectMapper,
     val clazz: Class<T>

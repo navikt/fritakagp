@@ -43,9 +43,9 @@ class KroniskKravProcessor(
     private val brregClient: BrregClient
 ) : BakgrunnsjobbProsesserer {
     companion object {
-        val JOB_TYPE = "kronisk-krav-formidling"
-        val dokumentasjonBrevkode = "krav_om_fritak_fra_agp_dokumentasjon"
-        val brevkode = "krav_om_fritak_fra_agp_kronisk"
+        const val JOB_TYPE = "kronisk-krav-formidling"
+        const val dokumentasjonBrevkode = "krav_om_fritak_fra_agp_dokumentasjon"
+        const val brevkode = "krav_om_fritak_fra_agp_kronisk"
     }
 
     override val type: String get() = JOB_TYPE
@@ -98,7 +98,7 @@ class KroniskKravProcessor(
     private fun getOrThrow(jobb: Bakgrunnsjobb): KroniskKrav {
         val jobbData = om.readValue<JobbData>(jobb.data)
         val krav = kroniskKravRepo.getById(jobbData.id)
-        requireNotNull(krav, { "Jobben indikerte et krav med id ${jobb.data} men den kunne ikke finnes" })
+        requireNotNull(krav) { "Jobben indikerte et krav med id ${jobb.data} men den kunne ikke finnes" }
         return krav
     }
 

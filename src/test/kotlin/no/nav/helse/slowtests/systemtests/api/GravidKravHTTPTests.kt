@@ -12,7 +12,7 @@ import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.KravStatus
-import no.nav.helse.fritakagp.web.api.resreq.ValidationProblem
+import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test

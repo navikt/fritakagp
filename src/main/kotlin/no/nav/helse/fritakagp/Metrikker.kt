@@ -11,17 +11,10 @@ class MetrikkVarsler : Bakgrunnsvarsler {
     }
 }
 
-val FEILET_JOBB_COUNTER = Counter.build()
+val FEILET_JOBB_COUNTER: Counter = Counter.build()
     .namespace(METRICS_NS)
     .name("feilet_jobb")
     .help("Counts the number of permanently failed jobs")
-    .register()
-
-val BrukernotifikasjonerMetrics = Counter.build()
-    .namespace(METRICS_NS)
-    .name("brukernotifikasjoner")
-    .labelNames("skjematype")
-    .help("Antall brukernotifikasjoner sendt")
     .register()
 
 object GravidKravMetrics :

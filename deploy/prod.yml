@@ -62,12 +62,8 @@ env:
     value: https://oppgave.prod-fss-pub.nais.io/api/v1/oppgaver
   - name: PDL_URL
     value: https://pdl-api.prod-fss-pub.nais.io/graphql
-  - name: ALTINN_SERVICE_OWNER_URL
-    value: https://altinn.no/api/serviceowner
   - name: ALTINN_ENDPOINT
     value: https://www.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternalBasic.svc
-  - name: ALTINN_SCOPE
-    value: altinn:serviceowner/reportees
   - name: ENHETSREGISTERET
     value: https://data.brreg.no/enhetsregisteret/api/underenheter
   - name: ALTINN_TILGANGER_SCOPE

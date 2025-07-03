@@ -43,9 +43,9 @@ class GravidSoeknadProcessor(
     private val brregClient: BrregClient
 ) : BakgrunnsjobbProsesserer {
     companion object {
-        val JOB_TYPE = "gravid-søknad-formidling"
-        val dokumentasjonBrevkode = "soeknad_om_fritak_fra_agp_dokumentasjon"
-        val brevkode = "soeknad_om_fritak_fra_agp_gravid"
+        const val JOB_TYPE = "gravid-søknad-formidling"
+        const val dokumentasjonBrevkode = "soeknad_om_fritak_fra_agp_dokumentasjon"
+        const val brevkode = "soeknad_om_fritak_fra_agp_gravid"
     }
 
     override val type: String get() = JOB_TYPE
@@ -62,7 +62,7 @@ class GravidSoeknadProcessor(
     override fun prosesser(jobb: Bakgrunnsjobb) {
         val jobbData = om.readValue<JobbData>(jobb.data)
         val soeknad = gravidSoeknadRepo.getById(jobbData.id)
-        requireNotNull(soeknad, { "Jobben indikerte en søknad med id ${jobb.data} men den kunne ikke finnes" })
+        requireNotNull(soeknad) { "Jobben indikerte en søknad med id ${jobb.data} men den kunne ikke finnes" }
 
         try {
             if (soeknad.virksomhetsnavn == null) {
@@ -132,7 +132,7 @@ class GravidSoeknadProcessor(
     private fun getSoeknadOrThrow(jobb: Bakgrunnsjobb): GravidSoeknad {
         val jobbData = om.readValue<JobbData>(jobb.data)
         val soeknad = gravidSoeknadRepo.getById(jobbData.id)
-        requireNotNull(soeknad, { "Jobben indikerte en søknad med id ${jobb.data} men den kunne ikke finnes" })
+        requireNotNull(soeknad) { "Jobben indikerte en søknad med id ${jobb.data} men den kunne ikke finnes" }
         return soeknad
     }
 

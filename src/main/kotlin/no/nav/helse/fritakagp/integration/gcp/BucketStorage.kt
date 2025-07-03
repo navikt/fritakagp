@@ -2,10 +2,8 @@ package no.nav.helse.fritakagp.integration.gcp
 
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
-import com.google.cloud.storage.Bucket
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
-import java.nio.file.Paths
 import java.util.UUID
 
 interface BucketStorage {
@@ -34,10 +32,9 @@ class MockBucketStorage : BucketStorage {
 
 class BucketStorageImpl(
     private val bucketName: String = "helse-arbeidsgiver-fritakagb-bucket",
-    private val gcpPrjID: String
+    gcpPrjID: String
 ) : BucketStorage {
     private val storage: Storage = StorageOptions.newBuilder().setProjectId(gcpPrjID).build().service
-    private val bucket: Bucket = storage.get(bucketName) ?: error("Bucket $bucketName eksistere ikke")
 
     override fun uploadDoc(uuid: UUID, filContent: String, filExt: String) {
         storage.create(
@@ -52,11 +49,6 @@ class BucketStorageImpl(
         val ext = blobMeta?.get("ext") ?: ""
 
         return BucketDocument(blob.getContent().decodeToString(), ext)
-    }
-
-    fun getDocAsFile(uuid: UUID, destFilePath: String) {
-        val blob = storage[BlobId.of(bucketName, uuid.toString())]
-        blob.downloadTo(Paths.get(destFilePath))
     }
 
     override fun deleteDoc(uuid: UUID) {

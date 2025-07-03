@@ -40,8 +40,8 @@ class KroniskKravSlettProcessor(
     private val bakgrunnsjobbRepo: BakgrunnsjobbRepository
 ) : BakgrunnsjobbProsesserer {
     companion object {
-        val JOB_TYPE = "slett-kronisk-krav"
-        val dokumentasjonBrevkode = "annuller_krav_om_fritak_fra_agp_dokumentasjon"
+        const val JOB_TYPE = "slett-kronisk-krav"
+        const val dokumentasjonBrevkode = "annuller_krav_om_fritak_fra_agp_dokumentasjon"
     }
 
     override val type: String get() = JOB_TYPE
@@ -76,7 +76,7 @@ class KroniskKravSlettProcessor(
     private fun getOrThrow(jobb: Bakgrunnsjobb): KroniskKrav {
         val jobbData = om.readValue<KroniskKravProcessor.JobbData>(jobb.data)
         val krav = kroniskKravRepo.getById(jobbData.id)
-        requireNotNull(krav, { "Jobben indikerte et krav med id ${jobb.data} men den kunne ikke finnes" })
+        requireNotNull(krav) { "Jobben indikerte et krav med id ${jobb.data} men den kunne ikke finnes" }
         return krav
     }
 

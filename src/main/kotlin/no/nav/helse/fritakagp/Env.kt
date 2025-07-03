@@ -16,8 +16,8 @@ fun readEnv(config: ApplicationConfig): Env =
     }
         .invoke(config)
 
-sealed class Env private constructor(
-    internal val config: ApplicationConfig
+sealed class Env(
+    private val config: ApplicationConfig
 ) {
     class Prod(config: ApplicationConfig) : Env(config)
     class Preprod(config: ApplicationConfig) : Env(config)
@@ -43,10 +43,7 @@ sealed class Env private constructor(
     val altinnMeldingUsername = "altinn_melding.username".prop()
     val altinnMeldingPassword = "altinn_melding.password".prop()
 
-    val altinnServiceOwnerUrl = "altinn.service_owner_api_url".prop()
     val altinnServiceOwnerServiceId = "altinn.service_id".prop()
-    val altinnServiceOwnerApiKey = "altinn.altinn_api_key".prop()
-    val altinnScope = "altinn.altinn_scope".prop()
 
     val altinnTilgangerScope = "altinn_tilganger.scope".prop()
     val altinnTilgangerBaseUrl = "altinn_tilganger.base_url".prop()

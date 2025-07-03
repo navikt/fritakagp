@@ -31,14 +31,14 @@ class PostgresGravidSoeknadRepositoryTest : SystemTestBase() {
     }
 
     @Test
-    fun `finnerDataIDb`() {
+    fun finnerDataIDb() {
         val soeknadGravidResult = repo.getById(testSoeknad.id)
         assertThat(soeknadGravidResult).isEqualToIgnoringGivenFields(testSoeknad, "referansenummer")
         assertThat(soeknadGravidResult!!.referansenummer).isNotNull
     }
 
     @Test
-    fun `kanOppdatereData`() {
+    fun kanOppdatereData() {
         val soeknadGravidResult = repo.getById(testSoeknad.id)
         assertNotNull(soeknadGravidResult, "Må finnes")
 
