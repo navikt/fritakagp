@@ -16,29 +16,14 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-          cache: gradle
-
-      - name: Cache Gradle wrapper
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-wrapper-
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('build.gradle') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-cache-
 
       - name: compose up
         run: cd docker/local && docker compose up -d && sleep 15
 
+      - uses: gradle/actions/setup-gradle@v4
+
       - name: Build and test
-        run: bash ./gradlew --console=plain build test jar
+        run: ./gradlew build test jar --console=plain
         env:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
