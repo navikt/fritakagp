@@ -11,26 +11,13 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-          cache: gradle
 
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
+      - uses: gradle/actions/setup-gradle@v4
 
       - name: Test
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: build test --console=plain
+        run: ./gradlew build test --console=plain
         env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cleanup Gradle Cache
-        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
-        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
-        run: |
-          rm -f ~/.gradle/caches/modules-2/modules-2.lock
-          rm -f ~/.gradle/caches/modules-2/gc.properties
 
   slowTest:
     runs-on: ubuntu-latest
@@ -40,26 +27,13 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-          cache: gradle
-
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
 
       - name: compose up
         run: cd docker/local && docker compose up -d && sleep 10
 
-      - name: Slow tests
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: build slowTests --console=plain
-        env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: gradle/actions/setup-gradle@v4
 
-      - name: Cleanup Gradle Cache
-        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
-        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
-        run: |
-          rm -f ~/.gradle/caches/modules-2/modules-2.lock
-          rm -f ~/.gradle/caches/modules-2/gc.properties
+      - name: Slow tests
+        run: ./gradlew build slowTests --console=plain
+        env:
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}

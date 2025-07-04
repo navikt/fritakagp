@@ -20,21 +20,16 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-          cache: gradle
-
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
 
       - name: compose up
         run: cd docker/local && docker compose up -d && sleep 15
 
+      - uses: gradle/actions/setup-gradle@v4
+
       - name: Build and test
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: --console=plain build test jar
+        run: ./gradlew build test jar --console=plain
         env:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-
 
       - name: Build and push
         id: docker-build-push
@@ -43,13 +38,6 @@ jobs:
           team: helsearbeidsgiver
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-
-      - name: Cleanup Gradle Cache
-        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
-        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
-        run: |
-          rm -f ~/.gradle/caches/modules-2/modules-2.lock
-          rm -f ~/.gradle/caches/modules-2/gc.properties
 
       - name: Deploy to DEV
         uses: nais/deploy/actions/deploy@v2
