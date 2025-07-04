@@ -42,6 +42,8 @@ import no.nav.helse.fritakagp.web.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
+import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
+import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.valiktor.ConstraintViolationException
 import org.valiktor.DefaultConstraintViolation
@@ -64,6 +66,8 @@ fun Route.gravidRoutes(
     authClient: AuthClient,
     fagerScope: String
 ) {
+    val logger = "gravidRoutes".logger()
+
     route("/gravid") {
         route("/soeknad") {
             get("/{id}") {
@@ -202,7 +206,11 @@ fun Route.gravidRoutes(
 
                 // Sletter gammelt krav
                 forrigeKrav.arbeidsgiverSakId?.let {
-                    runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    try {
+                        runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    } catch (_: SakEllerOppgaveFinnesIkkeException) {
+                        logger.warn("PATCH | Klarte ikke slette sak med ID ${forrigeKrav.arbeidsgiverSakId} fordi saken finnes ikke.")
+                    }
                 }
 
                 gravidKravRepo.update(forrigeKrav)
@@ -234,7 +242,11 @@ fun Route.gravidRoutes(
                 authorize(authorizer, authClient, fagerScope, form.virksomhetsnummer)
 
                 form.arbeidsgiverSakId?.let {
-                    runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    try {
+                        runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    } catch (_: SakEllerOppgaveFinnesIkkeException) {
+                        logger.warn("DELETE | Klarte ikke slette sak med ID ${form.arbeidsgiverSakId} fordi saken finnes ikke.")
+                    }
                 }
                 form.status = KravStatus.SLETTET
                 form.slettetAv = innloggetFnr

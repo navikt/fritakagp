@@ -38,6 +38,7 @@ import no.nav.helse.fritakagp.web.auth.hentIdentitetsnummerFraLoginToken
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
+import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDateTime
@@ -235,7 +236,11 @@ fun Route.kroniskRoutes(
                 // Sletter gammelt krav
                 logger.info("KKPa: Slett sak om gammelt krav i arbeidsgivernotifikasjon.")
                 forrigeKrav.arbeidsgiverSakId?.let {
-                    runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    try {
+                        runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    } catch (_: SakEllerOppgaveFinnesIkkeException) {
+                        logger.warn("PATCH | Klarte ikke slette sak med ID ${forrigeKrav.arbeidsgiverSakId} fordi saken finnes ikke.")
+                    }
                 }
 
                 logger.info("KKPa: Oppdater gammelt krav til status: ${KravStatus.ENDRET} i db.")
@@ -273,7 +278,11 @@ fun Route.kroniskRoutes(
 
                 logger.info("KKD: Slett sak i arbeidsgivernotifikasjon.")
                 form.arbeidsgiverSakId?.let {
-                    runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    try {
+                        runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                    } catch (_: SakEllerOppgaveFinnesIkkeException) {
+                        logger.warn("DELETE | Klarte ikke slette sak med ID ${form.arbeidsgiverSakId} fordi saken finnes ikke.")
+                    }
                 }
                 form.status = KravStatus.SLETTET
                 form.slettetAv = innloggetFnr
