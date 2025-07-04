@@ -31,7 +31,7 @@ fun Module.externalSystemClients(env: Env) {
         Altinn3OBOClient(
             baseUrl = env.altinnTilgangerBaseUrl,
             serviceCode = env.altinnServiceOwnerServiceId,
-            cacheConfig = LocalCache.Config(60.minutes, 100)
+            cacheConfig = LocalCache.Config(60.minutes, 250)
         )
     } bind Altinn3OBOClient::class
 
