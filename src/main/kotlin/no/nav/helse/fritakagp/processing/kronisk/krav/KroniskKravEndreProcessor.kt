@@ -41,8 +41,8 @@ class KroniskKravEndreProcessor(
     private val bakgrunnsjobbRepo: BakgrunnsjobbRepository
 ) : BakgrunnsjobbProsesserer {
     companion object {
-        val JOB_TYPE = "endre-kronisk-krav"
-        val dokumentasjonBrevkode = "endre_krav_om_fritak_fra_agp_dokumentasjon"
+        const val JOB_TYPE = "endre-kronisk-krav"
+        const val dokumentasjonBrevkode = "endre_krav_om_fritak_fra_agp_dokumentasjon"
     }
 
     override val type: String get() = JOB_TYPE

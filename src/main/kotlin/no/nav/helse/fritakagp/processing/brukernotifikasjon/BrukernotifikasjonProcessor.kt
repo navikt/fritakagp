@@ -32,7 +32,7 @@ class BrukernotifikasjonProcessor(
     val ukjentArbeidsgiver = "Arbeidsgiveren din"
 
     companion object {
-        val JOB_TYPE = "brukernotifikasjon"
+        const val JOB_TYPE = "brukernotifikasjon"
     }
 
     override fun prosesser(jobb: Bakgrunnsjobb) {

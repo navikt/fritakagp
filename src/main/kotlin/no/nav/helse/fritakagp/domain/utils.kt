@@ -19,9 +19,9 @@ fun sladdFnr(fnr: String): String {
     return fnr.take(6) + "*****"
 }
 
-val TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
-val DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-val TIMESTAMP_FORMAT_MED_KL = DateTimeFormatter.ofPattern("dd.MM.yyyy 'kl.' HH:mm")
+val TIMESTAMP_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
+val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+val TIMESTAMP_FORMAT_MED_KL: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy 'kl.' HH:mm")
 
 fun generereGravidSoeknadBeskrivelse(soeknad: GravidSoeknad, desc: String): String {
     val terminaDatoIkkeOppgitt = "Ikke oppgitt"

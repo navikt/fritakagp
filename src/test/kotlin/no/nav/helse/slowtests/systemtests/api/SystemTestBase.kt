@@ -12,8 +12,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.fritakagp.FritakAgpApplication
-import no.nav.helse.fritakagp.customObjectMapper
-import no.nav.helse.fritakagp.web.api.resreq.Problem
+import no.nav.helse.fritakagp.web.api.resreq.validation.Problem
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.koin.test.KoinTest
@@ -31,10 +30,9 @@ import org.koin.test.inject
 open class SystemTestBase : KoinTest {
 
     val httpClient by inject<HttpClient>()
-    val objectMapper = customObjectMapper(false)
 
     companion object {
-        val testServerPort = 8989
+        const val testServerPort = 8989
         var app: FritakAgpApplication? = null
     }
 

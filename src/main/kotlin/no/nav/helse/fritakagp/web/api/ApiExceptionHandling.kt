@@ -12,10 +12,10 @@ import io.ktor.server.plugins.ParameterConversionException
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 import no.nav.helse.fritakagp.integration.altinn.ManglerAltinnRettigheterException
-import no.nav.helse.fritakagp.web.dto.validation.Problem
-import no.nav.helse.fritakagp.web.dto.validation.ValidationProblem
-import no.nav.helse.fritakagp.web.dto.validation.ValidationProblemDetail
-import no.nav.helse.fritakagp.web.dto.validation.getContextualMessage
+import no.nav.helse.fritakagp.web.api.resreq.validation.Problem
+import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
+import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblemDetail
+import no.nav.helse.fritakagp.web.api.resreq.validation.getContextualMessage
 import no.nav.helsearbeidsgiver.utils.log.logger
 import org.valiktor.ConstraintViolationException
 import java.lang.reflect.InvocationTargetException
@@ -29,7 +29,7 @@ fun Application.configureExceptionHandling() {
         suspend fun handleUnexpectedException(call: ApplicationCall, cause: Throwable) {
             val errorId = UUID.randomUUID()
 
-            val userAgent = call.request.headers.get(HttpHeaders.UserAgent) ?: "Ukjent"
+            val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
             logger.error("Uventet feil, $errorId med useragent $userAgent", cause)
             val problem = Problem(
                 type = URI.create("urn:fritak:uventet-feil"),
@@ -87,7 +87,7 @@ fun Application.configureExceptionHandling() {
         }
 
         exception<BadRequestException> { call, cause ->
-            val userAgent = call.request.headers.get(HttpHeaders.UserAgent) ?: "Ukjent"
+            val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
             call.respond(
                 HttpStatusCode.BadRequest,
                 ValidationProblem(
@@ -105,7 +105,7 @@ fun Application.configureExceptionHandling() {
         }
 
         exception<MissingKotlinParameterException> { call, cause ->
-            val userAgent = call.request.headers.get(HttpHeaders.UserAgent) ?: "Ukjent"
+            val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
             call.respond(
                 HttpStatusCode.BadRequest,
                 ValidationProblem(
@@ -129,8 +129,8 @@ fun Application.configureExceptionHandling() {
                 handleValidationError(call, cause.cause as ConstraintViolationException)
             } else {
                 val errorId = UUID.randomUUID()
-                val userAgent = call.request.headers.get(HttpHeaders.UserAgent) ?: "Ukjent"
-                val locale = call.request.headers.get(HttpHeaders.AcceptLanguage) ?: "Ukjent"
+                val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
+                val locale = call.request.headers[HttpHeaders.AcceptLanguage] ?: "Ukjent"
                 logger.warn("$errorId : $userAgent : $locale", cause)
                 val problem = Problem(
                     status = HttpStatusCode.BadRequest.value,

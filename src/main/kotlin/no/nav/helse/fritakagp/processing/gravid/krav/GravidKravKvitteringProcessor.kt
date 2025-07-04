@@ -14,7 +14,7 @@ class GravidKravKvitteringProcessor(
 ) : BakgrunnsjobbProsesserer {
 
     companion object {
-        val JOB_TYPE = "gravid-krav-altinn-kvittering"
+        const val JOB_TYPE = "gravid-krav-altinn-kvittering"
     }
 
     override val type: String get() = JOB_TYPE

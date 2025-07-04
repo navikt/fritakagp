@@ -14,7 +14,7 @@ class BrukernotifikasjonProcessorNy(
     private val logger = this.logger()
 
     companion object {
-        val JOB_TYPE = "brukernotifikasjonNy"
+        const val JOB_TYPE = "brukernotifikasjonNy"
     }
 
     override fun prosesser(jobb: Bakgrunnsjobb) {

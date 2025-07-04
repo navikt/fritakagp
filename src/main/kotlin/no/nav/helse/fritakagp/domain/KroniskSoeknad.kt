@@ -44,5 +44,5 @@ data class FravaerData(
     val yearMonth: String,
     val antallDagerMedFravaer: Float
 ) {
-    fun toLocalDate() = LocalDate.parse("$yearMonth-01")
+    fun toLocalDate(): LocalDate = LocalDate.parse("$yearMonth-01")
 }
