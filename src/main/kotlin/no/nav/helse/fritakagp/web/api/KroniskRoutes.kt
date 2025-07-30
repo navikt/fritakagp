@@ -5,7 +5,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
@@ -45,6 +44,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 fun Route.kroniskRoutes(
+    isEnvPreprod: Boolean,
     breegClient: BrregClient,
     kroniskSoeknadRepo: KroniskSoeknadRepository,
     kroniskKravRepo: KroniskKravRepository,
@@ -86,7 +86,7 @@ fun Route.kroniskRoutes(
                 logger.info("KSP: Send inn kronisk søknad.")
                 val request = call.receive<KroniskSoknadRequest>()
 
-                val isVirksomhet = if (application.environment.config.property("koin.profile").getString() == "PREPROD") {
+                val isVirksomhet = if (isEnvPreprod) {
                     true
                 } else {
                     logger.info("KSP: Hent virksomhet fra brreg.")

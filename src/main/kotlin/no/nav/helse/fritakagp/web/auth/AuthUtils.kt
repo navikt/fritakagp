@@ -1,6 +1,7 @@
 package no.nav.helse.fritakagp.web.auth
 
 import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.request.authorization
 import io.ktor.server.routing.RoutingContext
 import no.nav.helse.fritakagp.Issuers
 import no.nav.helse.fritakagp.auth.AuthClient
@@ -33,7 +34,7 @@ fun hentUtløpsdatoFraLoginToken(request: ApplicationRequest): Date {
 }
 
 fun getTokenString(request: ApplicationRequest): String {
-    return request.headers["Authorization"]?.replaceFirst("Bearer ", "")
+    return request.authorization()?.replaceFirst("Bearer ", "")
         ?: throw IllegalAccessException("Du må angi et identitetstoken i Authorization-headeren")
 }
 

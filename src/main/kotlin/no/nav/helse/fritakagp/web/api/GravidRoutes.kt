@@ -5,7 +5,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
@@ -51,6 +50,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 fun Route.gravidRoutes(
+    isEnvPreprod: Boolean,
     breegClient: BrregClient,
     gravidSoeknadRepo: GravidSoeknadRepository,
     gravidKravRepo: GravidKravRepository,
@@ -87,7 +87,7 @@ fun Route.gravidRoutes(
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
                 val request = call.receive<GravidSoknadRequest>()
 
-                val isVirksomhet = if (application.environment.config.property("koin.profile").getString() == "PREPROD") true else breegClient.erVirksomhet(request.virksomhetsnummer)
+                val isVirksomhet = if (isEnvPreprod) true else breegClient.erVirksomhet(request.virksomhetsnummer)
                 request.validate(isVirksomhet)
 
                 val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
