@@ -194,7 +194,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:$kafkaClient")
     implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
     implementation("org.codehaus.janino:janino:$janinoVersion")
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
     implementation("org.postgresql:postgresql:$postgresqlVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
