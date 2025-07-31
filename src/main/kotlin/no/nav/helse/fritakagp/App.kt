@@ -117,7 +117,8 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
     private fun migrateDatabase() {
         logger.info("Starter databasemigrering")
 
-        Flyway.configure().baselineOnMigrate(true)
+        Flyway.configure()
+            .baselineOnMigrate(true)
             .dataSource(GlobalContext.getKoinApplicationOrNull()?.koin?.get())
             .load()
             .migrate()
