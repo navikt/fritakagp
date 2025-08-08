@@ -143,14 +143,13 @@ fun mockBrregClient(): BrregClient =
         val orgnrSetSlot = slot<Set<String>>()
 
         coEvery { hentOrganisasjonNavn(capture(orgnrSetSlot)) } answers {
-            val orgnr = orgnrSetSlot.captured.first()
+            val orgnrSet = orgnrSetSlot.captured
 
             orgnrSetSlot.clear()
 
-            mapOf(Orgnr(orgnr) to "Stark Industries")
+            orgnrSet.map(::Orgnr)
+                .associateWith { "Stark Industries" }
         }
 
-        coEvery { erOrganisasjon(any()) } answers {
-            true
-        }
+        coEvery { erOrganisasjon(any()) } returns true
     }
