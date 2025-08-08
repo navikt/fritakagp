@@ -17,8 +17,6 @@ import no.nav.helse.fritakagp.db.PostgresKroniskSoeknadRepository
 import no.nav.helse.fritakagp.db.createHikariConfig
 import no.nav.helse.fritakagp.domain.BeloepBeregning
 import no.nav.helse.fritakagp.integration.altinn.message.Clients
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
-import no.nav.helse.fritakagp.integration.brreg.BrregClientImpl
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOppdaterNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessor
@@ -49,11 +47,14 @@ import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitterin
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
 import no.nav.helse.fritakagp.service.PdlService
+import no.nav.helsearbeidsgiver.brreg.BrregClient
+import no.nav.helsearbeidsgiver.utils.cache.LocalCache
 import no.nav.tms.varsel.action.Sensitivitet
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import javax.sql.DataSource
+import kotlin.time.Duration.Companion.days
 
 fun prodConfig(env: Env.Prod): Module = module {
     externalSystemClients(env = env)
@@ -136,7 +137,12 @@ fun prodConfig(env: Env.Prod): Module = module {
     single { ArbeidsgiverOppdaterNotifikasjonProcessor(gravidKravRepo = get(), kroniskKravRepo = get(), om = get(), arbeidsgiverNotifikasjonKlient = get()) }
     single { PdlService(pdlClient = get()) }
 
-    single { BrregClientImpl(httpClient = get(), brregUndervirksomhetUrl = env.brregUrl) } bind BrregClient::class
+    single {
+        BrregClient(
+            url = env.brregUrl,
+            cacheConfig = LocalCache.Config(1.days, 2500)
+        )
+    }
 
     single { BeloepBeregning(grunnbeloepClient = get()) }
 }

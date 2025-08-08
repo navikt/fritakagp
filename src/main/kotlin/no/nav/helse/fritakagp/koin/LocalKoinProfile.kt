@@ -53,7 +53,7 @@ import org.koin.dsl.module
 import javax.sql.DataSource
 
 fun localConfig(env: Env.Local): Module = module {
-    mockExternalDependecies()
+    mockExternalDependencies()
 
     single { GrunnbeloepClient(url = env.grunnbeloepUrl, httpClient = get()) }
     single { BeloepBeregning(grunnbeloepClient = get()) }

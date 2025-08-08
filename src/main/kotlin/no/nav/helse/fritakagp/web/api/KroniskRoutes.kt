@@ -19,7 +19,6 @@ import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepBeregning
 import no.nav.helse.fritakagp.domain.KravStatus
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
@@ -38,14 +37,14 @@ import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
+import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDateTime
 import java.util.UUID
 
 fun Route.kroniskRoutes(
-    isEnvPreprod: Boolean,
-    breegClient: BrregClient,
+    brregClient: BrregClient,
     kroniskSoeknadRepo: KroniskSoeknadRepository,
     kroniskKravRepo: KroniskKravRepository,
     bakgunnsjobbService: BakgrunnsjobbService,
@@ -86,12 +85,8 @@ fun Route.kroniskRoutes(
                 logger.info("KSP: Send inn kronisk søknad.")
                 val request = call.receive<KroniskSoknadRequest>()
 
-                val isVirksomhet = if (isEnvPreprod) {
-                    true
-                } else {
-                    logger.info("KSP: Hent virksomhet fra brreg.")
-                    breegClient.erVirksomhet(request.virksomhetsnummer)
-                }
+                logger.info("KSP: Hent virksomhet fra brreg.")
+                val isVirksomhet = brregClient.erOrganisasjon(request.virksomhetsnummer)
                 request.validate(isVirksomhet)
 
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
