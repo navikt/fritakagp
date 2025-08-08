@@ -15,7 +15,6 @@ import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.GravidKrav
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
 import no.nav.helse.fritakagp.integration.gcp.BucketDocument
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.jsonEquals
@@ -28,8 +27,10 @@ import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor.Compani
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor.Companion.dokumentasjonBrevkode
 import no.nav.helse.fritakagp.readToObjectNode
 import no.nav.helse.fritakagp.service.PdlService
+import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,9 +50,9 @@ class GravidKravProcessorTest {
     val pdfGeneratorMock = mockk<GravidKravPDFGenerator>(relaxed = true)
     val bucketStorageMock = mockk<BucketStorage>(relaxed = true)
     val bakgrunnsjobbRepomock = mockk<BakgrunnsjobbRepository>(relaxed = true)
-    val berregServiceMock = mockk<BrregClient>(relaxed = true)
+    val brregClientMock = mockk<BrregClient>()
 
-    val prosessor = GravidKravProcessor(repositoryMock, joarkMock, oppgaveMock, pdlServiceMock, bakgrunnsjobbRepomock, pdfGeneratorMock, objectMapper, bucketStorageMock, berregServiceMock)
+    val prosessor = GravidKravProcessor(repositoryMock, joarkMock, oppgaveMock, pdlServiceMock, bakgrunnsjobbRepomock, pdfGeneratorMock, objectMapper, bucketStorageMock, brregClientMock)
     lateinit var krav: GravidKrav
 
     private val oppgaveId = 9999
@@ -61,13 +62,16 @@ class GravidKravProcessorTest {
     @BeforeEach
     fun setup() {
         krav = GravidTestData.gravidKrav.copy()
+        val orgnr = Orgnr(krav.virksomhetsnummer)
+
         jobb = testJob(objectMapper.writeValueAsString(GravidKravProcessor.JobbData(krav.id)))
+
         every { repositoryMock.getById(krav.id) } returns krav
         every { bucketStorageMock.getDocAsString(any()) } returns null
         every { pdlServiceMock.hentAktoerId(krav.identitetsnummer) } returns "aktør-id"
         coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns GravidTestData.gravidOpprettOppgaveResponse.copy(id = oppgaveId)
-        coEvery { berregServiceMock.getVirksomhetsNavn(krav.virksomhetsnummer) } returns "Stark Industries"
+        coEvery { brregClientMock.hentOrganisasjonNavn(setOf(orgnr.verdi)) } returns mapOf(orgnr to "Stark Industries")
     }
 
     @Test

@@ -20,7 +20,6 @@ import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepBeregning
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.decodeBase64File
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
@@ -42,6 +41,7 @@ import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
+import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.valiktor.ConstraintViolationException
@@ -50,8 +50,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 fun Route.gravidRoutes(
-    isEnvPreprod: Boolean,
-    breegClient: BrregClient,
+    brregClient: BrregClient,
     gravidSoeknadRepo: GravidSoeknadRepository,
     gravidKravRepo: GravidKravRepository,
     bakgunnsjobbService: BakgrunnsjobbService,
@@ -87,7 +86,7 @@ fun Route.gravidRoutes(
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
                 val request = call.receive<GravidSoknadRequest>()
 
-                val isVirksomhet = if (isEnvPreprod) true else breegClient.erVirksomhet(request.virksomhetsnummer)
+                val isVirksomhet = brregClient.erOrganisasjon(request.virksomhetsnummer)
                 request.validate(isVirksomhet)
 
                 val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
