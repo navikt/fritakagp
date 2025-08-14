@@ -19,6 +19,8 @@ import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepBeregning
 import no.nav.helse.fritakagp.domain.KravStatus
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
@@ -28,7 +30,6 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
-import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helse.fritakagp.web.api.resreq.KroniskKravRequest
 import no.nav.helse.fritakagp.web.api.resreq.KroniskSoknadRequest
 import no.nav.helse.fritakagp.web.auth.authorize
@@ -37,14 +38,13 @@ import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDateTime
 import java.util.UUID
 
 fun Route.kroniskRoutes(
-    brregClient: BrregClient,
+    brregService: IBrregService,
     kroniskSoeknadRepo: KroniskSoeknadRepository,
     kroniskKravRepo: KroniskKravRepository,
     bakgunnsjobbService: BakgrunnsjobbService,
@@ -86,7 +86,7 @@ fun Route.kroniskRoutes(
                 val request = call.receive<KroniskSoknadRequest>()
 
                 logger.info("KSP: Hent virksomhet fra brreg.")
-                val isVirksomhet = brregClient.erOrganisasjon(request.virksomhetsnummer)
+                val isVirksomhet = brregService.erOrganisasjon(request.virksomhetsnummer)
                 request.validate(isVirksomhet)
 
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)

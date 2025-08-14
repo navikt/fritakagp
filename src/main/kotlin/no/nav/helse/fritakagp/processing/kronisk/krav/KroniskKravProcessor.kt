@@ -13,13 +13,13 @@ import no.nav.helse.fritakagp.KroniskKravMetrics
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.domain.generereKroniskKravBeskrivelse
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.NotifikasjonsType.Oppretting
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.SkjemaType
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
-import no.nav.helse.fritakagp.service.PdlService
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Avsender
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Dokument
@@ -27,7 +27,6 @@ import no.nav.helsearbeidsgiver.dokarkiv.domene.DokumentVariant
 import no.nav.helsearbeidsgiver.dokarkiv.domene.GjelderPerson
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Kanal
 import no.nav.helsearbeidsgiver.utils.log.logger
-import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
@@ -41,7 +40,7 @@ class KroniskKravProcessor(
     private val pdfGenerator: KroniskKravPDFGenerator,
     private val om: ObjectMapper,
     private val bucketStorage: BucketStorage,
-    private val brregClient: BrregClient
+    private val brregService: IBrregService
 ) : BakgrunnsjobbProsesserer {
     companion object {
         const val JOB_TYPE = "kronisk-krav-formidling"
@@ -66,9 +65,8 @@ class KroniskKravProcessor(
 
         try {
             if (krav.virksomhetsnavn == null) {
-                val orgnr = Orgnr(krav.virksomhetsnummer)
                 runBlocking {
-                    krav.virksomhetsnavn = brregClient.hentOrganisasjonNavn(setOf(orgnr.verdi))[orgnr] ?: "Ukjent arbeidsgiver"
+                    krav.virksomhetsnavn = brregService.hentOrganisasjonNavn(krav.virksomhetsnummer)
                     logger.info("Slo opp virksomhet")
                 }
             }

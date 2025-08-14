@@ -2,7 +2,6 @@ package no.nav.helse.fritakagp.koin
 
 import io.mockk.coEvery
 import io.mockk.mockk
-import io.mockk.slot
 import kotlinx.serialization.json.Json
 import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlient
 import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveResponse
@@ -15,6 +14,8 @@ import no.nav.helse.fritakagp.auth.AuthClient
 import no.nav.helse.fritakagp.auth.IdentityProvider
 import no.nav.helse.fritakagp.auth.TokenResponse
 import no.nav.helse.fritakagp.auth.fetchToken
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.MockBrregService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.gcp.MockBucketStorage
 import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
@@ -26,7 +27,6 @@ import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.aareg.Periode
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.altinn.AltinnTilgangRespons
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.pdl.PdlClient
 import no.nav.helsearbeidsgiver.pdl.domene.FullPerson
@@ -91,6 +91,8 @@ fun Module.mockExternalDependencies() {
         DokArkivClient("url", authClient.fetchToken(IdentityProvider.AZURE_AD, "dokarkiv"))
     } bind DokArkivClient::class
 
+    single { MockBrregService() } bind IBrregService::class
+
     single {
         mockk<PdlClient> {
             coEvery { personNavn(any()) } returns PersonNavn("Ola", "M", "Avsender")
@@ -129,27 +131,9 @@ fun Module.mockExternalDependencies() {
     single { MockVirusScanner() } bind VirusScanner::class
     single { MockBucketStorage() } bind BucketStorage::class
 
-    single { mockBrregClient() }
-
     single { mockk<ArbeidsgiverOppdaterNotifikasjonProcessor>(relaxed = true) }
 }
 
 fun String.loadFromResources(): String {
     return ClassLoader.getSystemResource(this).readText()
 }
-
-fun mockBrregClient(): BrregClient =
-    mockk<BrregClient> {
-        val orgnrSetSlot = slot<Set<String>>()
-
-        coEvery { hentOrganisasjonNavn(capture(orgnrSetSlot)) } answers {
-            val orgnrSet = orgnrSetSlot.captured
-
-            orgnrSetSlot.clear()
-
-            orgnrSet.map(::Orgnr)
-                .associateWith { "Stark Industries" }
-        }
-
-        coEvery { erOrganisasjon(any()) } returns true
-    }

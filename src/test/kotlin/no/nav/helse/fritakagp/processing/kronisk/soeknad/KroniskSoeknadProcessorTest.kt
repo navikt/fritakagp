@@ -16,17 +16,16 @@ import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.domain.KroniskSoeknad
+import no.nav.helse.fritakagp.integration.BrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketDocument
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.emptyJob
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.testJob
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.SkjemaType
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
-import no.nav.helse.fritakagp.service.PdlService
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
-import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,7 +44,7 @@ class KroniskSoeknadProcessorTest {
     val pdfGeneratorMock = mockk<KroniskSoeknadPDFGenerator>(relaxed = true)
     val bucketStorageMock = mockk<BucketStorage>(relaxed = true)
     val bakgrunnsjobbRepomock = mockk<BakgrunnsjobbRepository>(relaxed = true)
-    val brregClientMock = mockk<BrregClient>()
+    val brregServiceMock = mockk<BrregService>()
     val prosessor = KroniskSoeknadProcessor(
         repositoryMock,
         joarkMock,
@@ -55,7 +54,7 @@ class KroniskSoeknadProcessorTest {
         pdfGeneratorMock,
         objectMapper,
         bucketStorageMock,
-        brregClientMock
+        brregServiceMock
     )
     lateinit var soeknad: KroniskSoeknad
 
@@ -66,8 +65,6 @@ class KroniskSoeknadProcessorTest {
     @BeforeEach
     fun setup() {
         soeknad = KroniskTestData.soeknadKronisk.copy()
-        val orgnr = Orgnr(soeknad.virksomhetsnummer)
-
         jobb = testJob(objectMapper.writeValueAsString(KroniskSoeknadProcessor.JobbData(soeknad.id)))
         objectMapper.registerModule(JavaTimeModule())
 
@@ -76,7 +73,7 @@ class KroniskSoeknadProcessorTest {
         every { pdlServiceMock.hentAktoerId(soeknad.identitetsnummer) } returns "aktør-id"
         coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns KroniskTestData.kroniskOpprettOppgaveResponse.copy(id = oppgaveId)
-        coEvery { brregClientMock.hentOrganisasjonNavn(setOf(orgnr.verdi)) } returns mapOf(orgnr to "Stark Industries")
+        coEvery { brregServiceMock.hentOrganisasjonNavn(soeknad.virksomhetsnummer) } returns "Stark Industries"
     }
 
     @Test

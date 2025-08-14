@@ -15,6 +15,8 @@ import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KroniskKrav
+import no.nav.helse.fritakagp.integration.BrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketDocument
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.jsonEquals
@@ -24,11 +26,8 @@ import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.testJob
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
 import no.nav.helse.fritakagp.readToObjectNode
-import no.nav.helse.fritakagp.service.PdlService
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
-import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -48,8 +47,8 @@ class KroniskKravProcessorTest {
     val pdfGeneratorMock = mockk<KroniskKravPDFGenerator>(relaxed = true)
     val bucketStorageMock = mockk<BucketStorage>(relaxed = true)
     val bakgrunnsjobbRepomock = mockk<BakgrunnsjobbRepository>(relaxed = true)
-    val brregClientMock = mockk<BrregClient>()
-    val prosessor = KroniskKravProcessor(repositoryMock, joarkMock, oppgaveMock, pdlServiceMock, bakgrunnsjobbRepomock, pdfGeneratorMock, objectMapper, bucketStorageMock, brregClientMock)
+    val brregServiceMock = mockk<BrregService>()
+    val prosessor = KroniskKravProcessor(repositoryMock, joarkMock, oppgaveMock, pdlServiceMock, bakgrunnsjobbRepomock, pdfGeneratorMock, objectMapper, bucketStorageMock, brregServiceMock)
     lateinit var krav: KroniskKrav
 
     private val oppgaveId = 9999
@@ -59,8 +58,6 @@ class KroniskKravProcessorTest {
     @BeforeEach
     fun setup() {
         krav = KroniskTestData.kroniskKrav.copy()
-        val orgnr = Orgnr(krav.virksomhetsnummer)
-
         jobb = testJob(objectMapper.writeValueAsString(KroniskKravProcessor.JobbData(krav.id)))
 
         every { repositoryMock.getById(krav.id) } returns krav
@@ -68,7 +65,7 @@ class KroniskKravProcessorTest {
         every { pdlServiceMock.hentAktoerId(krav.identitetsnummer) } returns "aktør-id"
         coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns KroniskTestData.kroniskOpprettOppgaveResponse.copy(id = oppgaveId)
-        coEvery { brregClientMock.hentOrganisasjonNavn(setOf(orgnr.verdi)) } returns mapOf(orgnr to "Stark Industries")
+        coEvery { brregServiceMock.hentOrganisasjonNavn(krav.virksomhetsnummer) } returns "Stark Industries"
     }
 
     @Test

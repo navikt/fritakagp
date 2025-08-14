@@ -12,6 +12,8 @@ import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepBeregning
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
@@ -30,9 +32,7 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
-import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -81,7 +81,7 @@ class KoinProfilesKtTest : KoinTest {
     private val arbeidsgiverNotifikasjonProcessor: ArbeidsgiverNotifikasjonProcessor by inject()
     private val arbeidsgiverOppdaterNotifikasjonProcessor: ArbeidsgiverOppdaterNotifikasjonProcessor by inject()
     private val pdlService: PdlService by inject()
-    private val brregClient: BrregClient by inject()
+    private val brregService: IBrregService by inject()
     private val beloepBeregning: BeloepBeregning by inject()
 
     private val objectMapper: ObjectMapper by inject()
@@ -138,7 +138,7 @@ class KoinProfilesKtTest : KoinTest {
         assertNotNull(arbeidsgiverNotifikasjonProcessor)
         assertNotNull(arbeidsgiverOppdaterNotifikasjonProcessor)
         assertNotNull(pdlService)
-        assertNotNull(brregClient)
+        assertNotNull(brregService)
         assertNotNull(beloepBeregning)
     }
 

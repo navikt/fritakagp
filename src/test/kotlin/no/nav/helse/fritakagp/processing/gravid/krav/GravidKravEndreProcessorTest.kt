@@ -11,10 +11,10 @@ import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlient
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.GravidKrav
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.emptyJob
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.testJob
-import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
 import org.assertj.core.api.Assertions.assertThat

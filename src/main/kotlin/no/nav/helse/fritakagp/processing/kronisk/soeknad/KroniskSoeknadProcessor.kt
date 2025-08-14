@@ -13,13 +13,13 @@ import no.nav.helse.fritakagp.KroniskSoeknadMetrics
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.domain.KroniskSoeknad
 import no.nav.helse.fritakagp.domain.generereKroniskSoeknadBeskrivelse
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.NotifikasjonsType.Oppretting
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.SkjemaType.KroniskSøknad
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
-import no.nav.helse.fritakagp.service.PdlService
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Avsender
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Dokument
@@ -27,7 +27,6 @@ import no.nav.helsearbeidsgiver.dokarkiv.domene.DokumentVariant
 import no.nav.helsearbeidsgiver.dokarkiv.domene.GjelderPerson
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Kanal
 import no.nav.helsearbeidsgiver.utils.log.logger
-import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
@@ -41,7 +40,7 @@ class KroniskSoeknadProcessor(
     private val pdfGenerator: KroniskSoeknadPDFGenerator,
     private val om: ObjectMapper,
     private val bucketStorage: BucketStorage,
-    private val brregClient: BrregClient
+    private val brregService: IBrregService
 ) : BakgrunnsjobbProsesserer {
     companion object {
         const val dokumentasjonBrevkode = "soeknad_om_fritak_fra_agp_dokumentasjon"
@@ -64,9 +63,8 @@ class KroniskSoeknadProcessor(
 
         try {
             if (soeknad.virksomhetsnavn == null) {
-                val orgnr = Orgnr(soeknad.virksomhetsnummer)
                 runBlocking {
-                    soeknad.virksomhetsnavn = brregClient.hentOrganisasjonNavn(setOf(orgnr.verdi))[orgnr] ?: "Ukjent arbeidsgiver"
+                    soeknad.virksomhetsnavn = brregService.hentOrganisasjonNavn(soeknad.virksomhetsnummer)
                 }
             }
             if (soeknad.journalpostId == null) {
