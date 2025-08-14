@@ -11,11 +11,10 @@ import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlient
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.GravidKrav
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.emptyJob
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.testJob
-import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -35,7 +34,6 @@ class GravidKravEndreProcessorTest {
     val objectMapper = customObjectMapper()
     val pdfGeneratorMock = mockk<GravidKravPDFGenerator>(relaxed = true)
     val bucketStorageMock = mockk<BucketStorage>(relaxed = true)
-    val berregServiceMock = mockk<BrregClient>(relaxed = true)
     val bakgrunnsjobbRepositoryMock = mockk<BakgrunnsjobbRepository>(relaxed = true)
 
     val prosessor = GravidKravEndreProcessor(repositoryMock, joarkMock, oppgaveMock, pdlServiceMock, pdfGeneratorMock, objectMapper, bucketStorageMock, bakgrunnsjobbRepositoryMock)
@@ -58,7 +56,6 @@ class GravidKravEndreProcessorTest {
         every { pdlServiceMock.hentAktoerId(endretKrav.identitetsnummer) } returns "aktør-id"
         coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns GravidTestData.gravidOpprettOppgaveResponse.copy(id = oppgaveId)
-        coEvery { berregServiceMock.getVirksomhetsNavn(endretKrav.virksomhetsnummer) } returns "Stark Industries"
     }
 
     @Test

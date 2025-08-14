@@ -14,8 +14,8 @@ import no.nav.helse.fritakagp.auth.AuthClient
 import no.nav.helse.fritakagp.auth.IdentityProvider
 import no.nav.helse.fritakagp.auth.TokenResponse
 import no.nav.helse.fritakagp.auth.fetchToken
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
-import no.nav.helse.fritakagp.integration.brreg.MockBrregClient
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.MockBrregService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.gcp.MockBucketStorage
 import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
@@ -38,7 +38,7 @@ import org.koin.dsl.bind
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-fun Module.mockExternalDependecies() {
+fun Module.mockExternalDependencies() {
     single { MockOAuth2Server().apply { start(port = 6668) } }
     single {
         mockk<AuthClient> {
@@ -91,6 +91,8 @@ fun Module.mockExternalDependecies() {
         DokArkivClient("url", authClient.fetchToken(IdentityProvider.AZURE_AD, "dokarkiv"))
     } bind DokArkivClient::class
 
+    single { MockBrregService() } bind IBrregService::class
+
     single {
         mockk<PdlClient> {
             coEvery { personNavn(any()) } returns PersonNavn("Ola", "M", "Avsender")
@@ -128,10 +130,10 @@ fun Module.mockExternalDependecies() {
 
     single { MockVirusScanner() } bind VirusScanner::class
     single { MockBucketStorage() } bind BucketStorage::class
-    single { MockBrregClient() } bind BrregClient::class
 
     single { mockk<ArbeidsgiverOppdaterNotifikasjonProcessor>(relaxed = true) }
 }
+
 fun String.loadFromResources(): String {
     return ClassLoader.getSystemResource(this).readText()
 }

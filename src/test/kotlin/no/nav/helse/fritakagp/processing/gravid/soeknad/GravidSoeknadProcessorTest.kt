@@ -17,12 +17,12 @@ import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.domain.GravidSoeknad
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
+import no.nav.helse.fritakagp.integration.BrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketDocument
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.SkjemaType
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
-import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -43,7 +43,7 @@ class GravidSoeknadProcessorTest {
     val pdfGeneratorMock = mockk<GravidSoeknadPDFGenerator>(relaxed = true)
     val bucketStorageMock = mockk<BucketStorage>(relaxed = true)
     val bakgrunnsjobbRepomock = mockk<BakgrunnsjobbRepository>(relaxed = true)
-    val berregServiceMock = mockk<BrregClient>(relaxed = true)
+    val brregServiceMock = mockk<BrregService>()
     val prosessor = GravidSoeknadProcessor(
         repositoryMock,
         joarkMock,
@@ -53,7 +53,7 @@ class GravidSoeknadProcessorTest {
         pdfGeneratorMock,
         objectMapper,
         bucketStorageMock,
-        berregServiceMock
+        brregServiceMock
     )
 
     lateinit var soeknad: GravidSoeknad
@@ -70,12 +70,13 @@ class GravidSoeknadProcessorTest {
             type = "test"
         )
         objectMapper.registerModule(JavaTimeModule())
+
         every { repositoryMock.getById(soeknad.id) } returns soeknad
         every { bucketStorageMock.getDocAsString(any()) } returns null
         every { pdlServiceMock.hentAktoerId(soeknad.identitetsnummer) } returns "aktør-id"
         coEvery { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) } returns OpprettOgFerdigstillResponse(arkivReferanse, true, null, emptyList())
         coEvery { oppgaveMock.opprettOppgave(any(), any()) } returns gravidOpprettOppgaveResponse.copy(id = oppgaveId)
-        coEvery { berregServiceMock.getVirksomhetsNavn(soeknad.virksomhetsnummer) } returns "Stark Industries"
+        coEvery { brregServiceMock.hentOrganisasjonNavn(soeknad.virksomhetsnummer) } returns "Stark Industries"
     }
 
     @Test
@@ -151,7 +152,7 @@ class GravidSoeknadProcessorTest {
         coVerify(exactly = 1) { joarkMock.opprettOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { oppgaveMock.opprettOppgave(any(), any()) }
         verify(exactly = 1) { repositoryMock.update(soeknad) }
-        coVerify(exactly = 1) { berregServiceMock.getVirksomhetsNavn(soeknad.virksomhetsnummer) }
+        coVerify(exactly = 1) { brregServiceMock.hentOrganisasjonNavn(soeknad.virksomhetsnummer) }
     }
 
     @Test

@@ -19,7 +19,8 @@ import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepBeregning
 import no.nav.helse.fritakagp.domain.KravStatus
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
@@ -29,7 +30,6 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
-import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helse.fritakagp.web.api.resreq.KroniskKravRequest
 import no.nav.helse.fritakagp.web.api.resreq.KroniskSoknadRequest
 import no.nav.helse.fritakagp.web.auth.authorize
@@ -44,8 +44,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 fun Route.kroniskRoutes(
-    isEnvPreprod: Boolean,
-    breegClient: BrregClient,
+    brregService: IBrregService,
     kroniskSoeknadRepo: KroniskSoeknadRepository,
     kroniskKravRepo: KroniskKravRepository,
     bakgunnsjobbService: BakgrunnsjobbService,
@@ -86,12 +85,8 @@ fun Route.kroniskRoutes(
                 logger.info("KSP: Send inn kronisk søknad.")
                 val request = call.receive<KroniskSoknadRequest>()
 
-                val isVirksomhet = if (isEnvPreprod) {
-                    true
-                } else {
-                    logger.info("KSP: Hent virksomhet fra brreg.")
-                    breegClient.erVirksomhet(request.virksomhetsnummer)
-                }
+                logger.info("KSP: Hent virksomhet fra brreg.")
+                val isVirksomhet = brregService.erOrganisasjon(request.virksomhetsnummer)
                 request.validate(isVirksomhet)
 
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)

@@ -33,10 +33,9 @@ fun hentUtløpsdatoFraLoginToken(request: ApplicationRequest): Date {
     return JwtToken(tokenString).jwtTokenClaims.expirationTime ?: Date.from(Instant.MIN)
 }
 
-fun getTokenString(request: ApplicationRequest): String {
-    return request.authorization()?.replaceFirst("Bearer ", "")
+fun getTokenString(request: ApplicationRequest): String =
+    request.authorization()?.removePrefix("Bearer ")
         ?: throw IllegalAccessException("Du må angi et identitetstoken i Authorization-headeren")
-}
 
 private val pidRegex = Regex("\\d{11}")
 

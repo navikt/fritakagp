@@ -103,6 +103,7 @@ dependencies {
     val arbeidsgiverNotifikasjonKlientVersion: String by project
     val assertJVersion: String by project
     val bakgrunnsjobbVersion: String by project
+    val brregClientVersion: String by project
     val brukernotifikasjonSchemasVersion: String by project
     val confluentVersion: String by project
     val coroutinesVersion: String by project
@@ -173,18 +174,19 @@ dependencies {
     implementation("javax.ws.rs:javax.ws.rs-api:$javaxWsRsApiVersion")
     implementation("javax.xml.ws:jaxws-api:$jaxwsVersion")
 
-    implementation("no.nav.helsearbeidsgiver:hag-bakgrunnsjobb:$bakgrunnsjobbVersion")
+    implementation("no.nav.helsearbeidsgiver:aareg-client:$aaregClientVersion")
+    implementation("no.nav.helsearbeidsgiver:altinn-client:$altinnClientVersion")
     implementation("no.nav.helsearbeidsgiver:arbeidsgiver-notifikasjon-klient:$arbeidsgiverNotifikasjonKlientVersion")
+    implementation("no.nav.helsearbeidsgiver:brreg-client:$brregClientVersion")
     implementation("no.nav.helsearbeidsgiver:dokarkiv-client:$dokarkivKlientVersion")
+    implementation("no.nav.helsearbeidsgiver:hag-bakgrunnsjobb:$bakgrunnsjobbVersion")
+    implementation("no.nav.helsearbeidsgiver:pdl-client:$pdlClientVersion")
     implementation("no.nav.helsearbeidsgiver:utils:$utilsVersion")
     implementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion") {
         exclude(group = "ch.qos.logback", module = "logback-classic")
         exclude(group = "org.slf4j", module = "slf4j-api")
         exclude(group = "io.netty", module = "netty-all")
     }
-    implementation("no.nav.helsearbeidsgiver:aareg-client:$aaregClientVersion")
-    implementation("no.nav.helsearbeidsgiver:altinn-client:$altinnClientVersion")
-    implementation("no.nav.helsearbeidsgiver:pdl-client:$pdlClientVersion")
     implementation("no.nav.security:token-validation-ktor-v3:$tokenSupportVersion")
     implementation("no.nav.tjenestespesifikasjoner:altinn-correspondence-agency-external-basic:$altinnCorrespondenceAgencyVersion")
     implementation("no.nav.tms.varsel:kotlin-builder:$tmsVarselKotlinBuilderVersion")
