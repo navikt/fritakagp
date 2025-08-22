@@ -45,6 +45,7 @@ spec:
     logging:
       destinations:
         - id: secure_logs
+        - id: loki
   secureLogs:
     enabled: true
   prometheus:
