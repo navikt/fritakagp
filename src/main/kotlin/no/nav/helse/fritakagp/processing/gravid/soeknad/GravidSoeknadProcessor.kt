@@ -13,13 +13,13 @@ import no.nav.helse.fritakagp.GravidSoeknadMetrics
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.domain.GravidSoeknad
 import no.nav.helse.fritakagp.domain.generereGravidSoeknadBeskrivelse
-import no.nav.helse.fritakagp.integration.brreg.BrregClient
+import no.nav.helse.fritakagp.integration.IBrregService
+import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.NotifikasjonsType.Oppretting
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.SkjemaType.GravidSøknad
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
-import no.nav.helse.fritakagp.service.PdlService
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Avsender
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Dokument
@@ -40,7 +40,7 @@ class GravidSoeknadProcessor(
     private val pdfGenerator: GravidSoeknadPDFGenerator,
     private val om: ObjectMapper,
     private val bucketStorage: BucketStorage,
-    private val brregClient: BrregClient
+    private val brregService: IBrregService
 ) : BakgrunnsjobbProsesserer {
     companion object {
         const val JOB_TYPE = "gravid-søknad-formidling"
@@ -67,7 +67,7 @@ class GravidSoeknadProcessor(
         try {
             if (soeknad.virksomhetsnavn == null) {
                 runBlocking {
-                    soeknad.virksomhetsnavn = brregClient.getVirksomhetsNavn(soeknad.virksomhetsnummer)
+                    soeknad.virksomhetsnavn = brregService.hentOrganisasjonNavn(soeknad.virksomhetsnummer)
                 }
             }
             if (soeknad.journalpostId == null) {

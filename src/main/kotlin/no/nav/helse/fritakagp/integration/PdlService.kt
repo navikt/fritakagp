@@ -1,4 +1,4 @@
-package no.nav.helse.fritakagp.service
+package no.nav.helse.fritakagp.integration
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helsearbeidsgiver.pdl.PdlClient
