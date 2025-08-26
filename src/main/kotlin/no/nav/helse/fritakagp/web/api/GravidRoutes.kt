@@ -2,7 +2,6 @@ package no.nav.helse.fritakagp.web.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -43,6 +42,7 @@ import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
 import no.nav.helsearbeidsgiver.utils.log.logger
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.valiktor.ConstraintViolationException
 import org.valiktor.DefaultConstraintViolation
@@ -66,25 +66,34 @@ fun Route.gravidRoutes(
     fagerScope: String
 ) {
     val logger = "gravidRoutes".logger()
+    val sikkerLogger = sikkerLogger()
+
+    val requestHandler = RequestHandler(
+        aapenLogger = logger,
+        sikkerLogger = sikkerLogger
+    )
 
     route("/gravid") {
         route("/soeknad") {
             get("/{id}") {
+                val soeknadId = requestHandler.lesParameterId(this)
+
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
-                val form = gravidSoeknadRepo.getById(UUID.fromString(call.parameters["id"]))
-                if (form == null || form.identitetsnummer != innloggetFnr) {
+                val soeknad = gravidSoeknadRepo.getById(soeknadId)
+                if (soeknad == null || soeknad.identitetsnummer != innloggetFnr) {
                     call.respond(HttpStatusCode.NotFound)
                 } else {
-                    form.sendtAvNavn = form.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
-                    form.navn = form.navn ?: pdlService.hentNavn(form.identitetsnummer)
+                    soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                    soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)
 
-                    call.respond(HttpStatusCode.OK, form)
+                    call.respond(HttpStatusCode.OK, soeknad)
                 }
             }
 
             post {
+                val request = requestHandler.lesRequestBody<GravidSoknadRequest>(this)
+
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
-                val request = call.receive<GravidSoknadRequest>()
 
                 val isVirksomhet = brregService.erOrganisasjon(request.virksomhetsnummer)
                 request.validate(isVirksomhet)
@@ -113,26 +122,28 @@ fun Route.gravidRoutes(
 
         route("/krav") {
             get("/{id}") {
+                val kravId = requestHandler.lesParameterId(this)
+
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
-                val form = gravidKravRepo.getById(UUID.fromString(call.parameters["id"]))
+                val krav = gravidKravRepo.getById(kravId)
                 val slettet = call.request.queryParameters.contains("slettet")
-                if (form == null) {
+                if (krav == null) {
                     call.respond(HttpStatusCode.NotFound)
-                } else if (!slettet && form.status == KravStatus.SLETTET) {
+                } else if (!slettet && krav.status == KravStatus.SLETTET) {
                     call.respond(HttpStatusCode.NotFound)
                 } else {
-                    if (form.identitetsnummer != innloggetFnr) {
-                        authorize(authorizer, authClient, fagerScope, form.virksomhetsnummer)
+                    if (krav.identitetsnummer != innloggetFnr) {
+                        authorize(authorizer, authClient, fagerScope, krav.virksomhetsnummer)
                     }
-                    form.sendtAvNavn = form.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
-                    form.navn = form.navn ?: pdlService.hentNavn(form.identitetsnummer)
+                    krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                    krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
 
-                    call.respond(HttpStatusCode.OK, form)
+                    call.respond(HttpStatusCode.OK, krav)
                 }
             }
 
             post {
-                val request = call.receive<GravidKravRequest>()
+                val request = requestHandler.lesRequestBody<GravidKravRequest>(this)
                 authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
                 val ansettelsesperioder = aaregClient
                     .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
@@ -167,7 +178,8 @@ fun Route.gravidRoutes(
             }
 
             patch("/{id}") {
-                val request = call.receive<GravidKravRequest>()
+                val kravId = requestHandler.lesParameterId(this)
+                val request = requestHandler.lesRequestBody<GravidKravRequest>(this)
 
                 authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
 
@@ -182,7 +194,6 @@ fun Route.gravidRoutes(
 
                 request.validate(ansettelsesperioder)
 
-                val kravId = UUID.fromString(call.parameters["id"])
                 val forrigeKrav = gravidKravRepo.getById(kravId)
                     ?: return@patch call.respond(HttpStatusCode.NotFound)
 
@@ -232,29 +243,31 @@ fun Route.gravidRoutes(
             }
 
             delete("/{id}") {
+                val kravId = requestHandler.lesParameterId(this)
+
                 val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
                 val slettetAv = pdlService.hentNavn(innloggetFnr)
-                val kravId = UUID.fromString(call.parameters["id"])
-                val form = gravidKravRepo.getById(kravId)
+
+                val krav = gravidKravRepo.getById(kravId)
                     ?: return@delete call.respond(HttpStatusCode.NotFound)
 
-                authorize(authorizer, authClient, fagerScope, form.virksomhetsnummer)
+                authorize(authorizer, authClient, fagerScope, krav.virksomhetsnummer)
 
-                form.arbeidsgiverSakId?.let {
+                krav.arbeidsgiverSakId?.let {
                     try {
                         runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
                     } catch (_: SakEllerOppgaveFinnesIkkeException) {
-                        logger.warn("DELETE | Klarte ikke slette sak med ID ${form.arbeidsgiverSakId} fordi saken finnes ikke.")
+                        logger.warn("DELETE | Klarte ikke slette sak med ID ${krav.arbeidsgiverSakId} fordi saken finnes ikke.")
                     }
                 }
-                form.status = KravStatus.SLETTET
-                form.slettetAv = innloggetFnr
-                form.slettetAvNavn = slettetAv
-                form.endretDato = LocalDateTime.now()
-                gravidKravRepo.update(form)
+                krav.status = KravStatus.SLETTET
+                krav.slettetAv = innloggetFnr
+                krav.slettetAvNavn = slettetAv
+                krav.endretDato = LocalDateTime.now()
+                gravidKravRepo.update(krav)
                 bakgunnsjobbService.opprettJobb<GravidKravSlettProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravProcessor.JobbData(form.id))
+                    data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id))
                 )
                 call.respond(HttpStatusCode.OK)
             }

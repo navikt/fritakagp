@@ -2,7 +2,6 @@ package no.nav.helse.fritakagp.web.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -14,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.fritakagp.KroniskKravMetrics
 import no.nav.helse.fritakagp.KroniskSoeknadMetrics
+import no.nav.helse.fritakagp.Log
 import no.nav.helse.fritakagp.auth.AuthClient
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
@@ -38,7 +38,9 @@ import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
+import no.nav.helsearbeidsgiver.utils.log.MdcUtils
 import no.nav.helsearbeidsgiver.utils.log.logger
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDateTime
 import java.util.UUID
@@ -60,237 +62,320 @@ fun Route.kroniskRoutes(
     fagerScope: String
 ) {
     val logger = "kroniskRoutes".logger()
+    val sikkerLogger = sikkerLogger()
+
+    val requestHandler = RequestHandler(
+        aapenLogger = logger,
+        sikkerLogger = sikkerLogger
+    )
+
+    fun slettSak(sakId: String) {
+        try {
+            runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(sakId) }
+        } catch (_: SakEllerOppgaveFinnesIkkeException) {
+            logger.warn("Klarte ikke slette sak med ID '$sakId' fordi saken finnes ikke.")
+        }
+    }
 
     route("/kronisk") {
         route("/soeknad") {
             get("/{id}") {
-                logger.info("KSG: Hent kronisk søknad.")
-                val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
+                val soeknadId = requestHandler.lesParameterId(this)
 
-                logger.info("KSG: Hent søknad fra db.")
-                val form = kroniskSoeknadRepo.getById(UUID.fromString(call.parameters["id"]))
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /kronisk/soeknad/{id}"),
+                    Log.soeknadId(soeknadId),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Hent kronisk søknad.")
 
-                if (form == null || form.identitetsnummer != innloggetFnr) {
-                    call.respond(HttpStatusCode.NotFound)
-                } else {
-                    logger.info("KSG: Hent personinfo fra pdl.")
-                    form.sendtAvNavn = form.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
-                    form.navn = form.navn ?: pdlService.hentNavn(form.identitetsnummer)
+                    val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
 
-                    call.respond(HttpStatusCode.OK, form)
+                    logger.info("Hent kronisk søknad fra database.")
+                    val soeknad = kroniskSoeknadRepo.getById(soeknadId)
+
+                    if (soeknad == null || soeknad.identitetsnummer != innloggetFnr) {
+                        logger.warn("Kronisk søknad ikke funnet eller matcher ikke innlogget fnr.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        logger.info("Hent personinfo fra PDL.")
+                        soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)
+
+                        logger.info("Kronisk søknad hentet OK.")
+                        call.respond(HttpStatusCode.OK, soeknad)
+                    }
                 }
             }
 
             post {
-                logger.info("KSP: Send inn kronisk søknad.")
-                val request = call.receive<KroniskSoknadRequest>()
+                MdcUtils.withLogFields(
+                    Log.apiRoute("POST /kronisk/soeknad"),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Motta kronisk søknad.")
 
-                logger.info("KSP: Hent virksomhet fra brreg.")
-                val isVirksomhet = brregService.erOrganisasjon(request.virksomhetsnummer)
-                request.validate(isVirksomhet)
+                    val request = requestHandler.lesRequestBody<KroniskSoknadRequest>(this)
 
-                val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
+                    logger.info("Hent virksomhet fra brreg.")
+                    val isVirksomhet = brregService.erOrganisasjon(request.virksomhetsnummer)
 
-                logger.info("KSP: Hent personinfo fra pdl.")
-                val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
-                val navn = pdlService.hentNavn(request.identitetsnummer)
+                    logger.info("Valider request.")
+                    request.validate(isVirksomhet)
 
-                val soeknad = request.toDomain(innloggetFnr, sendtAvNavn, navn)
+                    val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
 
-                logger.info("KSP: Prosesser dokument for GCP-lagring.")
-                processDocumentForGCPStorage(request.dokumentasjon, virusScanner, bucket, soeknad.id)
+                    logger.info("Hent personinfo fra PDL.")
+                    val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
+                    val navn = pdlService.hentNavn(request.identitetsnummer)
 
-                logger.info("KSP: Lagre søknad i db.")
-                kroniskSoeknadRepo.insert(soeknad)
-                bakgunnsjobbService.opprettJobb<KroniskSoeknadProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(KroniskSoeknadProcessor.JobbData(soeknad.id))
-                )
-                bakgunnsjobbService.opprettJobb<KroniskSoeknadKvitteringProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(KroniskSoeknadKvitteringProcessor.Jobbdata(soeknad.id))
-                )
+                    val soeknad = request.toDomain(innloggetFnr, sendtAvNavn, navn)
 
-                call.respond(HttpStatusCode.Created, soeknad)
-                KroniskSoeknadMetrics.tellMottatt()
+                    logger.info("Prosesser dokument for GCP-lagring.")
+                    processDocumentForGCPStorage(request.dokumentasjon, virusScanner, bucket, soeknad.id)
+
+                    logger.info("Lagre kronisk søknad i database.")
+                    kroniskSoeknadRepo.insert(soeknad)
+                    bakgunnsjobbService.opprettJobb<KroniskSoeknadProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskSoeknadProcessor.JobbData(soeknad.id))
+                    )
+                    bakgunnsjobbService.opprettJobb<KroniskSoeknadKvitteringProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskSoeknadKvitteringProcessor.Jobbdata(soeknad.id))
+                    )
+
+                    logger.info("Kronisk søknad mottatt OK.")
+                    call.respond(HttpStatusCode.Created, soeknad)
+                    KroniskSoeknadMetrics.tellMottatt()
+                }
             }
         }
 
         route("/krav") {
             get("/{id}") {
-                logger.info("KKG: Hent kronisk krav.")
-                val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
+                val kravId = requestHandler.lesParameterId(this)
+                val erSlettet = call.request.queryParameters.contains("slettet")
 
-                logger.info("KKG: Hent krav fra db.")
-                val form = kroniskKravRepo.getById(UUID.fromString(call.parameters["id"]))
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /kronisk/krav/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Hent kronisk krav.")
 
-                val slettet = call.request.queryParameters.contains("slettet")
-                if (form == null) {
-                    call.respond(HttpStatusCode.NotFound)
-                } else if (!slettet && form.status == KravStatus.SLETTET) {
-                    call.respond(HttpStatusCode.NotFound)
-                } else {
-                    if (form.identitetsnummer != innloggetFnr) {
-                        authorize(authorizer, authClient, fagerScope, form.virksomhetsnummer)
+                    val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
+
+                    logger.info("Hent kronisk krav fra database.")
+                    val krav = kroniskKravRepo.getById(kravId)
+
+                    if (krav == null) {
+                        logger.warn("Kronisk krav ikke funnet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else if (!erSlettet && krav.status == KravStatus.SLETTET) {
+                        logger.warn("Kronisk krav er slettet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        if (krav.identitetsnummer != innloggetFnr) {
+                            logger.info("Fnr på kronisk krav matcher ikke innlogget fnr.")
+                            authorize(authorizer, authClient, fagerScope, krav.virksomhetsnummer)
+                        }
+
+                        logger.info("Hent personinfo fra PDL.")
+                        krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+
+                        logger.info("Kronisk krav hentet OK.")
+                        call.respond(HttpStatusCode.OK, krav)
                     }
-
-                    logger.info("KKG: Hent personinfo fra pdl.")
-                    form.sendtAvNavn = form.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
-                    form.navn = form.navn ?: pdlService.hentNavn(form.identitetsnummer)
-
-                    call.respond(HttpStatusCode.OK, form)
                 }
             }
 
             post {
-                logger.info("KKPo: Send inn kronisk krav.")
+                MdcUtils.withLogFields(
+                    Log.apiRoute("POST /kronisk/krav"),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Motta kronisk krav.")
 
-                val request = call.receive<KroniskKravRequest>()
-                authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
+                    val request = requestHandler.lesRequestBody<KroniskKravRequest>(this)
 
-                logger.info("KKPo: Hent ansettelsesperioder fra aareg.")
-                val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
-                    .get(Orgnr(request.virksomhetsnummer))
-                    .orEmpty()
+                    authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
 
-                request.validate(ansettelsesperioder)
+                    logger.info("Hent ansettelsesperioder fra aareg.")
+                    val ansettelsesperioder = aaregClient
+                        .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
+                        .get(Orgnr(request.virksomhetsnummer))
+                        .orEmpty()
 
-                val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
+                    logger.info("Valider request.")
+                    request.validate(ansettelsesperioder)
 
-                logger.info("KKPo: Hent personinfo fra pdl.")
-                val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
-                val navn = pdlService.hentNavn(request.identitetsnummer)
+                    val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
 
-                val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
+                    logger.info("Hent personinfo fra PDL.")
+                    val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
+                    val navn = pdlService.hentNavn(request.identitetsnummer)
 
-                logger.info("KKPo: Hent grunnbeløp.")
-                belopBeregning.beregnBeloepKronisk(krav)
+                    val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
 
-                logger.info("KKPo: Legg til krav i db.")
-                kroniskKravRepo.insert(krav)
-                bakgunnsjobbService.opprettJobb<KroniskKravProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id))
-                )
-                bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
-                )
-                bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(krav.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav))
-                )
+                    logger.info("Hent grunnbeløp.")
+                    belopBeregning.beregnBeloepKronisk(krav)
 
-                call.respond(HttpStatusCode.Created, krav)
-                KroniskKravMetrics.tellMottatt()
+                    logger.info("Legg til kronisk krav i database.")
+                    kroniskKravRepo.insert(krav)
+                    bakgunnsjobbService.opprettJobb<KroniskKravProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id))
+                    )
+                    bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
+                    )
+                    bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(krav.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav))
+                    )
+
+                    logger.info("Kronisk krav mottatt OK.")
+                    call.respond(HttpStatusCode.Created, krav)
+                    KroniskKravMetrics.tellMottatt()
+                }
             }
 
             patch("/{id}") {
-                logger.info("KKPa: Oppdater kronisk krav.")
+                val kravId = requestHandler.lesParameterId(this)
 
-                val request = call.receive<KroniskKravRequest>()
+                MdcUtils.withLogFields(
+                    Log.apiRoute("PATCH /kronisk/krav/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Oppdater kronisk krav.")
 
-                authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
+                    val request = requestHandler.lesRequestBody<KroniskKravRequest>(this)
 
-                val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
-                val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
-                val navn = pdlService.hentNavn(request.identitetsnummer)
+                    authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
 
-                logger.info("KKPa: Hent ansettelsesperioder fra aareg.")
-                val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
-                    .get(Orgnr(request.virksomhetsnummer))
-                    .orEmpty()
+                    val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
 
-                request.validate(ansettelsesperioder)
+                    logger.info("Hent personinfo fra PDL.")
+                    val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
+                    val navn = pdlService.hentNavn(request.identitetsnummer)
 
-                val kravId = UUID.fromString(call.parameters["id"])
+                    logger.info("Hent ansettelsesperioder fra aareg.")
+                    val ansettelsesperioder = aaregClient
+                        .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
+                        .get(Orgnr(request.virksomhetsnummer))
+                        .orEmpty()
 
-                logger.info("KKPa: Hent gammelt krav fra db.")
-                val forrigeKrav = kroniskKravRepo.getById(kravId)
-                    ?: return@patch call.respond(HttpStatusCode.NotFound)
+                    logger.info("Valider request.")
+                    request.validate(ansettelsesperioder)
 
-                if (forrigeKrav.virksomhetsnummer != request.virksomhetsnummer) {
-                    return@patch call.respond(HttpStatusCode.Forbidden)
-                }
+                    logger.info("Hent gammelt kronisk krav fra database.")
+                    val forrigeKrav = kroniskKravRepo.getById(kravId)
 
-                val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeloepKronisk(kravTilOppdatering)
-                if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
-                    return@patch call.respond(HttpStatusCode.Conflict)
-                }
-                kravTilOppdatering.status = KravStatus.OPPDATERT
-
-                forrigeKrav.status = KravStatus.ENDRET
-                forrigeKrav.slettetAv = innloggetFnr
-                forrigeKrav.slettetAvNavn = sendtAvNavn
-                forrigeKrav.endretDato = LocalDateTime.now()
-                forrigeKrav.endretTilId = kravTilOppdatering.id
-
-                // Sletter gammelt krav
-                logger.info("KKPa: Slett sak om gammelt krav i arbeidsgivernotifikasjon.")
-                forrigeKrav.arbeidsgiverSakId?.let {
-                    try {
-                        runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
-                    } catch (_: SakEllerOppgaveFinnesIkkeException) {
-                        logger.warn("PATCH | Klarte ikke slette sak med ID ${forrigeKrav.arbeidsgiverSakId} fordi saken finnes ikke.")
+                    if (forrigeKrav == null) {
+                        logger.warn("Kronisk krav ikke funnet.")
+                        return@patch call.respond(HttpStatusCode.NotFound)
+                    } else if (forrigeKrav.virksomhetsnummer != request.virksomhetsnummer) {
+                        logger.warn("Orgnr på forrige kronisk krav matcher ikke nytt krav.")
+                        return@patch call.respond(HttpStatusCode.Forbidden)
                     }
+
+                    val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
+
+                    logger.info("Hent grunnbeløp.")
+                    belopBeregning.beregnBeloepKronisk(kravTilOppdatering)
+
+                    if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
+                        logger.warn("Nytt kronisk krav er duplikat.")
+                        return@patch call.respond(HttpStatusCode.Conflict)
+                    }
+
+                    kravTilOppdatering.status = KravStatus.OPPDATERT
+
+                    forrigeKrav.status = KravStatus.ENDRET
+                    forrigeKrav.slettetAv = innloggetFnr
+                    forrigeKrav.slettetAvNavn = sendtAvNavn
+                    forrigeKrav.endretDato = LocalDateTime.now()
+                    forrigeKrav.endretTilId = kravTilOppdatering.id
+
+                    // Sletter gammelt krav
+                    val arbeidsgiverSakId = forrigeKrav.arbeidsgiverSakId
+                    if (arbeidsgiverSakId != null) {
+                        logger.info("Slett sak for gammelt kronisk krav i arbeidsgivernotifikasjon.")
+                        slettSak(arbeidsgiverSakId)
+                    }
+
+                    logger.info("Oppdater gammelt kronisk krav til status '${KravStatus.ENDRET}' i database.")
+                    kroniskKravRepo.update(forrigeKrav)
+
+                    // Oppretter nytt krav
+                    logger.info("Legg til nytt kronisk krav med status '${KravStatus.OPPDATERT}' i database.")
+                    kroniskKravRepo.insert(kravTilOppdatering)
+                    bakgunnsjobbService.opprettJobb<KroniskKravEndreProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(forrigeKrav.id))
+                    )
+                    bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id))
+                    )
+                    bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(kravTilOppdatering.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav))
+                    )
+
+                    logger.info("Kronisk krav oppdatert OK.")
+                    call.respond(HttpStatusCode.OK, kravTilOppdatering)
                 }
-
-                logger.info("KKPa: Oppdater gammelt krav til status: ${KravStatus.ENDRET} i db.")
-                kroniskKravRepo.update(forrigeKrav)
-
-                // Oppretter nytt krav
-                logger.info("KKPa: Legg til nytt krav i db med status: ${KravStatus.OPPDATERT}.")
-                kroniskKravRepo.insert(kravTilOppdatering)
-                bakgunnsjobbService.opprettJobb<KroniskKravEndreProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(KroniskKravProcessor.JobbData(forrigeKrav.id))
-                )
-                bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id))
-                )
-                bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(kravTilOppdatering.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav))
-                )
-
-                call.respond(HttpStatusCode.OK, kravTilOppdatering)
             }
 
             delete("/{id}") {
-                logger.info("KKD: Slett kronisk krav.")
+                val kravId = requestHandler.lesParameterId(this)
 
-                val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
-                val slettetAv = pdlService.hentNavn(innloggetFnr)
-                val kravId = UUID.fromString(call.parameters["id"])
-                val form = kroniskKravRepo.getById(kravId)
-                    ?: return@delete call.respond(HttpStatusCode.NotFound)
+                MdcUtils.withLogFields(
+                    Log.apiRoute("DELETE /kronisk/krav/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Slett kronisk krav.")
 
-                authorize(authorizer, authClient, fagerScope, form.virksomhetsnummer)
+                    val innloggetFnr = hentIdentitetsnummerFraLoginToken(call.request)
 
-                logger.info("KKD: Slett sak i arbeidsgivernotifikasjon.")
-                form.arbeidsgiverSakId?.let {
-                    try {
-                        runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
-                    } catch (_: SakEllerOppgaveFinnesIkkeException) {
-                        logger.warn("DELETE | Klarte ikke slette sak med ID ${form.arbeidsgiverSakId} fordi saken finnes ikke.")
+                    logger.info("Hent personinfo fra PDL.")
+                    val slettetAv = pdlService.hentNavn(innloggetFnr)
+
+                    val krav = kroniskKravRepo.getById(kravId)
+                    if (krav == null) {
+                        logger.warn("Kronisk krav ikke funnet.")
+                        return@delete call.respond(HttpStatusCode.NotFound)
                     }
-                }
-                form.status = KravStatus.SLETTET
-                form.slettetAv = innloggetFnr
-                form.slettetAvNavn = slettetAv
-                form.endretDato = LocalDateTime.now()
 
-                logger.info("KKD: Oppdater krav til slettet i db.")
-                kroniskKravRepo.update(form)
-                bakgunnsjobbService.opprettJobb<KroniskKravSlettProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(KroniskKravProcessor.JobbData(form.id))
-                )
-                call.respond(HttpStatusCode.OK)
+                    authorize(authorizer, authClient, fagerScope, krav.virksomhetsnummer)
+
+                    val arbeidsgiverSakId = krav.arbeidsgiverSakId
+                    if (arbeidsgiverSakId != null) {
+                        logger.info("Slett sak for kronisk krav i arbeidsgivernotifikasjon.")
+                        slettSak(arbeidsgiverSakId)
+                    }
+
+                    krav.status = KravStatus.SLETTET
+                    krav.slettetAv = innloggetFnr
+                    krav.slettetAvNavn = slettetAv
+                    krav.endretDato = LocalDateTime.now()
+
+                    logger.info("Oppdater kronisk krav til slettet i database.")
+                    kroniskKravRepo.update(krav)
+                    bakgunnsjobbService.opprettJobb<KroniskKravSlettProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id))
+                    )
+
+                    logger.info("Kronisk krav slettet OK.")
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }
