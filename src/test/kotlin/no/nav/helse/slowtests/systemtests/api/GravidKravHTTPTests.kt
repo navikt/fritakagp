@@ -62,7 +62,7 @@ class GravidKravHTTPTests : SystemTestBase() {
     }
 
     @Test
-    fun `Gir ikke not found når kravet er slettet og flaget slettet er satt`() = suspendableTest {
+    fun `Gir ikke not found når kravet er slettet og flagget slettet er satt`() = suspendableTest {
         val repo by inject<GravidKravRepository>()
 
         repo.insert(GravidTestData.gravidKrav.copy(status = KravStatus.SLETTET))
