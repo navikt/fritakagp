@@ -202,9 +202,10 @@ fun Route.kroniskRoutes(
 
                     authorize(authorizer, authClient, fagerScope, request.virksomhetsnummer)
 
-                    logger.info("Hent ansettelsesperioder fra aareg.")
+                    val callId = UUID.randomUUID().toString()
+                    logger.info("Hent ansettelsesperioder fra aareg, callId: $callId")
                     val ansettelsesperioder = aaregClient
-                        .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
+                        .hentAnsettelsesperioder(request.identitetsnummer, callId)
                         .get(Orgnr(request.virksomhetsnummer))
                         .orEmpty()
 
