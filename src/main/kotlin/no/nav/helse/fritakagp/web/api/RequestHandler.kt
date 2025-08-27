@@ -32,7 +32,6 @@ class RequestHandler(
         return try {
             objectMapper.readValue<T>(body)
         } catch (e: Exception) {
-            aapenLogger.info("error er:", e)
             val feilmelding = "Klarte ikke lese request body."
             aapenLogger.error(feilmelding)
             sikkerLogger.error("$feilmelding\n'requestBody'=$body", e)
