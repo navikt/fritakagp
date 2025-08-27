@@ -1,7 +1,8 @@
 package no.nav.helse.fritakagp.web.api
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -48,6 +49,24 @@ fun Application.configureExceptionHandling() {
             call.respond(HttpStatusCode.UnprocessableEntity, ValidationProblem(problems))
         }
 
+        suspend fun handleBadRequestError(call: ApplicationCall, cause: Exception) {
+            val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ValidationProblem(
+                    setOf(
+                        ValidationProblemDetail(
+                            "BadInput",
+                            "Feil input",
+                            "",
+                            "null"
+                        )
+                    )
+                )
+            )
+            logger.warn("Feil med validering for $userAgent: ${cause.message}")
+        }
+
         exception<InvocationTargetException> { call, cause ->
             when (cause.targetException) {
                 is ConstraintViolationException -> handleValidationError(
@@ -86,25 +105,18 @@ fun Application.configureExceptionHandling() {
             logger.warn("${cause.parameterName} kunne ikke konverteres")
         }
 
+        // Oppstår ved ugyldig JSON når Ktor-server deserialiserer
         exception<BadRequestException> { call, cause ->
-            val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ValidationProblem(
-                    setOf(
-                        ValidationProblemDetail(
-                            "BadInput",
-                            "Feil input",
-                            "",
-                            "null"
-                        )
-                    )
-                )
-            )
-            logger.warn("Feil med validering av ${call.request.rawQueryParameters} for $userAgent: ${cause.message}")
+            handleBadRequestError(call, cause)
         }
 
-        exception<MissingKotlinParameterException> { call, cause ->
+        // Oppstår ved ugyldig JSON når vi deserialiserer direkte med ObjectMapper
+        exception<JsonParseException> { call, cause ->
+            handleBadRequestError(call, cause)
+        }
+
+        exception<MismatchedInputException> { call, cause ->
+            val params = cause.path.mapNotNull { it.fieldName }
             val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
             call.respond(
                 HttpStatusCode.BadRequest,
@@ -113,15 +125,13 @@ fun Application.configureExceptionHandling() {
                         ValidationProblemDetail(
                             "NotNull",
                             "Det angitte feltet er påkrevd",
-                            cause.path.filter { it.fieldName != null }.joinToString(".") {
-                                it.fieldName
-                            },
+                            params.joinToString("."),
                             "null"
                         )
                     )
                 )
             )
-            logger.warn("Feil med validering av ${cause.parameter.name ?: "Ukjent"} for $userAgent: ${cause.message}")
+            logger.warn("Feil med validering av [${params.joinToString()}] for $userAgent: ${cause.message}")
         }
 
         exception<JsonMappingException> { call, cause ->

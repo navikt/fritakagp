@@ -38,7 +38,7 @@ class KroniskKravHTTPTests : SystemTestBase() {
     }
 
     @Test
-    fun `Gir ikke not found når kravet er slettet men flaget slettet er satt`() = suspendableTest {
+    fun `Gir ikke not found når kravet er slettet men flagget slettet er satt`() = suspendableTest {
         val repo by inject<KroniskKravRepository>()
 
         repo.insert(KroniskTestData.kroniskKrav.copy(status = KravStatus.SLETTET))
