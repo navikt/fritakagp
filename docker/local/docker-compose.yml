@@ -1,9 +1,5 @@
 version: '3.4'
 
-networks:
-  kafka-net:
-    driver: bridge
-
 services:
   fritakagp-database:
     build:
@@ -14,26 +10,11 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
-  fritakagp_zookeeper:
-    image: 'bitnami/zookeeper:3.6'
-    networks:
-      - kafka-net
-    ports:
-      - '2181:2181'
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
   fritakagp_kafka:
-    image: 'bitnami/kafka:2.8.0'
-    networks:
-      - kafka-net
+    image: apache/kafka:latest
+    platform: linux/amd64
     ports:
-      - '9092:9092'
-    environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=fritakagp_zookeeper:2181
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - ALLOW_PLAINTEXT_LISTENER=yes
-    depends_on:
-      - fritakagp_zookeeper
+      - "9092:9092"
 
 volumes:
   data:
