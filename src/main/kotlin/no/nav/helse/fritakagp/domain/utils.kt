@@ -2,6 +2,7 @@ package no.nav.helse.fritakagp.domain
 
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
+import no.nav.helse.fritakagp.multipySafe
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Base64
@@ -154,11 +155,10 @@ fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String {
     return table {
         header("FOM", "TOM", "Sykmeldingsgrad", "kreves refusjon for", "Beregnet månedsinntekt (NOK)", "Dagsats (NOK)", "Beløp (NOK)")
         for (p in perioder.sortedBy { it.fom }) {
-            val gradering = (p.gradering * 100).toString() + "%"
             row(
                 DATE_FORMAT.format(p.fom),
                 DATE_FORMAT.format(p.tom),
-                gradering,
+                p.gradering.tilProsent(),
                 p.antallDagerMedRefusjon,
                 p.månedsinntekt.roundToInt().toString(),
                 p.dagsats.toString(),
@@ -177,3 +177,6 @@ fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String {
         }
     }.render(StringBuilder()).toString()
 }
+
+fun Double.tilProsent(): String =
+    multipySafe(100.0).toString() + "%"
