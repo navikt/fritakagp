@@ -3,6 +3,7 @@ package no.nav.helse.fritakagp.processing.gravid.krav
 import no.nav.helse.fritakagp.domain.DATE_FORMAT
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT
+import no.nav.helse.fritakagp.domain.tilProsent
 import org.apache.commons.lang3.text.WordUtils
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -77,11 +78,10 @@ class GravidKravPDFGenerator {
                     content.close()
                     content = lagNySide(doc, font)
                 }
-                val gradering = (periode.gradering * 100).toString()
                 with(content) {
                     writeTextWrapped("FOM: ${periode.fom.format(DATE_FORMAT)}")
                     writeTextWrapped("TOM: ${periode.tom.format(DATE_FORMAT)}")
-                    writeTextWrapped("Sykmeldingsgrad: $gradering%")
+                    writeTextWrapped("Sykmeldingsgrad: ${periode.gradering.tilProsent()}")
                     writeTextWrapped("Antall dager det kreves refusjon for: ${periode.antallDagerMedRefusjon}")
                     writeTextWrapped("Beregnet månedsinntekt (NOK): ${periode.månedsinntekt.roundToInt()}")
                     writeTextWrapped("Dagsats (NOK): ${periode.dagsats.roundToInt()}")
@@ -114,11 +114,10 @@ class GravidKravPDFGenerator {
                 content.close()
                 content = lagNySide(doc, font)
             }
-            val gradering = (periode.gradering * 100).toString()
             with(content) {
                 writeTextWrapped("FOM: ${periode.fom.format(DATE_FORMAT)}")
                 writeTextWrapped("TOM: ${periode.tom.format(DATE_FORMAT)}")
-                writeTextWrapped("Sykmeldingsgrad: $gradering%")
+                writeTextWrapped("Sykmeldingsgrad: ${periode.gradering.tilProsent()}")
                 writeTextWrapped("Antall dager det kreves refusjon for: ${periode.antallDagerMedRefusjon}")
                 writeTextWrapped("Beregnet månedsinntekt (NOK): ${periode.månedsinntekt.roundToInt()}")
                 writeTextWrapped("Dagsats (NOK): ${periode.dagsats.roundToInt()}")

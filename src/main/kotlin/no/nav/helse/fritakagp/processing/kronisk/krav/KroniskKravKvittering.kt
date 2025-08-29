@@ -10,6 +10,7 @@ import no.nav.helse.fritakagp.domain.DATE_FORMAT
 import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT_MED_KL
 import no.nav.helse.fritakagp.domain.sladdFnr
+import no.nav.helse.fritakagp.domain.tilProsent
 import kotlin.math.roundToInt
 
 interface KroniskKravKvitteringSender {
@@ -117,15 +118,15 @@ fun lagrePerioder(perioder: List<Arbeidsgiverperiode>): String {
     return head + rader + tail
 }
 
-fun lagePeriod(periode: Arbeidsgiverperiode): String {
-    val gradering = (periode.gradering * 100).toString() + "%"
-    return """<tr>
-                <td style="text-align:center">${periode.fom.format(DATE_FORMAT)}</td>
-                <td style="text-align:center">${periode.tom.format(DATE_FORMAT)}</td>
-                <td style="text-align:center">$gradering</td>
-                <td style="text-align:center">${periode.antallDagerMedRefusjon}</td>
-                <td style="text-align:center">${periode.månedsinntekt}</td>
-                <td style="text-align:center">${periode.dagsats.roundToInt()}</td>
-                <td style="text-align:center">${periode.belop.roundToInt()}</td>
-            </tr>"""
-}
+fun lagePeriod(periode: Arbeidsgiverperiode): String =
+    """
+    <tr>
+        <td style="text-align:center">${periode.fom.format(DATE_FORMAT)}</td>
+        <td style="text-align:center">${periode.tom.format(DATE_FORMAT)}</td>
+        <td style="text-align:center">${periode.gradering.tilProsent()}</td>
+        <td style="text-align:center">${periode.antallDagerMedRefusjon}</td>
+        <td style="text-align:center">${periode.månedsinntekt}</td>
+        <td style="text-align:center">${periode.dagsats.roundToInt()}</td>
+        <td style="text-align:center">${periode.belop.roundToInt()}</td>
+    </tr>
+    """
