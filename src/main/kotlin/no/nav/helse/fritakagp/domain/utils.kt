@@ -2,7 +2,7 @@ package no.nav.helse.fritakagp.domain
 
 import de.m3y.kformat.Table
 import de.m3y.kformat.table
-import no.nav.helse.fritakagp.multipySafe
+import no.nav.helse.fritakagp.multiplySafe
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Base64
@@ -179,4 +179,4 @@ fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String {
 }
 
 fun Double.tilProsent(): String =
-    multipySafe(100.0).toString() + "%"
+    multiplySafe(100.0).toString() + "%"
