@@ -2,20 +2,17 @@ package no.nav.helse.fritakagp.koin
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.serialization.json.Json
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlient
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveResponse
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveRequest
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveResponse
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.Prioritet
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.Status
 import no.nav.helse.fritakagp.Issuers
-import no.nav.helse.fritakagp.auth.AuthClient
-import no.nav.helse.fritakagp.auth.IdentityProvider
-import no.nav.helse.fritakagp.auth.TokenResponse
-import no.nav.helse.fritakagp.auth.fetchToken
 import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.MockBrregService
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OppgaveKlient
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OppgaveResponse
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OpprettOppgaveRequest
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OpprettOppgaveResponse
+import no.nav.helse.fritakagp.integration.arbeidsgiver.Prioritet
+import no.nav.helse.fritakagp.integration.arbeidsgiver.Status
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.gcp.MockBucketStorage
 import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
@@ -23,6 +20,9 @@ import no.nav.helse.fritakagp.integration.kafka.MockBrukernotifikasjonBeskjedSen
 import no.nav.helse.fritakagp.integration.virusscan.MockVirusScanner
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOppdaterNotifikasjonProcessor
+import no.nav.helse.fritakagp.web.auth.AuthClient
+import no.nav.helse.fritakagp.web.auth.IdentityProvider
+import no.nav.helse.fritakagp.web.auth.TokenResponse
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.aareg.Periode
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
@@ -41,7 +41,9 @@ import java.time.LocalDateTime
 fun Module.mockExternalDependencies() {
     single { MockOAuth2Server().apply { start(port = 6668) } }
     single {
-        mockk<AuthClient> {
+        spyk(
+            AuthClient("token-endpoint", "token-exchange-endpoint", "token-introspection-endpoint")
+        ) {
             val mockOAuth2Server: MockOAuth2Server = get()
             coEvery { exchange(IdentityProvider.TOKEN_X, any(), any()) } returns
                 mockOAuth2Server.issueToken(subject = "", issuerId = Issuers.TOKENX, audience = "").let {

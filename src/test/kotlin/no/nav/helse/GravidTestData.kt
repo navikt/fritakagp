@@ -1,14 +1,14 @@
 package no.nav.helse
 
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveResponse
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.Prioritet
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.Status
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.GravidSoeknad
 import no.nav.helse.fritakagp.domain.Omplassering
 import no.nav.helse.fritakagp.domain.OmplasseringAarsak
 import no.nav.helse.fritakagp.domain.Tiltak
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OpprettOppgaveResponse
+import no.nav.helse.fritakagp.integration.arbeidsgiver.Prioritet
+import no.nav.helse.fritakagp.integration.arbeidsgiver.Status
 import no.nav.helse.fritakagp.web.api.resreq.GravidKravRequest
 import no.nav.helse.fritakagp.web.api.resreq.GravidSoknadRequest
 import java.time.LocalDate
