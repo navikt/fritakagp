@@ -116,7 +116,7 @@ class KroniskKravEndreProcessor(
                 callId = UUID.randomUUID().toString(),
                 kanal = Kanal.NAV_NO
             )
-            logger.debug("Journalført ${oppdatertKrav.id} med ref $journalpostId")
+            logger.info("Journalført ${oppdatertKrav.id} med ref $journalpostId")
             return@runBlocking journalpostId.journalpostId
         }
         return id

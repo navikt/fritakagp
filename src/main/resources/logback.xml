@@ -34,7 +34,7 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <logger name="no.nav" level="${log.level.no.nav:-DEBUG}"/>
+    <logger name="no.nav" level="${log.level.no.nav:-INFO}"/>
     <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}"/>
     <logger name="org.apache.cxf" level="${log.level.ch.qos.logback:-WARN}"/>
 
