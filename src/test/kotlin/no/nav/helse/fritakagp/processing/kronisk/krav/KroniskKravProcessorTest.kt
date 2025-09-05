@@ -9,14 +9,14 @@ import io.mockk.verify
 import no.nav.hag.utils.bakgrunnsjobb.Bakgrunnsjobb
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbRepository
 import no.nav.helse.KroniskTestData
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OPPGAVETYPE_FORDELINGSOPPGAVE
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlient
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.integration.BrregService
 import no.nav.helse.fritakagp.integration.PdlService
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OPPGAVETYPE_FORDELINGSOPPGAVE
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OppgaveKlient
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.integration.gcp.BucketDocument
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.jsonEquals
