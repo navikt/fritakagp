@@ -128,7 +128,7 @@ class KroniskSoeknadProcessor(
                 callId = UUID.randomUUID().toString(),
                 kanal = Kanal.NAV_NO
             )
-            logger.debug("Journalført ${soeknad.id} med ref $journalpostId")
+            logger.info("Journalført ${soeknad.id} med ref $journalpostId")
             return@runBlocking journalpostId.journalpostId
         }
         return id

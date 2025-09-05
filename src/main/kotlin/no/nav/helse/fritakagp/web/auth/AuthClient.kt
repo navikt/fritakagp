@@ -16,6 +16,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.fritakagp.customObjectMapper
+import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 
 enum class IdentityProvider(@JsonValue val alias: String) {
@@ -46,12 +47,11 @@ data class TokenErrorResponse(
 
 class AuthClient(
     private val tokenEndpoint: String,
-    private val tokenExchangeEndpoint: String,
-    private val tokenIntrospectionEndpoint: String
+    private val tokenExchangeEndpoint: String
 ) {
     private val httpClient = createHttpClient()
     suspend fun token(provider: IdentityProvider, target: String): TokenResponse = try {
-        sikkerLogger().info("Requesting token for $target from ${provider.alias} and endpoint $tokenEndpoint")
+        logger().debug("Henter token fra ${provider.alias}")
         httpClient.submitForm(
             tokenEndpoint,
             parameters {
@@ -82,6 +82,7 @@ class AuthClient(
                 when (it) {
                     is TokenResponse.Success -> it.accessToken
                     is TokenResponse.Error -> {
+                        logger().error("Feilet å hente token")
                         sikkerLogger().error("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
                         throw RuntimeException("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
                     }

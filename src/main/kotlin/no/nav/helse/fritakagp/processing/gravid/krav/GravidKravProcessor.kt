@@ -129,7 +129,7 @@ class GravidKravProcessor(
                 kanal = Kanal.NAV_NO
             )
 
-            logger.debug("Journalført ${krav.id} med ref $journalpostId")
+            logger.info("Journalført ${krav.id} med ref $journalpostId")
             return@runBlocking journalpostId.journalpostId
         }
         return id

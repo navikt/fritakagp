@@ -23,8 +23,7 @@ class AuthClientTest {
     fun createAuthClient(): AuthClient {
         val tokenEndpoint = "http://localhost:8080/token"
         val tokenExchangeEndpoint = "http://localhost:8080/token-exchange"
-        val tokenIntrospectEndpoint = "http://localhost:8080/token-introspect"
-        val authClient = AuthClient(tokenEndpoint, tokenExchangeEndpoint, tokenIntrospectEndpoint)
+        val authClient = AuthClient(tokenEndpoint, tokenExchangeEndpoint)
         return authClient
     }
 
