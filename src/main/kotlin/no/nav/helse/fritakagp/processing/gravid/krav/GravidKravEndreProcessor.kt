@@ -6,14 +6,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hag.utils.bakgrunnsjobb.Bakgrunnsjobb
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbRepository
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OPPGAVETYPE_FORDELINGSOPPGAVE
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlient
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.generereEndretGravidKravBeskrivelse
 import no.nav.helse.fritakagp.domain.generereGravidKravBeskrivelse
 import no.nav.helse.fritakagp.integration.PdlService
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OPPGAVETYPE_FORDELINGSOPPGAVE
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OppgaveKlient
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OpprettOppgaveRequest
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.NotifikasjonsType.Endring

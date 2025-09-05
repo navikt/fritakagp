@@ -1,12 +1,9 @@
 package no.nav.helse.fritakagp.koin
 
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlient
-import no.nav.helse.arbeidsgiver.integrasjoner.oppgave2.OppgaveKlientImpl
 import no.nav.helse.fritakagp.Env
-import no.nav.helse.fritakagp.auth.AuthClient
-import no.nav.helse.fritakagp.auth.IdentityProvider
-import no.nav.helse.fritakagp.auth.fetchToken
 import no.nav.helse.fritakagp.integration.GrunnbeloepClient
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OppgaveKlient
+import no.nav.helse.fritakagp.integration.arbeidsgiver.OppgaveKlientImpl
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.gcp.BucketStorageImpl
 import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonKafkaProducer
@@ -14,6 +11,8 @@ import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
 import no.nav.helse.fritakagp.integration.kafka.brukernotifikasjonKafkaProps
 import no.nav.helse.fritakagp.integration.virusscan.ClamavVirusScannerImp
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
+import no.nav.helse.fritakagp.web.auth.AuthClient
+import no.nav.helse.fritakagp.web.auth.IdentityProvider
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient

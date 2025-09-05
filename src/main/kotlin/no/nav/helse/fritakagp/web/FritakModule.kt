@@ -17,12 +17,13 @@ import io.ktor.server.routing.routing
 import no.nav.helse.fritakagp.Env
 import no.nav.helse.fritakagp.Issuers
 import no.nav.helse.fritakagp.customObjectMapper
-import no.nav.helse.fritakagp.web.api.altinnRoutes
 import no.nav.helse.fritakagp.web.api.configureExceptionHandling
-import no.nav.helse.fritakagp.web.api.gravidRoutes
-import no.nav.helse.fritakagp.web.api.kroniskRoutes
-import no.nav.helse.fritakagp.web.api.swaggerRoutes
-import no.nav.helse.fritakagp.web.api.systemRoutes
+import no.nav.helse.fritakagp.web.api.route.altinnRoutes
+import no.nav.helse.fritakagp.web.api.route.gravidRoutes
+import no.nav.helse.fritakagp.web.api.route.kroniskRoutes
+import no.nav.helse.fritakagp.web.api.route.swaggerRoutes
+import no.nav.helse.fritakagp.web.api.route.systemRoutes
+import no.nav.helse.fritakagp.web.auth.AuthService
 import no.nav.helse.fritakagp.web.auth.containsPid
 import no.nav.security.token.support.v3.tokenValidationSupport
 import org.koin.ktor.ext.get
@@ -49,16 +50,29 @@ fun Application.fritakModule(env: Env) {
         }
     }
 
+    setupRoutes(
+        ktorBasepath = env.ktorBasepath,
+        altinnTilgangerScope = env.altinnTilgangerScope
+    )
+}
+
+private fun Application.setupRoutes(ktorBasepath: String, altinnTilgangerScope: String) {
+    val authService = AuthService(
+        altinnClient = get(),
+        authClient = get(),
+        altinnTilgangerScope = altinnTilgangerScope
+    )
+
     routing {
-        route("${env.ktorBasepath}/api/v1") {
+        route("$ktorBasepath/api/v1") {
             authenticate("tokenx-issuer") {
                 systemRoutes()
-                kroniskRoutes(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), env.altinnTilgangerScope)
-                gravidRoutes(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), env.altinnTilgangerScope)
-                altinnRoutes(altinn3OBOClient = get(), authClient = get(), fagerScope = env.altinnTilgangerScope)
+                kroniskRoutes(authService, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+                gravidRoutes(authService, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+                altinnRoutes(authService)
             }
         }
-        swaggerRoutes(env.ktorBasepath)
+        swaggerRoutes(ktorBasepath)
     }
 }
 

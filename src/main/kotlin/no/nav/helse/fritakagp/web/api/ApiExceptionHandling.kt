@@ -12,11 +12,11 @@ import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.ParameterConversionException
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
-import no.nav.helse.fritakagp.integration.altinn.ManglerAltinnRettigheterException
 import no.nav.helse.fritakagp.web.api.resreq.validation.Problem
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblemDetail
 import no.nav.helse.fritakagp.web.api.resreq.validation.getContextualMessage
+import no.nav.helse.fritakagp.web.auth.ManglerAltinnRettigheterException
 import no.nav.helsearbeidsgiver.utils.log.logger
 import org.valiktor.ConstraintViolationException
 import java.lang.reflect.InvocationTargetException

@@ -1,4 +1,4 @@
-package no.nav.helse.fritakagp.web.api
+package no.nav.helse.fritakagp.web.api.route
 
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.Route

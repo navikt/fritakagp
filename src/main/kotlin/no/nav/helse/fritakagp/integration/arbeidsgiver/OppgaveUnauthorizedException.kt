@@ -1,4 +1,4 @@
-package no.nav.helse.arbeidsgiver.integrasjoner.oppgave2
+package no.nav.helse.fritakagp.integration.arbeidsgiver
 
 import io.ktor.http.HttpStatusCode
 

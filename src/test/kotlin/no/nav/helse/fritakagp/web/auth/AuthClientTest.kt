@@ -1,4 +1,4 @@
-package no.nav.helse.fritakagp.auth
+package no.nav.helse.fritakagp.web.auth
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient

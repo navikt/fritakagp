@@ -1,4 +1,4 @@
-package no.nav.helse.fritakagp.auth
+package no.nav.helse.fritakagp.web.auth
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
@@ -75,7 +75,6 @@ class AuthClient(
     } catch (e: ResponseException) {
         TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
     }
-}
 
 fun AuthClient.fetchToken(identityProvider: IdentityProvider, target: String): () -> String = {
     runBlocking {
@@ -92,23 +91,24 @@ fun AuthClient.fetchToken(identityProvider: IdentityProvider, target: String): (
     }
 }
 
-fun AuthClient.fetchOboToken(
-    target: String,
-    userToken: String
-): () -> String =
-    {
-        runBlocking {
-            exchange(IdentityProvider.TOKEN_X, target, userToken).let {
-                when (it) {
-                    is TokenResponse.Success -> it.accessToken
-                    is TokenResponse.Error -> {
-                        sikkerLogger().error("Feilet å hente obo token status: ${it.status} - ${it.error.errorDescription}")
-                        throw RuntimeException("Feilet å hente obo token status: ${it.status} - ${it.error.errorDescription}")
+    fun fetchOboToken(
+        target: String,
+        userToken: String
+    ): () -> String =
+        {
+            runBlocking {
+                exchange(IdentityProvider.TOKEN_X, target, userToken).let {
+                    when (it) {
+                        is TokenResponse.Success -> it.accessToken
+                        is TokenResponse.Error -> {
+                            sikkerLogger().error("Feilet å hente obo token status: ${it.status} - ${it.error.errorDescription}")
+                            throw RuntimeException("Feilet å hente obo token status: ${it.status} - ${it.error.errorDescription}")
+                        }
                     }
                 }
             }
         }
-    }
+}
 
 fun createHttpClient(): HttpClient = HttpClient(Apache5) {
     expectSuccess = true
