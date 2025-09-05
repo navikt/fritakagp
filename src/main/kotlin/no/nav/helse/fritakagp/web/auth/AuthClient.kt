@@ -76,20 +76,20 @@ class AuthClient(
         TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
     }
 
-fun AuthClient.fetchToken(identityProvider: IdentityProvider, target: String): () -> String = {
-    runBlocking {
-        token(identityProvider, target).let {
-            when (it) {
-                is TokenResponse.Success -> it.accessToken
-                is TokenResponse.Error -> {
-                    logger().error("Feilet å hente token")
-                    sikkerLogger().error("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
-                    throw RuntimeException("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
+    fun fetchToken(identityProvider: IdentityProvider, target: String): () -> String = {
+        runBlocking {
+            token(identityProvider, target).let {
+                when (it) {
+                    is TokenResponse.Success -> it.accessToken
+                    is TokenResponse.Error -> {
+                        logger().error("Feilet å hente token")
+                        sikkerLogger().error("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
+                        throw RuntimeException("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
+                    }
                 }
             }
         }
     }
-}
 
     fun fetchOboToken(
         target: String,

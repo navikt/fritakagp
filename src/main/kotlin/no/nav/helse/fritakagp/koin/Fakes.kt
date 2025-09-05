@@ -42,7 +42,7 @@ fun Module.mockExternalDependencies() {
     single { MockOAuth2Server().apply { start(port = 6668) } }
     single {
         spyk(
-            AuthClient("token-endpoint", "token-exchange-endpoint", "token-introspection-endpoint")
+            AuthClient("token-endpoint", "token-exchange-endpoint")
         ) {
             val mockOAuth2Server: MockOAuth2Server = get()
             coEvery { exchange(IdentityProvider.TOKEN_X, any(), any()) } returns
