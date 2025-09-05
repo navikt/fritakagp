@@ -50,7 +50,6 @@ sealed class Env(
 
     val tokenEndpoint = "auth.token_endpoint".prop()
     val tokenExchangeEndpoint = "auth.token_exchange_endpoint".prop()
-    val tokenIntrospectionEndpoint = "auth.token_introspection_endpoint".prop()
 
     val tokenxDiscoveryUrl = "tokenx_config.discoveryurl".prop()
     val tokenxAcceptedAudience = "tokenx_config.accepted_audience".prop()

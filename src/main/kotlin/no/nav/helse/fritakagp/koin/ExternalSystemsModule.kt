@@ -92,5 +92,5 @@ fun Module.externalSystemClients(env: Env) {
         )
     } bind BrukernotifikasjonSender::class
 
-    single { AuthClient(tokenEndpoint = env.tokenEndpoint, tokenExchangeEndpoint = env.tokenExchangeEndpoint, tokenIntrospectionEndpoint = env.tokenIntrospectionEndpoint) }
+    single { AuthClient(tokenEndpoint = env.tokenEndpoint, tokenExchangeEndpoint = env.tokenExchangeEndpoint) }
 }
