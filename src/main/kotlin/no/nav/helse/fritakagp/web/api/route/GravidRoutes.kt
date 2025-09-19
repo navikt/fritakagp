@@ -2,6 +2,7 @@ package no.nav.helse.fritakagp.web.api.route
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -176,6 +177,7 @@ fun Route.gravidRoutes(
 
             patch("/{id}") {
                 val kravId = requestHandler.lesParameterId(this)
+                sikkerLogger.debug("Mottatt PATCH /gravid/krav/$kravId: ${call.receiveText()}")
                 val request = requestHandler.lesRequestBody<GravidKravRequest>(this)
 
                 authService.validerTilgangTilOrganisasjon(this, request.virksomhetsnummer)
