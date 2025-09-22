@@ -2,7 +2,6 @@ package no.nav.helse.fritakagp.web.api.route
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
