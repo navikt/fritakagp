@@ -22,6 +22,7 @@ import org.valiktor.functions.isLessThanOrEqualTo
 import org.valiktor.functions.isNotEmpty
 import org.valiktor.functions.isNotNull
 import org.valiktor.functions.isTrue
+import org.valiktor.functions.isValid
 import org.valiktor.functions.validateForEach
 import org.valiktor.validate
 import java.time.LocalDate
@@ -85,14 +86,19 @@ data class GravidSoknadRequest(
     )
 }
 
+enum class AarsakEndring {
+    TARIFFENDRING_, ANNET
+}
+
 data class GravidKravRequest(
     val virksomhetsnummer: String,
     val identitetsnummer: String,
     val perioder: List<Arbeidsgiverperiode>,
     val bekreftet: Boolean,
     val kontrollDager: Int?,
-    val antallDager: Int
-) {
+    val antallDager: Int,
+    var aarsakEndring: AarsakEndring? = null,
+    ) {
     fun validate(ansettelsesperioder: Set<Periode>) {
         validate(this) {
             validate(GravidKravRequest::antallDager).isGreaterThan(0)
@@ -120,7 +126,8 @@ data class GravidKravRequest(
         sendtAv = sendtAv,
         sendtAvNavn = sendtAvNavn,
         kontrollDager = kontrollDager,
-        antallDager = antallDager
+        antallDager = antallDager,
+        aarsakEndring = aarsakEndring?.name
     )
 }
 
