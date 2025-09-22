@@ -177,7 +177,6 @@ fun Route.gravidRoutes(
 
             patch("/{id}") {
                 val kravId = requestHandler.lesParameterId(this)
-                sikkerLogger.debug("Mottatt PATCH /gravid/krav/$kravId: ${call.receiveText()}")
                 val request = requestHandler.lesRequestBody<GravidKravRequest>(this)
 
                 authService.validerTilgangTilOrganisasjon(this, request.virksomhetsnummer)
