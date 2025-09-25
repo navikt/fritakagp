@@ -44,10 +44,7 @@ spec:
   observability:
     logging:
       destinations:
-        - id: secure_logs
         - id: loki
-  secureLogs:
-    enabled: true
   prometheus:
     enabled: true
 
