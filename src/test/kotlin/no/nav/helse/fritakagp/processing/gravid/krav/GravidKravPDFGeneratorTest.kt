@@ -1,6 +1,7 @@
 package no.nav.helse.fritakagp.processing.gravid.krav
 
 import no.nav.helse.GravidTestData
+import no.nav.helse.fritakagp.web.api.resreq.AarsakEndring
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 import org.assertj.core.api.Assertions.assertThat
@@ -50,6 +51,20 @@ class GravidKravPDFGeneratorTest {
         assertThat(pdfText).contains(krav.navn)
         assertThat(pdfText).contains(krav.virksomhetsnummer)
         assertThat(pdfText).contains(krav.journalpostId)
+    }
+
+    @Test
+    fun testLagEndringPDF() {
+        val krav = GravidTestData.gravidKrav.copy(journalpostId = "12345", endretDato = LocalDateTime.now())
+        val endretKrav = krav.copy(journalpostId = "12346", endretDato = LocalDateTime.now(), aarsakEndring = AarsakEndring.TARIFFENDRING.name)
+        val pdf = GravidKravPDFGenerator().lagEndringPdf(krav, endretKrav)
+        assertThat(pdf).isNotNull
+
+        val pdfText = extractTextFromPdf(pdf)
+
+        assertThat(pdfText).contains(endretKrav.navn)
+        assertThat(pdfText).contains(endretKrav.virksomhetsnummer)
+        assertThat(pdfText).contains(endretKrav.aarsakEndring)
     }
 
     @Test

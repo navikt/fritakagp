@@ -65,6 +65,9 @@ class GravidKravPDFGenerator {
         content.writeTextWrapped("Sendt av: ${krav.sendtAvNavn}")
         content.writeTextWrapped("Person navn: ${krav.navn}")
         content.writeTextWrapped("Arbeidsgiver oppgitt i krav: ${krav.virksomhetsnavn} (${krav.virksomhetsnummer})")
+        if (krav.aarsakEndring != null) {
+            content.writeTextWrapped("Årsak til endring: ${krav.aarsakEndring}")
+        }
         content.writeTextWrapped("Antall lønnsdager: ${krav.antallDager}")
         content.writeTextWrapped("Arbeidsgiverperiode", 2)
         krav

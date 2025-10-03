@@ -22,7 +22,6 @@ import org.valiktor.functions.isLessThanOrEqualTo
 import org.valiktor.functions.isNotEmpty
 import org.valiktor.functions.isNotNull
 import org.valiktor.functions.isTrue
-import org.valiktor.functions.isValid
 import org.valiktor.functions.validateForEach
 import org.valiktor.validate
 import java.time.LocalDate
@@ -87,7 +86,7 @@ data class GravidSoknadRequest(
 }
 
 enum class AarsakEndring {
-    TARIFFENDRING_, ANNET
+    TARIFFENDRING, ANNETT
 }
 
 data class GravidKravRequest(
