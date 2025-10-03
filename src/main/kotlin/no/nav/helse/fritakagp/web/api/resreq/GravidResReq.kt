@@ -96,8 +96,8 @@ data class GravidKravRequest(
     val bekreftet: Boolean,
     val kontrollDager: Int?,
     val antallDager: Int,
-    var aarsakEndring: AarsakEndring? = null,
-    ) {
+    var aarsakEndring: AarsakEndring? = null
+) {
     fun validate(ansettelsesperioder: Set<Periode>) {
         validate(this) {
             validate(GravidKravRequest::antallDager).isGreaterThan(0)
