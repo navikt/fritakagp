@@ -83,6 +83,9 @@ fun generereKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String {
         appendLine("Referansenummer: ${krav.referansenummer}")
         appendLine("Person (FNR): ${krav.identitetsnummer}")
         appendLine("Arbeidsgiver oppgitt i krav: ${krav.virksomhetsnavn} (${krav.virksomhetsnummer})")
+        if (krav.aarsakEndring != null) {
+            appendLine("Årsak til endring: ${krav.aarsakEndring}")
+        }
         appendLine("Antall lønnsdager: ${krav.antallDager}")
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
