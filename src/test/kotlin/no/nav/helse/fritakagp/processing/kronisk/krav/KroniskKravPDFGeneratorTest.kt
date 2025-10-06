@@ -1,7 +1,7 @@
 package no.nav.helse.fritakagp.processing.kronisk.krav
 
 import no.nav.helse.KroniskTestData
-import no.nav.helse.fritakagp.web.api.resreq.AarsakEndring
+import no.nav.helse.fritakagp.domain.AarsakEndring
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 import org.assertj.core.api.Assertions.assertThat

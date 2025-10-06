@@ -1,5 +1,6 @@
 package no.nav.helse.fritakagp.web.api.resreq
 
+import no.nav.helse.fritakagp.domain.AarsakEndring
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.GravidSoeknad
@@ -83,10 +84,6 @@ data class GravidSoknadRequest(
         tiltakBeskrivelse = tiltakBeskrivelse,
         harVedlegg = !dokumentasjon.isNullOrEmpty()
     )
-}
-
-enum class AarsakEndring {
-    TARIFFENDRING, ANNETT
 }
 
 data class GravidKravRequest(
