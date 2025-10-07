@@ -40,14 +40,12 @@ class KroniskKravPDFGenerator {
         content.showText(tittel)
         content.setFont(font, FONT_SIZE)
 
+        krav.aarsakEndring?.let { content.writeTextWrapped("Årsak til endring: $it") }
         content.writeTextWrapped("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}", 4)
         content.writeTextWrapped("Referansenummer: ${krav.referansenummer}")
         content.writeTextWrapped("Sendt av: ${krav.sendtAvNavn}")
         content.writeTextWrapped("Person navn: ${krav.navn}")
         content.writeTextWrapped("Arbeidsgiver oppgitt i krav: ${krav.virksomhetsnavn} (${krav.virksomhetsnummer})")
-        if (krav.aarsakEndring != null) {
-            content.writeTextWrapped("Årsak til endring: ${krav.aarsakEndring}")
-        }
         content.writeTextWrapped("Antall lønnsdager: ${krav.antallDager}")
         content.writeTextWrapped("Perioder", 2)
 

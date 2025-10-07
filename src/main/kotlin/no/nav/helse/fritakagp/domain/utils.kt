@@ -79,13 +79,11 @@ fun generereKroniskSoeknadBeskrivelse(soeknad: KroniskSoeknad, desc: String): St
 fun generereKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String {
     return buildString {
         appendLine(desc)
+        krav.aarsakEndring?.let { appendLine("Årsak til endring: $it") }
         appendLine("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}")
         appendLine("Referansenummer: ${krav.referansenummer}")
         appendLine("Person (FNR): ${krav.identitetsnummer}")
         appendLine("Arbeidsgiver oppgitt i krav: ${krav.virksomhetsnavn} (${krav.virksomhetsnummer})")
-        if (krav.aarsakEndring != null) {
-            appendLine("Årsak til endring: ${krav.aarsakEndring}")
-        }
         appendLine("Antall lønnsdager: ${krav.antallDager}")
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
@@ -132,13 +130,11 @@ fun generereEndretGravidKravBeskrivelse(krav: GravidKrav, desc: String): String 
 fun generereGravidKravBeskrivelse(krav: GravidKrav, desc: String): String {
     return buildString {
         appendLine(desc)
+        krav.aarsakEndring?.let { appendLine("Årsak til endring: $it") }
         appendLine("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}")
         appendLine("Referansenummer: ${krav.referansenummer}")
         appendLine("Person (FNR): ${krav.identitetsnummer}")
         appendLine("Arbeidsgiver oppgitt i krav: ${krav.virksomhetsnavn} (${krav.virksomhetsnummer})")
-        if (krav.aarsakEndring != null) {
-            appendLine("Årsak til endring: ${krav.aarsakEndring}")
-        }
         appendLine("Antall lønnsdager: ${krav.antallDager}")
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
