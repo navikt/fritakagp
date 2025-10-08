@@ -1,5 +1,6 @@
 package no.nav.helse.fritakagp.web.api.resreq
 
+import no.nav.helse.fritakagp.domain.AarsakEndring
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.FravaerData
 import no.nav.helse.fritakagp.domain.KroniskKrav
@@ -84,7 +85,8 @@ data class KroniskKravRequest(
     val perioder: List<Arbeidsgiverperiode>,
     val bekreftet: Boolean,
     val kontrollDager: Int?,
-    val antallDager: Int
+    val antallDager: Int,
+    var aarsakEndring: AarsakEndring? = null
 ) {
     fun validate(ansettelsesperioder: Set<Periode>) {
         validate(this) {
@@ -112,6 +114,7 @@ data class KroniskKravRequest(
         sendtAv = sendtAv,
         sendtAvNavn = sendtAvNavn,
         kontrollDager = kontrollDager,
-        antallDager = antallDager
+        antallDager = antallDager,
+        aarsakEndring = aarsakEndring?.name
     )
 }

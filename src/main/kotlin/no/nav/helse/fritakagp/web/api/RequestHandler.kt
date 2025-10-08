@@ -28,6 +28,7 @@ class RequestHandler(
 
     suspend inline fun <reified T : Any> lesRequestBody(context: RoutingContext): T {
         val body = context.call.receiveText()
+        sikkerLogger.info("Mottatt request body: $body")
 
         return try {
             objectMapper.readValue<T>(body)

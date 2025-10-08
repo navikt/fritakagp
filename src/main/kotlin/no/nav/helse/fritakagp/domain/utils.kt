@@ -79,6 +79,7 @@ fun generereKroniskSoeknadBeskrivelse(soeknad: KroniskSoeknad, desc: String): St
 fun generereKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String {
     return buildString {
         appendLine(desc)
+        krav.aarsakEndring?.let { appendLine("Årsak til endring: $it") }
         appendLine("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}")
         appendLine("Referansenummer: ${krav.referansenummer}")
         appendLine("Person (FNR): ${krav.identitetsnummer}")
@@ -129,6 +130,7 @@ fun generereEndretGravidKravBeskrivelse(krav: GravidKrav, desc: String): String 
 fun generereGravidKravBeskrivelse(krav: GravidKrav, desc: String): String {
     return buildString {
         appendLine(desc)
+        krav.aarsakEndring?.let { appendLine("Årsak til endring: $it") }
         appendLine("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}")
         appendLine("Referansenummer: ${krav.referansenummer}")
         appendLine("Person (FNR): ${krav.identitetsnummer}")
