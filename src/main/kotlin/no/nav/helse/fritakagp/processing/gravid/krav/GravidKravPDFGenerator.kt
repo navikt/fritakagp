@@ -60,8 +60,8 @@ class GravidKravPDFGenerator {
         content.showText(tittel)
         content.setFont(font, FONT_SIZE)
 
-        krav.aarsakEndring?.let { content.writeTextWrapped("Årsak til endring: $it") }
-        content.writeTextWrapped("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}", 4)
+        krav.aarsakEndring?.let { content.writeTextWrapped(text = "Årsak til endring: $it", spacing = 4) }
+        content.writeTextWrapped("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}")
         content.writeTextWrapped("Referansenummer: ${krav.referansenummer}")
         content.writeTextWrapped("Sendt av: ${krav.sendtAvNavn}")
         content.writeTextWrapped("Person navn: ${krav.navn}")
