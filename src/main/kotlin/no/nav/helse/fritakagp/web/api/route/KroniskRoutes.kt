@@ -42,7 +42,7 @@ import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 fun Route.kroniskRoutes(
     authService: AuthService,
@@ -369,6 +369,10 @@ fun Route.kroniskRoutes(
                     bakgunnsjobbService.opprettJobb<KroniskKravSlettProcessor>(
                         maksAntallForsoek = 10,
                         data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id))
+                    )
+                    bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
                     )
 
                     logger.info("Kronisk krav slettet OK.")

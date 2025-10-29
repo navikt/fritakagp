@@ -46,7 +46,7 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.valiktor.ConstraintViolationException
 import org.valiktor.DefaultConstraintViolation
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 fun Route.gravidRoutes(
     authService: AuthService,
@@ -265,6 +265,10 @@ fun Route.gravidRoutes(
                 bakgunnsjobbService.opprettJobb<GravidKravSlettProcessor>(
                     maksAntallForsoek = 10,
                     data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id))
+                )
+                bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
+                    maksAntallForsoek = 10,
+                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
                 )
                 call.respond(HttpStatusCode.OK)
             }

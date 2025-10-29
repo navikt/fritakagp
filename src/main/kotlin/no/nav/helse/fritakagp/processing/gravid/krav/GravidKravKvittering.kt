@@ -6,6 +6,7 @@ import no.altinn.schemas.services.serviceengine.correspondence._2010._10.InsertC
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasicInsertCorrespondenceBasicV2AltinnFaultFaultFaultMessage
 import no.nav.helse.fritakagp.domain.GravidKrav
+import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT_MED_KL
 import no.nav.helse.fritakagp.domain.sladdFnr
 import no.nav.helse.fritakagp.processing.kronisk.krav.lagrePerioder
@@ -48,10 +49,15 @@ class GravidKravAltinnKvitteringSender(
         }
     }
 
+    fun KravStatus.tilTekst() = when (this) {
+        KravStatus.SLETTET -> "slettet"
+        else -> "mottatt"
+    }
+
     fun mapKvitteringTilInsertCorrespondence(kvittering: GravidKrav): InsertCorrespondenceV2 {
         val sladdetFnr = sladdFnr(kvittering.identitetsnummer)
-        val tittel = "$sladdetFnr - Kvittering for mottatt refusjonskrav fra arbeidsgiverperioden grunnet graviditet"
-
+        val tilstand = kvittering.status.tilTekst()
+        val tittel = "$sladdetFnr - Kvittering for $tilstand refusjonskrav fra arbeidsgiverperioden grunnet graviditet"
         val innhold = """
         <html>
            <head>
@@ -59,7 +65,7 @@ class GravidKravAltinnKvitteringSender(
            </head>
            <body>
                <div class="melding">
-            <p>Kvittering for mottatt krav om fritak fra arbeidsgiverperioden grunnet risiko for høyt sykefravær knyttet til graviditet.</p>
+            <p>Kvittering for $tilstand krav om fritak fra arbeidsgiverperioden grunnet risiko for høyt sykefravær knyttet til graviditet.</p>
             <p>Virksomhetsnummer: ${kvittering.virksomhetsnummer}</p>
             <p>${kvittering.opprettet.format(TIMESTAMP_FORMAT_MED_KL)}</p>
             <p>Kravet vil bli behandlet fortløpende. Ved behov vil NAV innhente ytterligere dokumentasjon.
@@ -82,7 +88,7 @@ class GravidKravAltinnKvitteringSender(
             .withLanguageCode("1044")
             .withMessageTitle(tittel)
             .withMessageBody(innhold)
-            .withMessageSummary("Kvittering for krav om refusjon av arbeidsgiverperioden ifbm graviditetsrelatert fravær")
+            .withMessageSummary("Kvittering for $tilstand krav om refusjon av arbeidsgiverperioden ifbm graviditetsrelatert fravær")
 
         return InsertCorrespondenceV2()
             .withAllowForwarding(false)
