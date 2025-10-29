@@ -205,6 +205,8 @@ fun Route.gravidRoutes(
                     return@patch call.respond(HttpStatusCode.Conflict)
                 }
 
+                kravTilOppdatering.status = KravStatus.OPPDATERT
+
                 forrigeKrav.status = KravStatus.ENDRET
                 forrigeKrav.slettetAv = innloggetFnr
                 forrigeKrav.slettetAvNavn = sendtAvNavn

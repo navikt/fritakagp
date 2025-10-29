@@ -54,7 +54,9 @@ class KroniskKravAltinnKvitteringSender(
 
     fun KravStatus.tilTekst() = when (this) {
         KravStatus.SLETTET -> "slettet"
-        else -> "mottatt"
+        KravStatus.OPPRETTET -> "mottatt"
+        KravStatus.OPPDATERT,
+        KravStatus.ENDRET -> "endret"
     }
 
     fun mapKvitteringTilInsertCorrespondence(kvittering: KroniskKrav): InsertCorrespondenceV2 {
@@ -80,6 +82,7 @@ class KroniskKravAltinnKvitteringSender(
                 <li>Dokumentasjon vedlagt: ${if (kvittering.harVedlegg) "Ja" else "Nei"} </li>
                 <li>Mottatt:  ${kvittering.opprettet.format(TIMESTAMP_FORMAT_MED_KL)}  </li>
                 <li>Innrapportert av: ${kvittering.sendtAvNavn}</li>
+                ${kvittering.aarsakEndring?.let { "<li>Årsak til endring: $it</li>" } ?: ""}
                 <li>Perioder: </li>
                 <ul> ${lagrePerioder(kvittering.perioder)}</ul>
             </ul>
