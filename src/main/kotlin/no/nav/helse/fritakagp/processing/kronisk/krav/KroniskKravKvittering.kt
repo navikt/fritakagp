@@ -7,6 +7,7 @@ import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondence
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasicInsertCorrespondenceBasicV2AltinnFaultFaultFaultMessage
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.DATE_FORMAT
+import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT_MED_KL
 import no.nav.helse.fritakagp.domain.sladdFnr
@@ -51,9 +52,17 @@ class KroniskKravAltinnKvitteringSender(
         }
     }
 
+    fun KravStatus.tilTekst() = when (this) {
+        KravStatus.SLETTET -> "slettet"
+        KravStatus.OPPRETTET -> "mottatt"
+        KravStatus.OPPDATERT,
+        KravStatus.ENDRET -> "endret"
+    }
+
     fun mapKvitteringTilInsertCorrespondence(kvittering: KroniskKrav): InsertCorrespondenceV2 {
         val sladdetFnr = sladdFnr(kvittering.identitetsnummer)
-        val tittel = "$sladdetFnr - Kvittering for mottatt refusjonskrav fra arbeidsgiverperioden grunnet kronisk sykdom"
+        val tilstand = kvittering.status.tilTekst()
+        val tittel = "$sladdetFnr - Kvittering for $tilstand refusjonskrav fra arbeidsgiverperioden grunnet kronisk sykdom"
 
         val innhold = """
         <html>
@@ -62,7 +71,7 @@ class KroniskKravAltinnKvitteringSender(
            </head>
            <body>
                <div class="melding">
-            <p>Kvittering for mottatt krav om fritak fra arbeidsgiverperioden grunnet risiko for høyt sykefravær knyttet til kronisk sykdom.</p>
+            <p>Kvittering for $tilstand krav om fritak fra arbeidsgiverperioden grunnet risiko for høyt sykefravær knyttet til kronisk sykdom.</p>
             <p>Virksomhetsnummer: ${kvittering.virksomhetsnummer}</p>
             <p>${kvittering.opprettet.format(TIMESTAMP_FORMAT_MED_KL)}</p>
             <p>Kravet vil bli behandlet fortløpende. Ved behov vil NAV innhente ytterligere dokumentasjon.
@@ -73,6 +82,7 @@ class KroniskKravAltinnKvitteringSender(
                 <li>Dokumentasjon vedlagt: ${if (kvittering.harVedlegg) "Ja" else "Nei"} </li>
                 <li>Mottatt:  ${kvittering.opprettet.format(TIMESTAMP_FORMAT_MED_KL)}  </li>
                 <li>Innrapportert av: ${kvittering.sendtAvNavn}</li>
+                ${kvittering.aarsakEndring?.let { "<li>Årsak til endring: $it</li>" } ?: ""}
                 <li>Perioder: </li>
                 <ul> ${lagrePerioder(kvittering.perioder)}</ul>
             </ul>
@@ -85,7 +95,7 @@ class KroniskKravAltinnKvitteringSender(
             .withLanguageCode("1044")
             .withMessageTitle(tittel)
             .withMessageBody(innhold)
-            .withMessageSummary("Kvittering for krav om refusjon av arbeidsgiverperioden ifbm kronisk sykdom")
+            .withMessageSummary("Kvittering for $tilstand krav om refusjon av arbeidsgiverperioden ifbm kronisk sykdom")
 
         return InsertCorrespondenceV2()
             .withAllowForwarding(false)

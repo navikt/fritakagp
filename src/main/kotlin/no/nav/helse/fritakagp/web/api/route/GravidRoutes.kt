@@ -205,6 +205,8 @@ fun Route.gravidRoutes(
                     return@patch call.respond(HttpStatusCode.Conflict)
                 }
 
+                kravTilOppdatering.status = KravStatus.OPPDATERT
+
                 forrigeKrav.status = KravStatus.ENDRET
                 forrigeKrav.slettetAv = innloggetFnr
                 forrigeKrav.slettetAvNavn = sendtAvNavn
@@ -265,6 +267,10 @@ fun Route.gravidRoutes(
                 bakgunnsjobbService.opprettJobb<GravidKravSlettProcessor>(
                     maksAntallForsoek = 10,
                     data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id))
+                )
+                bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
+                    maksAntallForsoek = 10,
+                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
                 )
                 call.respond(HttpStatusCode.OK)
             }

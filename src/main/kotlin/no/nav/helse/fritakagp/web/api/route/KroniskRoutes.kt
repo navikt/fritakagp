@@ -370,6 +370,10 @@ fun Route.kroniskRoutes(
                         maksAntallForsoek = 10,
                         data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id))
                     )
+                    bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
+                    )
 
                     logger.info("Kronisk krav slettet OK.")
                     call.respond(HttpStatusCode.OK)
