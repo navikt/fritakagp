@@ -104,7 +104,6 @@ dependencies {
     val assertJVersion: String by project
     val bakgrunnsjobbVersion: String by project
     val brregClientVersion: String by project
-    val brukernotifikasjonSchemasVersion: String by project
     val confluentVersion: String by project
     val coroutinesVersion: String by project
     val cxfVersion: String by project
