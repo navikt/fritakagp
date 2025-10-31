@@ -104,7 +104,6 @@ dependencies {
     val assertJVersion: String by project
     val bakgrunnsjobbVersion: String by project
     val brregClientVersion: String by project
-    val brukernotifikasjonSchemasVersion: String by project
     val confluentVersion: String by project
     val coroutinesVersion: String by project
     val cxfVersion: String by project
@@ -144,7 +143,6 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonModuleKotlinVersion")
-    implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonSchemasVersion")
     implementation("com.google.cloud:google-cloud-storage:$gcpStorageVersion")
     implementation("com.sun.activation:javax.activation:$javaxActivationVersion")
     implementation("com.sun.xml.ws:jaxws-tools:$jaxwsToolsVersion") {
