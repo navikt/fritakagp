@@ -27,7 +27,7 @@ accessInbound:
 envFrom:
   # servicebrukerens passord som er  hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
   - service-user-password-prod
-  - altinn-user-password-prod
+  - altinn-correspondence-credentials
   - altinn-api-gw-keys-prod
 env:
   - name: KOIN_PROFILE
