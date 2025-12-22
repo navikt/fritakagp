@@ -11,7 +11,7 @@ import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
-import no.nav.helse.fritakagp.domain.BeloepBeregning
+import no.nav.helse.fritakagp.domain.BeloepService
 import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
@@ -82,7 +82,7 @@ class KoinProfilesKtTest : KoinTest {
     private val arbeidsgiverOppdaterNotifikasjonProcessor: ArbeidsgiverOppdaterNotifikasjonProcessor by inject()
     private val pdlService: PdlService by inject()
     private val brregService: IBrregService by inject()
-    private val beloepBeregning: BeloepBeregning by inject()
+    private val beloepService: BeloepService by inject()
 
     private val objectMapper: ObjectMapper by inject()
 
@@ -139,7 +139,7 @@ class KoinProfilesKtTest : KoinTest {
         assertNotNull(arbeidsgiverOppdaterNotifikasjonProcessor)
         assertNotNull(pdlService)
         assertNotNull(brregService)
-        assertNotNull(beloepBeregning)
+        assertNotNull(beloepService)
     }
 
     private fun getTestModules(): Module {

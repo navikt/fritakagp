@@ -9,22 +9,22 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.helse.GravidTestData
 import no.nav.helse.fritakagp.db.GravidKravRepository
-import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.KravStatus
+import no.nav.helse.fritakagp.web.api.resreq.ArbeidsgiverperiodeRequest
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
+import no.nav.helsearbeidsgiver.utils.test.date.januar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.koin.test.inject
-import java.time.LocalDate
 
 class GravidKravHTTPTests : SystemTestBase() {
     private val kravGravidUrl = "/fritak-agp-api/api/v1/gravid/krav"
 
     @Test
     @Disabled
-    internal fun `Returnerer kravet når korrekt bruker er innlogget, 403 når ikke`() = suspendableTest {
+    fun `Returnerer kravet når korrekt bruker er innlogget, 403 når ikke`() = suspendableTest {
         val repo by inject<GravidKravRepository>()
 
         repo.insert(GravidTestData.gravidKrav)
@@ -150,22 +150,22 @@ class GravidKravHTTPTests : SystemTestBase() {
                 setBody(
                     GravidTestData.gravidKravRequestInValid.copy(
                         perioder = listOf(
-                            Arbeidsgiverperiode(
-                                LocalDate.of(2020, 1, 15),
-                                LocalDate.of(2020, 1, 10),
-                                2,
+                            ArbeidsgiverperiodeRequest(
+                                fom = 15.januar(2020),
+                                tom = 10.januar(2020),
+                                antallDagerMedRefusjon = 2,
                                 månedsinntekt = 2590.8
                             ),
-                            Arbeidsgiverperiode(
-                                LocalDate.of(2020, 1, 5),
-                                LocalDate.of(2020, 1, 4),
-                                2,
+                            ArbeidsgiverperiodeRequest(
+                                fom = 5.januar(2020),
+                                tom = 4.januar(2020),
+                                antallDagerMedRefusjon = 2,
                                 månedsinntekt = 2590.8
                             ),
-                            Arbeidsgiverperiode(
-                                LocalDate.of(2020, 1, 5),
-                                LocalDate.of(2020, 1, 14),
-                                12,
+                            ArbeidsgiverperiodeRequest(
+                                fom = 5.januar(2020),
+                                tom = 14.januar(2020),
+                                antallDagerMedRefusjon = 12,
                                 månedsinntekt = 2590.8
                             )
                         )
@@ -188,22 +188,22 @@ class GravidKravHTTPTests : SystemTestBase() {
                 setBody(
                     GravidTestData.gravidKravRequestInValid.copy(
                         perioder = listOf(
-                            Arbeidsgiverperiode(
-                                LocalDate.of(2020, 1, 15),
-                                LocalDate.of(2020, 1, 10),
-                                2,
+                            ArbeidsgiverperiodeRequest(
+                                fom = 15.januar(2020),
+                                tom = 10.januar(2020),
+                                antallDagerMedRefusjon = 2,
                                 månedsinntekt = 2590.8
                             ),
-                            Arbeidsgiverperiode(
-                                LocalDate.of(2020, 1, 5),
-                                LocalDate.of(2020, 1, 4),
-                                2,
+                            ArbeidsgiverperiodeRequest(
+                                fom = 5.januar(2020),
+                                tom = 4.januar(2020),
+                                antallDagerMedRefusjon = 2,
                                 månedsinntekt = 2590.8
                             ),
-                            Arbeidsgiverperiode(
-                                LocalDate.of(2020, 1, 5),
-                                LocalDate.of(2020, 1, 14),
-                                12,
+                            ArbeidsgiverperiodeRequest(
+                                fom = 5.januar(2020),
+                                tom = 14.januar(2020),
+                                antallDagerMedRefusjon = 12,
                                 månedsinntekt = 2590.8
                             )
                         )

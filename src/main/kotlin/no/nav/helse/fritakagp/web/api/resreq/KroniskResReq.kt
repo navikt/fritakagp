@@ -5,7 +5,6 @@ import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.FravaerData
 import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.domain.KroniskSoeknad
-import no.nav.helse.fritakagp.web.api.resreq.validation.datoerHarRiktigRekkefolge
 import no.nav.helse.fritakagp.web.api.resreq.validation.ikkeFlereFravaersdagerEnnDagerIMaanden
 import no.nav.helse.fritakagp.web.api.resreq.validation.ingenDataEldreEnn
 import no.nav.helse.fritakagp.web.api.resreq.validation.ingenDataFraFremtiden
@@ -14,15 +13,11 @@ import no.nav.helse.fritakagp.web.api.resreq.validation.isGodkjentFiltype
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidIdentitetsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidOrganisasjonsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isVirksomhet
-import no.nav.helse.fritakagp.web.api.resreq.validation.maaHaAktivAnsettelsesperiode
-import no.nav.helse.fritakagp.web.api.resreq.validation.maanedsInntektErMellomNullOgTiMil
-import no.nav.helse.fritakagp.web.api.resreq.validation.refusjonsDagerIkkeOverstigerPeriodelengde
 import no.nav.helsearbeidsgiver.aareg.Periode
 import org.valiktor.functions.isBetween
 import org.valiktor.functions.isEmpty
 import org.valiktor.functions.isEqualTo
 import org.valiktor.functions.isGreaterThan
-import org.valiktor.functions.isGreaterThanOrEqualTo
 import org.valiktor.functions.isLessThanOrEqualTo
 import org.valiktor.functions.isNotNull
 import org.valiktor.functions.isTrue
@@ -82,7 +77,7 @@ data class KroniskSoknadRequest(
 data class KroniskKravRequest(
     val virksomhetsnummer: String,
     val identitetsnummer: String,
-    val perioder: List<Arbeidsgiverperiode>,
+    val perioder: List<ArbeidsgiverperiodeRequest>,
     val bekreftet: Boolean,
     val kontrollDager: Int?,
     val antallDager: Int,
@@ -95,18 +90,11 @@ data class KroniskKravRequest(
             validate(KroniskKravRequest::identitetsnummer).isValidIdentitetsnummer()
             validate(KroniskKravRequest::virksomhetsnummer).isValidOrganisasjonsnummer()
             validate(KroniskKravRequest::bekreftet).isTrue()
-            validate(KroniskKravRequest::perioder).validateForEach {
-                validate(Arbeidsgiverperiode::fom).datoerHarRiktigRekkefolge(it.tom)
-                validate(Arbeidsgiverperiode::antallDagerMedRefusjon).refusjonsDagerIkkeOverstigerPeriodelengde(it)
-                validate(Arbeidsgiverperiode::månedsinntekt).maanedsInntektErMellomNullOgTiMil()
-                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
-                validate(Arbeidsgiverperiode::gradering).isLessThanOrEqualTo(1.0)
-                validate(Arbeidsgiverperiode::gradering).isGreaterThanOrEqualTo(0.2)
-            }
+            validate(KroniskKravRequest::perioder).validateForEach { it.validate(this, ansettelsesperioder) }
         }
     }
 
-    fun toDomain(sendtAv: String, sendtAvNavn: String, navn: String) = KroniskKrav(
+    fun tilKrav(sendtAv: String, sendtAvNavn: String, navn: String, perioder: List<Arbeidsgiverperiode>) = KroniskKrav(
         identitetsnummer = identitetsnummer,
         navn = navn,
         virksomhetsnummer = virksomhetsnummer,
