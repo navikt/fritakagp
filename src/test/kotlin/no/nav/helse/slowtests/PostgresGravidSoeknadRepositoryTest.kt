@@ -1,6 +1,7 @@
 package no.nav.helse.slowtests
 
 import com.zaxxer.hikari.HikariDataSource
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.helse.GravidTestData
 import no.nav.helse.fritakagp.db.PostgresGravidSoeknadRepository
 import no.nav.helse.fritakagp.db.createTestHikariConfig
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.core.component.get
-import kotlin.test.assertNotNull
 
 class PostgresGravidSoeknadRepositoryTest : SystemTestBase() {
 
@@ -39,8 +39,7 @@ class PostgresGravidSoeknadRepositoryTest : SystemTestBase() {
 
     @Test
     fun kanOppdatereData() {
-        val soeknadGravidResult = repo.getById(testSoeknad.id)
-        assertNotNull(soeknadGravidResult, "Må finnes")
+        val soeknadGravidResult = repo.getById(testSoeknad.id).shouldNotBeNull()
 
         soeknadGravidResult.journalpostId = "1234"
         soeknadGravidResult.oppgaveId = "78990"

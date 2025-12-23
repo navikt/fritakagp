@@ -18,12 +18,12 @@ import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.testJob
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
 import java.util.UUID
-import kotlin.test.assertEquals
 
 class GravidKravEndreProcessorTest {
 

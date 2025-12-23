@@ -29,13 +29,13 @@ import no.nav.helse.fritakagp.readToObjectNode
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
 import java.util.Base64
-import kotlin.test.assertEquals
-import kotlin.test.fail
 
 class KroniskKravProcessorTest {
 
@@ -167,8 +167,7 @@ class KroniskKravProcessorTest {
                     if (!forventetJson.jsonEquals(objectMapper, it.beskrivelse!!, "id", "opprettet")) {
                         println("expected json to be equal, was not: \nexpectedJson=$forventetJson \nactualJson=${it.beskrivelse}")
                         fail()
-                    }
-                    if (!forventetJson.readToObjectNode(objectMapper)["kravType"].asText().equals("KRONISK")) {
+                    } else if (!forventetJson.readToObjectNode(objectMapper)["kravType"].asText().equals("KRONISK")) {
                         println("expected json to contain kravType = KRONISK, was not")
                         fail()
                     }

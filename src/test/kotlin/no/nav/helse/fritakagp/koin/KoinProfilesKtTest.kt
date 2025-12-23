@@ -1,6 +1,7 @@
 package no.nav.helse.fritakagp.koin
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
@@ -33,7 +34,6 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.core.context.startKoin
@@ -114,32 +114,34 @@ class KoinProfilesKtTest : KoinTest {
     }
 
     private fun assertKoin() {
-        assertNotNull(gravidSoeknadRepository)
-        assertNotNull(kroniskSoeknadRepository)
-        assertNotNull(gravidKravRepository)
-        assertNotNull(kroniskKravRepository)
-        assertNotNull(bakgrunnsjobbRepository)
-        assertNotNull(bakgrunnsjobbService)
-        assertNotNull(brukernotifikasjonService)
-        assertNotNull(objectMapper)
-        assertNotNull(kroniskKravProcessor)
-        assertNotNull(kroniskKravSlettProcessor)
-        assertNotNull(kroniskKravEndreProcessor)
-        assertNotNull(gravidSoeknadKvitteringSender)
-        assertNotNull(gravidSoeknadKvitteringProcessor)
-        assertNotNull(gravidKravKvitteringSender)
-        assertNotNull(gravidKravKvitteringProcessor)
-        assertNotNull(kroniskSoeknadKvitteringSender)
-        assertNotNull(kroniskSoeknadKvitteringProcessor)
-        assertNotNull(kroniskKravKvitteringSender)
-        assertNotNull(kroniskKravKvitteringProcessor)
-        assertNotNull(brukernotifikasjonProcessorNy)
-        assertNotNull(brukernotifikasjonProcessor)
-        assertNotNull(arbeidsgiverNotifikasjonProcessor)
-        assertNotNull(arbeidsgiverOppdaterNotifikasjonProcessor)
-        assertNotNull(pdlService)
-        assertNotNull(brregService)
-        assertNotNull(beloepBeregning)
+        listOf(
+            gravidSoeknadRepository,
+            kroniskSoeknadRepository,
+            gravidKravRepository,
+            kroniskKravRepository,
+            bakgrunnsjobbRepository,
+            bakgrunnsjobbService,
+            brukernotifikasjonService,
+            objectMapper,
+            kroniskKravProcessor,
+            kroniskKravSlettProcessor,
+            kroniskKravEndreProcessor,
+            gravidSoeknadKvitteringSender,
+            gravidSoeknadKvitteringProcessor,
+            gravidKravKvitteringSender,
+            gravidKravKvitteringProcessor,
+            kroniskSoeknadKvitteringSender,
+            kroniskSoeknadKvitteringProcessor,
+            kroniskKravKvitteringSender,
+            kroniskKravKvitteringProcessor,
+            brukernotifikasjonProcessorNy,
+            brukernotifikasjonProcessor,
+            arbeidsgiverNotifikasjonProcessor,
+            arbeidsgiverOppdaterNotifikasjonProcessor,
+            pdlService,
+            brregService,
+            beloepBeregning
+        ).forEach { it.shouldNotBeNull() }
     }
 
     private fun getTestModules(): Module {

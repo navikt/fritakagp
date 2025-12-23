@@ -4,10 +4,10 @@ import no.nav.helse.KroniskTestData
 import no.nav.helse.fritakagp.domain.FravaerData
 import no.nav.helse.fritakagp.domain.generereKroniskSoeknadBeskrivelse
 import no.nav.helse.toYearMonthString
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class KroniskSoeknadAntallDagerFloatTest {
 
@@ -29,7 +29,7 @@ class KroniskSoeknadAntallDagerFloatTest {
         )
         val result = generereKroniskSoeknadBeskrivelse(KroniskTestData.soeknadKronisk.copy(fravaer = testData), "Test")
 
-        assertContains(result, "10.3")
+        assertTrue(result.contains("10.3"))
         println(result)
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.fritakagp.processing.brukernotifikasjon
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata.NotifikasjonsType.Oppretting
@@ -8,12 +9,12 @@ import no.nav.tms.varsel.action.OpprettVarsel
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.action.Varseltype
 import no.nav.tms.varsel.builder.BuilderEnvironment
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class BrukernotifikasjonServiceTest {
     val objectMapper = customObjectMapper()
@@ -46,9 +47,8 @@ class BrukernotifikasjonServiceTest {
         val varselId = UUID.randomUUID().toString()
         val opprettVarselJson = service.opprettVarsel(varselId, testJob)
 
-        val opprettVarsel = objectMapper.readValue(opprettVarselJson, OpprettVarsel::class.java)
+        val opprettVarsel = objectMapper.readValue(opprettVarselJson, OpprettVarsel::class.java).shouldNotBeNull()
 
-        assertNotNull(opprettVarsel, "Varsel skal ikke være null")
         assertEquals(Varseltype.Beskjed, opprettVarsel.type, "Type skal stemme")
         assertEquals(varselId, opprettVarsel.varselId, "Varsel ID skal stemme")
         assertEquals(jobData.identitetsnummer, opprettVarsel.ident, "Identitetsnummer skal stemme")
