@@ -8,7 +8,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 50M
     nais.io/read-only-file-system: "false"
-    texas.nais.io/enabled: "true"
 
 spec:
   image: {{ image }}
