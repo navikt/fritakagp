@@ -1,6 +1,7 @@
 context: dev
 bucketName: helse-arbeidsgiver-fritakagb-bucket
 dbTier: db-f1-micro
+dbType: POSTGRES_14
 ingresses:
   - https://fritakagp-api.intern.dev.nav.no
 accessOutbound:
