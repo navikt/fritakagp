@@ -1,6 +1,7 @@
 context: prod
 bucketName: helse-arbeidsgiver-fritakagb-bucket-prod
 dbTier: db-custom-1-3840
+dbType: POSTGRES_14
 ingresses:
   - https://fritakagp-api.intern.nav.no
 accessOutbound:
