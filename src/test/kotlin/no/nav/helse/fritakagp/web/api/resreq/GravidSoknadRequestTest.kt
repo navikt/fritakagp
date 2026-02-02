@@ -15,7 +15,7 @@ class GravidSoknadRequestTest {
     val sendtAvNavn = "Ola M Avsender"
 
     @Test
-    internal fun `Gyldig FNR er påkrevd`() {
+    fun `Gyldig FNR er påkrevd`() {
         validationShouldFailFor(GravidSoknadRequest::identitetsnummer) {
             GravidTestData.fullValidSoeknadRequest.copy(identitetsnummer = "01020312345").validate(true)
         }
@@ -29,7 +29,7 @@ class GravidSoknadRequestTest {
     }
 
     @Test
-    internal fun `Gyldig OrgNr er påkrevd dersom det er oppgitt`() {
+    fun `Gyldig OrgNr er påkrevd dersom det er oppgitt`() {
         validationShouldFailFor(GravidSoknadRequest::virksomhetsnummer) {
             GravidTestData.fullValidSoeknadRequest.copy(virksomhetsnummer = "098765432").validate(true)
         }
@@ -66,20 +66,20 @@ class GravidSoknadRequestTest {
     }
 
     @Test
-    internal fun `Bekreftelse av egenerklæring er påkrevd`() {
+    fun `Bekreftelse av egenerklæring er påkrevd`() {
         validationShouldFailFor(GravidSoknadRequest::bekreftet) {
             GravidTestData.fullValidSoeknadRequest.copy(bekreftet = false).validate(true)
         }
     }
 
     @Test
-    internal fun `mapping til domenemodell tar med harVedleggflagg`() {
+    fun `mapping til domenemodell tar med harVedleggflagg`() {
         Assertions.assertThat(GravidTestData.gravidSoknadMedFil.toDomain(sendtAv, sendtAvNavn, navn).harVedlegg).isTrue()
         Assertions.assertThat(GravidTestData.fullValidSoeknadRequest.toDomain(sendtAv, sendtAvNavn, navn).harVedlegg).isFalse()
     }
 
     @Test
-    internal fun `ved tomt vedlegg så skal validering feile`() {
+    fun `ved tomt vedlegg så skal validering feile`() {
         validationShouldFailNTimesFor((GravidSoknadRequest::dokumentasjon), 2) {
             GravidTestData.fullValidSoeknadRequest.copy(dokumentasjon = " ").validate(true)
         }

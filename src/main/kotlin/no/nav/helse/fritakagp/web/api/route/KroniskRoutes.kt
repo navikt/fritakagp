@@ -16,7 +16,7 @@ import no.nav.helse.fritakagp.KroniskSoeknadMetrics
 import no.nav.helse.fritakagp.Log
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
-import no.nav.helse.fritakagp.domain.BeloepBeregning
+import no.nav.helse.fritakagp.domain.BeloepService
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.PdlService
@@ -48,7 +48,7 @@ fun Route.kroniskRoutes(
     authService: AuthService,
     brregService: IBrregService,
     pdlService: PdlService,
-    belopBeregning: BeloepBeregning,
+    beloepService: BeloepService,
     aaregClient: AaregClient,
     arbeidsgiverNotifikasjonKlient: ArbeidsgiverNotifikasjonKlient,
     kroniskSoeknadRepo: KroniskSoeknadRepository,
@@ -215,10 +215,15 @@ fun Route.kroniskRoutes(
                     val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
                     val navn = pdlService.hentNavn(request.identitetsnummer)
 
-                    val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-
                     logger.info("Hent grunnbeløp.")
-                    belopBeregning.beregnBeloepKronisk(krav)
+                    val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
+
+                    val krav = request.tilKrav(
+                        sendtAv = innloggetFnr,
+                        sendtAvNavn = sendtAvNavn,
+                        navn = navn,
+                        perioder = perioder
+                    )
 
                     logger.info("Legg til kronisk krav i database.")
                     kroniskKravRepo.insert(krav)
@@ -281,10 +286,15 @@ fun Route.kroniskRoutes(
                         return@patch call.respond(HttpStatusCode.Forbidden)
                     }
 
-                    val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-
                     logger.info("Hent grunnbeløp.")
-                    belopBeregning.beregnBeloepKronisk(kravTilOppdatering)
+                    val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
+
+                    val kravTilOppdatering = request.tilKrav(
+                        sendtAv = innloggetFnr,
+                        sendtAvNavn = sendtAvNavn,
+                        navn = navn,
+                        perioder = perioder
+                    )
 
                     if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                         logger.warn("Nytt kronisk krav er duplikat.")

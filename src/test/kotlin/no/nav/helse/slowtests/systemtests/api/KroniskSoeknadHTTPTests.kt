@@ -21,7 +21,7 @@ class KroniskSoeknadHTTPTests : SystemTestBase() {
     private val soeknadKroniskUrl = "/fritak-agp-api/api/v1/kronisk/soeknad"
 
     @Test
-    internal fun `Returnerer søknaden når korrekt bruker er innlogget, 404 når ikke`() = suspendableTest {
+    fun `Returnerer søknaden når korrekt bruker er innlogget, 404 når ikke`() = suspendableTest {
         val repo by inject<KroniskSoeknadRepository>()
 
         repo.insert(KroniskTestData.soeknadKronisk)
