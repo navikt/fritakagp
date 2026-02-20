@@ -15,9 +15,6 @@ import no.nav.helse.fritakagp.web.auth.AuthClient
 import no.nav.helse.fritakagp.web.auth.IdentityProvider
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
-import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.AltinnMottaker
-import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
-import no.nav.helsearbeidsgiver.arbeidsgivernotifkasjon.graphql.generated.enums.Sendevindu
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.pdl.Behandlingsgrunnlag
 import no.nav.helsearbeidsgiver.pdl.PdlClient
@@ -66,12 +63,6 @@ fun Module.externalSystemClients(env: Env) {
         val azureAuthClient: AuthClient = get()
         OppgaveKlientImpl(env.oppgavebehandlingUrl, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeOppgave), get())
     } bind OppgaveKlient::class
-
-    single {
-        val azureAuthClient: AuthClient = get()
-        val altinnMottaker = AltinnMottaker.Altinn2("4936", "1")
-        ArbeidsgiverNotifikasjonKlient(env.arbeidsgiverNotifikasjonUrl, altinnMottaker, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeArbeidsgivernotifikasjon), Sendevindu.NKS_AAPNINGSTID)
-    }
 
     single {
         ClamavVirusScannerImp(
