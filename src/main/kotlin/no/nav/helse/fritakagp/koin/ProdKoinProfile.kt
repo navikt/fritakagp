@@ -49,6 +49,11 @@ import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitterin
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
+import no.nav.helse.fritakagp.web.auth.AuthClient
+import no.nav.helse.fritakagp.web.auth.IdentityProvider
+import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.AltinnMottaker
+import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
+import no.nav.helsearbeidsgiver.arbeidsgivernotifkasjon.graphql.generated.enums.Sendevindu
 import no.nav.helsearbeidsgiver.brreg.BrregClient
 import no.nav.helsearbeidsgiver.utils.cache.LocalCache
 import no.nav.tms.varsel.action.Sensitivitet
@@ -131,6 +136,11 @@ fun prodConfig(env: Env.Prod): Module = module {
             password = env.altinnMeldingPassword
         )
     } bind KroniskKravKvitteringSender::class
+    single {
+        val azureAuthClient: AuthClient = get()
+        val altinnMottaker = AltinnMottaker.Altinn2("4936", "1")
+        ArbeidsgiverNotifikasjonKlient(env.arbeidsgiverNotifikasjonUrl, altinnMottaker, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeArbeidsgivernotifikasjon), Sendevindu.NKS_AAPNINGSTID)
+    }
     single { KroniskKravKvitteringProcessor(kroniskKravKvitteringSender = get(), db = get(), om = get()) }
     single { BrukernotifikasjonService(om = get(), sensitivitetNivaa = Sensitivitet.High, frontendAppBaseUrl = env.frontendUrl) }
     single { BrukernotifikasjonProcessorNy(brukerNotifikasjonProducerFactory = get(), brukernotifikasjonService = get()) }

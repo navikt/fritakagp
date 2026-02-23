@@ -15,7 +15,6 @@ import no.nav.helse.fritakagp.web.auth.AuthClient
 import no.nav.helse.fritakagp.web.auth.IdentityProvider
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
-import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.pdl.Behandlingsgrunnlag
 import no.nav.helsearbeidsgiver.pdl.PdlClient
@@ -64,11 +63,6 @@ fun Module.externalSystemClients(env: Env) {
         val azureAuthClient: AuthClient = get()
         OppgaveKlientImpl(env.oppgavebehandlingUrl, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeOppgave), get())
     } bind OppgaveKlient::class
-
-    single {
-        val azureAuthClient: AuthClient = get()
-        ArbeidsgiverNotifikasjonKlient(env.arbeidsgiverNotifikasjonUrl, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeArbeidsgivernotifikasjon))
-    }
 
     single {
         ClamavVirusScannerImp(
