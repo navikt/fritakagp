@@ -15,6 +15,7 @@ import no.nav.helse.fritakagp.web.auth.AuthClient
 import no.nav.helse.fritakagp.web.auth.IdentityProvider
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
+import no.nav.helsearbeidsgiver.altinn.Altinn3Ressurs
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.pdl.Behandlingsgrunnlag
 import no.nav.helsearbeidsgiver.pdl.PdlClient
@@ -29,6 +30,7 @@ fun Module.externalSystemClients(env: Env) {
         Altinn3OBOClient(
             baseUrl = env.altinnTilgangerBaseUrl,
             serviceCode = env.altinnServiceOwnerServiceId,
+            ressurs = Altinn3Ressurs.FRITAKAGP,
             cacheConfig = LocalCache.Config(60.minutes, 250)
         )
     } bind Altinn3OBOClient::class

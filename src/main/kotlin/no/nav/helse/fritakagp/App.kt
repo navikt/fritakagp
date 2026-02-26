@@ -29,6 +29,7 @@ import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
 import no.nav.helse.fritakagp.web.auth.localAuthTokenDispenser
 import no.nav.helse.fritakagp.web.fritakModule
 import no.nav.helse.fritakagp.web.nais.nais
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import org.flywaydb.core.Flyway
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -130,7 +131,10 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
 fun main() {
     val logger = LoggerFactory.getLogger("fritakagp")
     Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
-        logger.error("uncaught exception in thread ${thread.name}: ${err.message}", err)
+        "Uncaught exception in thread ${thread.name}: ${err.message}".also {
+            logger.error(it)
+            sikkerLogger().error(it, err)
+        }
     }
 
     val application = FritakAgpApplication()
