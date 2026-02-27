@@ -15,7 +15,7 @@ import no.nav.helse.fritakagp.db.PostgresGravidSoeknadRepository
 import no.nav.helse.fritakagp.db.PostgresKroniskKravRepository
 import no.nav.helse.fritakagp.db.PostgresKroniskSoeknadRepository
 import no.nav.helse.fritakagp.db.createHikariConfig
-import no.nav.helse.fritakagp.domain.BeloepBeregning
+import no.nav.helse.fritakagp.domain.BeloepService
 import no.nav.helse.fritakagp.integration.BrregService
 import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.PdlService
@@ -158,5 +158,5 @@ fun prodConfig(env: Env.Prod): Module = module {
         )
     } bind IBrregService::class
 
-    single { BeloepBeregning(grunnbeloepClient = get()) }
+    single { BeloepService(grunnbeloepClient = get()) }
 }

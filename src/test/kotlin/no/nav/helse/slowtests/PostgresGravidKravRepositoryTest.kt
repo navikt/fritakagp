@@ -18,7 +18,7 @@ class PostgresGravidKravRepositoryTest : SystemTestBase() {
     val testKrav = GravidTestData.gravidKrav
 
     @BeforeEach
-    internal fun setUp() {
+    fun setUp() {
         val ds = HikariDataSource(createTestHikariConfig())
 
         repo = PostgresGravidKravRepository(ds, get())
@@ -26,7 +26,7 @@ class PostgresGravidKravRepositoryTest : SystemTestBase() {
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun tearDown() {
         repo.delete(testKrav.id)
     }
 

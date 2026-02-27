@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class BrukernotifikasjonProcessorNyTest {
+class BrukernotifikasjonProcessorNyTest {
 
     val ksRepo = mockk<KroniskSoeknadRepository>(relaxed = true)
     val kkRepo = mockk<KroniskKravRepository>(relaxed = true)

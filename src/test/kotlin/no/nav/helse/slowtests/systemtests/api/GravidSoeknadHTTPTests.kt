@@ -18,7 +18,7 @@ class GravidSoeknadHTTPTests : SystemTestBase() {
     private val soeknadGravidUrl = "/fritak-agp-api/api/v1/gravid/soeknad"
 
     @Test
-    internal fun `Returnerer søknaden når korrekt bruker er innlogget, 404 når ikke`() = suspendableTest {
+    fun `Returnerer søknaden når korrekt bruker er innlogget, 404 når ikke`() = suspendableTest {
         val repo by inject<GravidSoeknadRepository>()
 
         repo.insert(GravidTestData.soeknadGravid)

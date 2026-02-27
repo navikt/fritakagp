@@ -18,7 +18,7 @@ class PostgresKroniskSoeknadRepositoryTest : SystemTestBase() {
     val testSoeknad = KroniskTestData.soeknadKronisk
 
     @BeforeEach
-    internal fun setUp() {
+    fun setUp() {
         val ds = HikariDataSource(createTestHikariConfig())
 
         repo = PostgresKroniskSoeknadRepository(ds, get())
@@ -26,7 +26,7 @@ class PostgresKroniskSoeknadRepositoryTest : SystemTestBase() {
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun tearDown() {
         repo.delete(testSoeknad.id)
     }
 

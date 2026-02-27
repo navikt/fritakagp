@@ -15,7 +15,7 @@ class SlettGravidKravHTTPTests : SystemTestBase() {
     private val kravGravidUrl = "/fritak-agp-api/api/v1/gravid/krav"
 
     @Test
-    internal fun `Skal returnere 200 OK når vi sletter med korrekt bruker innlogget`() = suspendableTest {
+    fun `Skal returnere 200 OK når vi sletter med korrekt bruker innlogget`() = suspendableTest {
         val repo by inject<GravidKravRepository>()
 
         repo.insert(GravidTestData.gravidKrav)
@@ -30,7 +30,7 @@ class SlettGravidKravHTTPTests : SystemTestBase() {
     }
 
     @Test
-    internal fun `Skal returnere 404 når kravet ikke finnes`() = suspendableTest {
+    fun `Skal returnere 404 når kravet ikke finnes`() = suspendableTest {
         val repo by inject<GravidKravRepository>()
 
         repo.insert(GravidTestData.gravidKrav)
