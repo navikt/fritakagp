@@ -12,6 +12,7 @@ import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT_MED_KL
 import no.nav.helse.fritakagp.domain.sladdFnr
 import no.nav.helse.fritakagp.domain.tilProsent
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import kotlin.math.roundToInt
 
 interface KroniskKravKvitteringSender {
@@ -48,6 +49,7 @@ class KroniskKravAltinnKvitteringSender(
                 throw RuntimeException("Fikk uventet statuskode fra Altinn: ${receiptExternal.receiptStatusCode} ${receiptExternal.receiptText}")
             }
         } catch (e: ICorrespondenceAgencyExternalBasicInsertCorrespondenceBasicV2AltinnFaultFaultFaultMessage) {
+            sikkerLogger().error("Feil ved altinn-kvittering for kronisk krav ${kvittering.id}", e)
             throw RuntimeException("Feil fra altinn: ${e.faultInfo}", e)
         }
     }
