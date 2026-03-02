@@ -12,6 +12,7 @@ import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT_MED_KL
 import no.nav.helse.fritakagp.domain.sladdFnr
 import no.nav.helse.fritakagp.domain.tilProsent
+import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import kotlin.math.roundToInt
 
@@ -38,6 +39,7 @@ class KroniskKravAltinnKvitteringSender(
 
     override fun send(kvittering: KroniskKrav) {
         try {
+            logger().info("forsøker sende altinn-kvittering for kronisk krav ${kvittering.id} med tjenestekode $altinnTjenesteKode")
             val receiptExternal = iCorrespondenceAgencyExternalBasic.insertCorrespondenceBasicV2(
                 username,
                 password,
