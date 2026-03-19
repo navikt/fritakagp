@@ -103,7 +103,7 @@ fun preprodConfig(env: Env.Preprod): Module = module {
         )
     } bind GravidSoeknadKvitteringSender::class
 
-    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get()) }
+    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogProducer = get()) }
 
     single {
         GravidKravAltinnKvitteringSender(

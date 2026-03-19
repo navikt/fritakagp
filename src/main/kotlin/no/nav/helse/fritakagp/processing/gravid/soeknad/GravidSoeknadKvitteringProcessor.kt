@@ -5,12 +5,15 @@ import no.nav.hag.utils.bakgrunnsjobb.Bakgrunnsjobb
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.helse.fritakagp.GravidSoeknadMetrics
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
+import no.nav.helse.fritakagp.kafka.KafkaDialogProducer
 import java.util.UUID
+import kotlin.jvm.java
 
 class GravidSoeknadKvitteringProcessor(
     private val gravidSoeknadKvitteringSender: GravidSoeknadKvitteringSender,
     private val db: GravidSoeknadRepository,
-    private val om: ObjectMapper
+    private val om: ObjectMapper,
+    private val dialogProducer: KafkaDialogProducer
 ) : BakgrunnsjobbProsesserer {
 
     companion object {
@@ -26,6 +29,14 @@ class GravidSoeknadKvitteringProcessor(
 
         gravidSoeknadKvitteringSender.send(soeknad)
         GravidSoeknadMetrics.tellKvitteringSendt()
+        dialogProducer.sendMessage(
+            UUID.randomUUID().toString(),
+            """{
+            "orgnr": "214398982",
+            "sykemeldt": "Ola Nordmann",
+            "type": "GravidSoeknadMelding"
+        }"""
+        )
     }
 
     data class Jobbdata(

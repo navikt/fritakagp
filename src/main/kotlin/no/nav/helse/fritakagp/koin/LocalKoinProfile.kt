@@ -81,7 +81,7 @@ fun localConfig(env: Env.Local): Module = module {
     single { KroniskKravEndreProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
 
     single { GravidSoeknadKvitteringSenderDummy() } bind GravidSoeknadKvitteringSender::class
-    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get()) }
+    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogProducer = get()) }
     single { GravidKravKvitteringSenderDummy() } bind GravidKravKvitteringSender::class
     single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get()) }
 
