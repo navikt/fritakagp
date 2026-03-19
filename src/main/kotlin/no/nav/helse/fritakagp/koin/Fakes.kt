@@ -19,6 +19,7 @@ import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
 import no.nav.helse.fritakagp.integration.kafka.MockBrukernotifikasjonBeskjedSender
 import no.nav.helse.fritakagp.integration.virusscan.MockVirusScanner
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
+import no.nav.helse.fritakagp.kafka.MockDialogProducer
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOppdaterNotifikasjonProcessor
 import no.nav.helse.fritakagp.web.auth.AuthClient
 import no.nav.helse.fritakagp.web.auth.IdentityProvider
@@ -134,6 +135,7 @@ fun Module.mockExternalDependencies() {
     single { MockBucketStorage() } bind BucketStorage::class
 
     single { mockk<ArbeidsgiverOppdaterNotifikasjonProcessor>(relaxed = true) }
+    single { MockDialogProducer() }
 }
 
 fun String.loadFromResources(): String {
