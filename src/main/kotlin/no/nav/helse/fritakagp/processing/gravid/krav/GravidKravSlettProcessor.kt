@@ -25,6 +25,7 @@ import no.nav.helsearbeidsgiver.dokarkiv.domene.DokumentVariant
 import no.nav.helsearbeidsgiver.dokarkiv.domene.GjelderPerson
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Kanal
 import no.nav.helsearbeidsgiver.utils.log.logger
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
@@ -68,6 +69,8 @@ class GravidKravSlettProcessor(
                     type = BrukernotifikasjonProcessorNy.JOB_TYPE
                 )
             )
+        } catch (e: Throwable) {
+            sikkerLogger().error("Feilet i å slette krav ${krav.id}. JournalpostID: ${krav.journalpostId} OppgaveID: ${krav.oppgaveId}", e)
         } finally {
             updateAndLogOnFailure(krav)
         }

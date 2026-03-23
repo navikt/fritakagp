@@ -5,10 +5,8 @@ import no.nav.hag.utils.bakgrunnsjobb.Bakgrunnsjobb
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.helse.fritakagp.GravidSoeknadMetrics
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
-import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helse.fritakagp.kafka.GravidSoeknadMelding
-import no.nav.helsearbeidsgiver.utils.json.toJson
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 import kotlin.jvm.java
@@ -36,7 +34,7 @@ class GravidSoeknadKvitteringProcessor(
 
         val gravidSoeknadMelding = GravidSoeknadMelding(soeknad.id, Orgnr(soeknad.virksomhetsnummer), soeknad.navn, soeknad.identitetsnummer)
 
-        dialogProducer.sendMessage(soeknad.id.toString(), gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
+        //   dialogProducer.sendMessage(soeknad.id.toString(), gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
     }
 
     data class Jobbdata(
