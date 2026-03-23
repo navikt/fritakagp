@@ -91,6 +91,7 @@ class GravidKravProcessor(
         } catch (e: Exception) {
             logger.error("Feilet i å prosessere krav ${krav.id}. JournalpostID: ${krav.journalpostId} OppgaveID: ${krav.oppgaveId}", e)
             sikkerLogger().error("Feilet i å prosessere krav ${krav.id}. JournalpostID: ${krav.journalpostId} OppgaveID: ${krav.oppgaveId}", e)
+            throw e
         } finally {
             updateAndLogOnFailure(krav)
         }
