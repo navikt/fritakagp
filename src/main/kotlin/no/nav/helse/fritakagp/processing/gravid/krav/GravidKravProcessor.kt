@@ -27,6 +27,7 @@ import no.nav.helsearbeidsgiver.dokarkiv.domene.DokumentVariant
 import no.nav.helsearbeidsgiver.dokarkiv.domene.GjelderPerson
 import no.nav.helsearbeidsgiver.dokarkiv.domene.Kanal
 import no.nav.helsearbeidsgiver.utils.log.logger
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
@@ -87,6 +88,9 @@ class GravidKravProcessor(
                     type = BrukernotifikasjonProcessorNy.JOB_TYPE
                 )
             )
+        } catch (e: Exception) {
+            logger.error("Feilet i å prosessere krav ${krav.id}. JournalpostID: ${krav.journalpostId} OppgaveID: ${krav.oppgaveId}", e)
+            sikkerLogger().error("Feilet i å prosessere krav ${krav.id}. JournalpostID: ${krav.journalpostId} OppgaveID: ${krav.oppgaveId}", e)
         } finally {
             updateAndLogOnFailure(krav)
         }
