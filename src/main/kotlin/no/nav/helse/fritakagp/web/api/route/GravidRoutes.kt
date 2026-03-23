@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.fritakagp.GravidKravMetrics
 import no.nav.helse.fritakagp.GravidSoeknadMetrics
+import no.nav.helse.fritakagp.Log.kravId
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepBeregning
@@ -242,37 +243,42 @@ fun Route.gravidRoutes(
             }
 
             delete("/{id}") {
-                val kravId = requestHandler.lesParameterId(this)
+                try {
+                    val kravId = requestHandler.lesParameterId(this)
 
-                val innloggetFnr = hentFnrFraLoginToken()
-                val slettetAv = pdlService.hentNavn(innloggetFnr)
+                    val innloggetFnr = hentFnrFraLoginToken()
+                    val slettetAv = pdlService.hentNavn(innloggetFnr)
 
-                val krav = gravidKravRepo.getById(kravId)
-                    ?: return@delete call.respond(HttpStatusCode.NotFound)
+                    val krav = gravidKravRepo.getById(kravId)
+                        ?: return@delete call.respond(HttpStatusCode.NotFound)
 
-                authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+                    authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
 
-                krav.arbeidsgiverSakId?.let {
-                    try {
-                        runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
-                    } catch (_: SakEllerOppgaveFinnesIkkeException) {
-                        logger.warn("DELETE | Klarte ikke slette sak med ID ${krav.arbeidsgiverSakId} fordi saken finnes ikke.")
+                    krav.arbeidsgiverSakId?.let {
+                        try {
+                            runBlocking { arbeidsgiverNotifikasjonKlient.hardDeleteSak(it) }
+                        } catch (_: SakEllerOppgaveFinnesIkkeException) {
+                            logger.warn("DELETE | Klarte ikke slette sak med ID ${krav.arbeidsgiverSakId} fordi saken finnes ikke.")
+                        }
                     }
+                    krav.status = KravStatus.SLETTET
+                    krav.slettetAv = innloggetFnr
+                    krav.slettetAvNavn = slettetAv
+                    krav.endretDato = LocalDateTime.now()
+                    gravidKravRepo.update(krav)
+                    bakgunnsjobbService.opprettJobb<GravidKravSlettProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id))
+                    )
+                    bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
+                        maksAntallForsoek = 10,
+                        data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
+                    )
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    logger.error("Feilet i å slette krav", e)
+                    sikkerLogger.error("Feilet i å slette krav", e)
                 }
-                krav.status = KravStatus.SLETTET
-                krav.slettetAv = innloggetFnr
-                krav.slettetAvNavn = slettetAv
-                krav.endretDato = LocalDateTime.now()
-                gravidKravRepo.update(krav)
-                bakgunnsjobbService.opprettJobb<GravidKravSlettProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id))
-                )
-                bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
-                    maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
-                )
-                call.respond(HttpStatusCode.OK)
             }
         }
     }
