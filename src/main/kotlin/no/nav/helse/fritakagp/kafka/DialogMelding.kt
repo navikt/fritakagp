@@ -19,5 +19,5 @@ data class GravidSoeknadMelding(
     val id: UUID,
     val orgnr: Orgnr,
     val navn: String?,
-    val fnr: String
+    val foedselsdato: String
 ) : DialogMelding()
