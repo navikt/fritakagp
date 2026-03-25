@@ -34,7 +34,7 @@ class GravidSoeknadKvitteringProcessor(
         gravidSoeknadKvitteringSender.send(soeknad)
         GravidSoeknadMetrics.tellKvitteringSendt()
 
-        val gravidSoeknadMelding = GravidSoeknadMelding(soeknad.id, Orgnr(soeknad.virksomhetsnummer), soeknad.navn, foedselsdatoFraFnr(soeknad.identitetsnummer))
+        val gravidSoeknadMelding = GravidSoeknadMelding(soeknad.id, Orgnr(soeknad.virksomhetsnummer), soeknad.navn, soeknad.identitetsnummer)
 
         dialogProducer.sendMessage(soeknad.id.toString(), gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
     }
@@ -42,8 +42,4 @@ class GravidSoeknadKvitteringProcessor(
     data class Jobbdata(
         val soeknadId: UUID
     )
-}
-
-fun foedselsdatoFraFnr(fnr: String): String {
-    return fnr.take(6)
 }
