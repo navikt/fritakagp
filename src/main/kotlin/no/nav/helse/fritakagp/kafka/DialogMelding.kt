@@ -21,3 +21,19 @@ data class GravidSoeknadMelding(
     val navn: String?,
     val fnr: String
 ) : DialogMelding()
+
+@Serializable
+@SerialName("GravidKravMelding")
+data class GravidKravMelding(
+    val id: UUID,
+    val orgnr: Orgnr,
+    val navn: String,
+    val foedselsdato: String,
+    val status: FritakKravStatus
+) : DialogMelding()
+
+enum class FritakKravStatus {
+    OPPRETTET,
+    ENDER,
+    SLETTET
+}

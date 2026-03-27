@@ -31,12 +31,10 @@ class GravidSoeknadKvitteringProcessor(
         val soeknad = db.getById(kvitteringJobbData.soeknadId)
             ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
 
-        gravidSoeknadKvitteringSender.send(soeknad)
-        GravidSoeknadMetrics.tellKvitteringSendt()
-
         val gravidSoeknadMelding = GravidSoeknadMelding(soeknad.id, Orgnr(soeknad.virksomhetsnummer), soeknad.navn, soeknad.identitetsnummer)
-
         dialogProducer.sendMessage(soeknad.id.toString(), gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
+
+        GravidSoeknadMetrics.tellKvitteringSendt()
     }
 
     data class Jobbdata(
