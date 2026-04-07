@@ -10,6 +10,7 @@ import no.nav.helse.GravidTestData
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.KravStatus
+import no.nav.helse.mockArbeidsgiverperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.koin.test.inject
@@ -19,7 +20,7 @@ class OppdaterGravidKravHTTPTests : SystemTestBase() {
     private val kravGravidUrl = "/fritak-agp-api/api/v1/gravid/krav"
 
     @Test
-    internal fun `Returnerer endret krav når korrekt bruker er innlogget`() = suspendableTest {
+    fun `Returnerer endret krav når korrekt bruker er innlogget`() = suspendableTest {
         val repo by inject<GravidKravRepository>()
 
         repo.insert(GravidTestData.gravidKrav)
@@ -40,10 +41,10 @@ class OppdaterGravidKravHTTPTests : SystemTestBase() {
     }
 
     @Test
-    internal fun `Oppdaterer ikke når ny request er duplikat`() = suspendableTest {
+    fun `Oppdaterer ikke når ny request er duplikat`() = suspendableTest {
         val repo by inject<GravidKravRepository>()
 
-        val krav = repo.insert(GravidTestData.gravidKravRequestValid.toDomain("hohoho", "god", "jul"))
+        val krav = repo.insert(GravidTestData.gravidKravRequestValid.tilKrav("hohoho", "god", "jul", listOf(mockArbeidsgiverperiode())))
 
         val response = httpClient.patch {
             appUrl("$kravGravidUrl/${krav.id}")
@@ -55,7 +56,7 @@ class OppdaterGravidKravHTTPTests : SystemTestBase() {
     }
 
     @Test
-    internal fun `Skal returnere 404 når kravet ikke finnes`() = suspendableTest {
+    fun `Skal returnere 404 når kravet ikke finnes`() = suspendableTest {
         val response =
             httpClient.patch {
                 appUrl("$kravGravidUrl/${UUID.randomUUID()}")

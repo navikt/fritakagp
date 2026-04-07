@@ -1,8 +1,8 @@
 package no.nav.helse.fritakagp.web.api.resreq.validation
 
-import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.FravaerData
 import no.nav.helse.fritakagp.domain.GodkjenteFiletyper
+import no.nav.helse.fritakagp.web.api.resreq.ArbeidsgiverperiodeRequest
 import no.nav.helsearbeidsgiver.utils.pipe.orDefault
 import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -28,9 +28,9 @@ fun <E> Validator<E>.Property<String?>.isValidOrganisasjonsnummer() =
 
 class RefusjonsdagerKanIkkeOverstigePeriodelengdenConstraint : CustomConstraint
 
-fun <E> Validator<E>.Property<Int?>.refusjonsDagerIkkeOverstigerPeriodelengde(ap: Arbeidsgiverperiode) =
+fun <E> Validator<E>.Property<Int?>.refusjonsDagerIkkeOverstigerPeriodelengde(agp: ArbeidsgiverperiodeRequest) =
     this.validate(RefusjonsdagerKanIkkeOverstigePeriodelengdenConstraint()) {
-        return@validate ChronoUnit.DAYS.between(ap.fom, ap.tom.plusDays(1)) >= it!!
+        return@validate ChronoUnit.DAYS.between(agp.fom, agp.tom.plusDays(1)) >= it!!
     }
 
 class MåVæreVirksomhetContraint : CustomConstraint
@@ -41,7 +41,7 @@ fun <E> Validator<E>.Property<String?>.isVirksomhet(erVirksomhet: Boolean) =
 class FraDatoKanIkkeKommeEtterTomDato : CustomConstraint
 
 fun <E> Validator<E>.Property<LocalDate?>.datoerHarRiktigRekkefolge(tom: LocalDate) =
-    this.validate(FraDatoKanIkkeKommeEtterTomDato()) { fom -> fom!!.isEqual(tom) || fom!!.isBefore(tom) }
+    this.validate(FraDatoKanIkkeKommeEtterTomDato()) { fom -> fom!!.isEqual(tom) || fom.isBefore(tom) }
 
 class MaanedsInntektErStorreEnTiMil : CustomConstraint
 

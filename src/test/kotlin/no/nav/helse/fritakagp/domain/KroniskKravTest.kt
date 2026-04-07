@@ -1,10 +1,10 @@
 package no.nav.helse.fritakagp.domain
 
 import no.nav.helse.KroniskTestData
+import no.nav.helsearbeidsgiver.utils.test.date.januar
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class KroniskKravTest {
 
@@ -30,7 +30,15 @@ class KroniskKravTest {
 
     @Test
     fun `Duplikatsjekk - forskjellige arbeidsgiverperioder gir ingen duplikat-treff`() {
-        val agp1 = Arbeidsgiverperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 16), 10, 1000.0, 1.0)
+        val agp1 = Arbeidsgiverperiode(
+            fom = 1.januar(2020),
+            tom = 16.januar(2020),
+            antallDagerMedRefusjon = 10,
+            månedsinntekt = 1000.0,
+            gradering = 1.0,
+            dagsats = 111.0,
+            belop = 1110.0
+        )
         val endretFraDato = agp1.copy(fom = agp1.fom.plusDays(1))
         val endretTilDato = agp1.copy(tom = agp1.tom.plusDays(1))
         val endretRefusjon = agp1.copy(antallDagerMedRefusjon = 11)

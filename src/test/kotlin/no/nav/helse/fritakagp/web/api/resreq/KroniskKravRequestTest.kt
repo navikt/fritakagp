@@ -2,9 +2,9 @@ package no.nav.helse.fritakagp.web.api.resreq
 
 import no.nav.helse.AaregTestData
 import no.nav.helse.KroniskTestData
+import no.nav.helsearbeidsgiver.utils.test.date.januar
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class KroniskKravRequestTest {
     val navn = "Personliga Person"
@@ -12,21 +12,21 @@ class KroniskKravRequestTest {
     val sendtAvNavn = "Ola M Avsender"
 
     @Test
-    internal fun `Antall dager kan ikke være mer enn dager i året`() {
+    fun `Antall dager kan ikke være mer enn dager i året`() {
         validationShouldFailFor(KroniskKravRequest::antallDager) {
             KroniskTestData.kroniskKravRequestValid.copy(antallDager = 367).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
-    internal fun `Antall dager kan ikke være negativt`() {
+    fun `Antall dager kan ikke være negativt`() {
         validationShouldFailFor(KroniskKravRequest::antallDager) {
             KroniskTestData.kroniskKravRequestValid.copy(antallDager = -1).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
-    internal fun `Antall dager må være 1-366`() {
+    fun `Antall dager må være 1-366`() {
         validationShouldFailFor(KroniskKravRequest::antallDager) {
             KroniskTestData.kroniskKravRequestValid.copy(antallDager = 0).validate(AaregTestData.evigAnsettelsesperiode)
         }
@@ -36,33 +36,33 @@ class KroniskKravRequestTest {
     }
 
     @Test
-    internal fun `Gyldig FNR er påkrevd`() {
+    fun `Gyldig FNR er påkrevd`() {
         validationShouldFailFor(KroniskKravRequest::identitetsnummer) {
             KroniskTestData.kroniskKravRequestValid.copy(identitetsnummer = "01020312345").validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
-    internal fun `Gyldig OrgNr er påkrevd dersom det er oppgitt`() {
+    fun `Gyldig OrgNr er påkrevd dersom det er oppgitt`() {
         validationShouldFailFor(KroniskKravRequest::virksomhetsnummer) {
             KroniskTestData.kroniskKravRequestValid.copy(virksomhetsnummer = "098765432").validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
-    internal fun `Bekreftelse av egenerklæring er påkrevd`() {
+    fun `Bekreftelse av egenerklæring er påkrevd`() {
         validationShouldFailFor(KroniskKravRequest::bekreftet) {
             KroniskTestData.kroniskKravRequestValid.copy(bekreftet = false).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
-    internal fun `mapping til domenemodell setter harVedlegg til default false - dokumentasjon er fjernet fra krav`() {
-        Assertions.assertThat(KroniskTestData.kroniskKravRequestValid.toDomain(sendtAv, sendtAvNavn, navn).harVedlegg).isFalse
+    fun `mapping til domenemodell setter harVedlegg til default false - dokumentasjon er fjernet fra krav`() {
+        Assertions.assertThat(KroniskTestData.kroniskKravRequestValid.tilKrav(sendtAv, sendtAvNavn, navn, emptyList()).harVedlegg).isFalse
     }
 
     @Test
-    internal fun `Antall refusjonsdager kan ikke overstige periodelengden`() {
+    fun `Antall refusjonsdager kan ikke overstige periodelengden`() {
         validationShouldFailFor("perioder[0].antallDagerMedRefusjon") {
             KroniskTestData.kroniskKravRequestValid.copy(
                 perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(antallDagerMedRefusjon = 21))
@@ -71,13 +71,13 @@ class KroniskKravRequestTest {
     }
 
     @Test
-    internal fun `Til dato kan ikke komme før fra dato`() {
+    fun `Til dato kan ikke komme før fra dato`() {
         validationShouldFailFor("perioder[0].fom") {
             KroniskTestData.kroniskKravRequestValid.copy(
                 perioder = listOf(
                     KroniskTestData.kroniskKravRequestValid.perioder.first().copy(
-                        fom = LocalDate.of(2020, 1, 10),
-                        tom = LocalDate.of(2020, 1, 5),
+                        fom = 10.januar(2020),
+                        tom = 5.januar(2020),
                         antallDagerMedRefusjon = -5
                     )
                 ) // slik at validationShouldFailFor() kaster ikke to unntak
@@ -86,7 +86,7 @@ class KroniskKravRequestTest {
     }
 
     @Test
-    internal fun `Sykemeldingsgrad må være gyldig`() {
+    fun `Sykemeldingsgrad må være gyldig`() {
         validationShouldFailFor("perioder[0].gradering") {
             KroniskTestData.kroniskKravRequestValid.copy(
                 perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(gradering = 1.1))

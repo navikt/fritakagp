@@ -2,7 +2,7 @@ package no.nav.helse.fritakagp.web.api.resreq.validation
 
 import no.nav.helse.AaregTestData
 import no.nav.helse.GravidTestData
-import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
+import no.nav.helse.fritakagp.web.api.resreq.ArbeidsgiverperiodeRequest
 import no.nav.helse.fritakagp.web.api.resreq.GravidKravRequest
 import no.nav.helse.fritakagp.web.api.resreq.validationShouldFailFor
 import no.nav.helsearbeidsgiver.aareg.Periode
@@ -23,21 +23,22 @@ class AaregConstraintsKtTest {
 
     @Test
     fun `Ansatt slutter fram i tid`() {
-        val periode = Arbeidsgiverperiode(
-            15.januar(2021),
-            20.januar(2021),
-            4,
-            månedsinntekt = 2590.8
+        val periode = ArbeidsgiverperiodeRequest(
+            fom = 15.januar(2021),
+            tom = 20.januar(2021),
+            antallDagerMedRefusjon = 4,
+            månedsinntekt = 2590.8,
+            gradering = 1.0
         )
 
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.ansettelsesperioderMedSluttDato)
+            validate(ArbeidsgiverperiodeRequest::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.ansettelsesperioderMedSluttDato)
         }
     }
 
     @Test
     fun `Refusjonskravet er innenfor Arbeidsforholdet`() {
-        val periode = Arbeidsgiverperiode(
+        val periode = ArbeidsgiverperiodeRequest(
             15.januar(2021),
             18.januar(2021),
             2,
@@ -45,7 +46,7 @@ class AaregConstraintsKtTest {
         )
 
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.evigAnsettelsesperiode)
+            validate(ArbeidsgiverperiodeRequest::fom).maaHaAktivAnsettelsesperiode(periode, AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -64,13 +65,13 @@ class AaregConstraintsKtTest {
 
         val gravidKravRequest = GravidTestData.gravidKravRequestInValid.copy(
             perioder = listOf(
-                Arbeidsgiverperiode(
+                ArbeidsgiverperiodeRequest(
                     15.januar(2021),
                     18.januar(2021),
                     2,
                     månedsinntekt = 2590.8
                 ),
-                Arbeidsgiverperiode(
+                ArbeidsgiverperiodeRequest(
                     26.februar(2021),
                     10.mars(2021),
                     12,
@@ -80,22 +81,22 @@ class AaregConstraintsKtTest {
         )
         validate(gravidKravRequest) {
             validate(GravidKravRequest::perioder).validateForEach {
-                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
+                validate(ArbeidsgiverperiodeRequest::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
             }
         }
     }
 
     @Test
     fun `Refusjonsdato er før Arbeidsforhold har begynt`() {
-        val periode = Arbeidsgiverperiode(
+        val periode = ArbeidsgiverperiodeRequest(
             1.januar(2021),
             5.januar(2021),
             2,
             månedsinntekt = 2590.8
         )
-        validationShouldFailFor(Arbeidsgiverperiode::fom) {
+        validationShouldFailFor(ArbeidsgiverperiodeRequest::fom) {
             validate(periode) {
-                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
+                validate(ArbeidsgiverperiodeRequest::fom).maaHaAktivAnsettelsesperiode(
                     periode,
                     AaregTestData.paagaaendeAnsettelsesperiode
                 )
@@ -105,14 +106,14 @@ class AaregConstraintsKtTest {
 
     @Test
     fun `Refusjonsdato begynner samtidig som Arbeidsforhold skal ikke feile`() {
-        val periode = Arbeidsgiverperiode(
+        val periode = ArbeidsgiverperiodeRequest(
             5.februar(2021),
             9.februar(2021),
             2,
             månedsinntekt = 2590.8
         )
         validate(periode) {
-            validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
+            validate(ArbeidsgiverperiodeRequest::fom).maaHaAktivAnsettelsesperiode(
                 periode,
                 AaregTestData.paagaaendeAnsettelsesperiode
             )
@@ -121,16 +122,16 @@ class AaregConstraintsKtTest {
 
     @Test
     fun `Refusjonsdato etter Arbeidsforhold er avsluttet`() {
-        val periode = Arbeidsgiverperiode(
+        val periode = ArbeidsgiverperiodeRequest(
             15.mai(2021),
             18.mai(2021),
             2,
             månedsinntekt = 2590.8
         )
 
-        validationShouldFailFor(Arbeidsgiverperiode::fom) {
+        validationShouldFailFor(ArbeidsgiverperiodeRequest::fom) {
             validate(periode) {
-                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(
+                validate(ArbeidsgiverperiodeRequest::fom).maaHaAktivAnsettelsesperiode(
                     periode,
                     AaregTestData.avsluttetAnsettelsesperiode
                 )
