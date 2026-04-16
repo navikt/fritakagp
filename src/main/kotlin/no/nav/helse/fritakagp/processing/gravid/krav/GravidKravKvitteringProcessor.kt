@@ -40,7 +40,7 @@ class GravidKravKvitteringProcessor(
 
         val gravidKrav = when (krav.status) {
             KravStatus.OPPRETTET -> GravidKrav(id, orgnr, navn, fnr)
-            KravStatus.ENDRET -> GravidKravEndret(
+            KravStatus.OPPDATERT -> GravidKravEndret(
                 id,
                 orgnr,
                 navn,
