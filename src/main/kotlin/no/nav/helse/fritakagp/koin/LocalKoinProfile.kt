@@ -83,7 +83,7 @@ fun localConfig(env: Env.Local): Module = module {
     single { GravidSoeknadKvitteringSenderDummy() } bind GravidSoeknadKvitteringSender::class
     single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogProducer = get()) }
     single { GravidKravKvitteringSenderDummy() } bind GravidKravKvitteringSender::class
-    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get()) }
+    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get(), dialogProducer = get()) }
 
     single { KroniskSoeknadKvitteringSenderDummy() } bind KroniskSoeknadKvitteringSender::class
     single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get()) }

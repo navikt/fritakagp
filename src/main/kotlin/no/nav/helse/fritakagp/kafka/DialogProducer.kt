@@ -10,14 +10,14 @@ import java.util.Properties
 const val DEFAULT_DIALOG_TOPIC_NAME = "helsearbeidsgiver.dialog"
 
 interface DialogSender {
-    fun sendMessage(dialogId: String, message: String): RecordMetadata?
+    fun sendMessage(message: String): RecordMetadata?
 }
 
 class MockDialogProducer : DialogSender {
     private val logger = this.logger()
 
-    override fun sendMessage(dialogId: String, message: String): RecordMetadata? {
-        logger.info("Mocked sending av dialogId $dialogId til Kafka-topic $DEFAULT_DIALOG_TOPIC_NAME")
+    override fun sendMessage(message: String): RecordMetadata? {
+        logger.info("Mocked sending av dialogId $message til Kafka-topic $DEFAULT_DIALOG_TOPIC_NAME")
         return null
     }
 }
@@ -31,11 +31,11 @@ class KafkaDialogProducer(
     private val kafkaProducer: Producer<String, String> = producerFactory(props)
     private val logger = this.logger()
 
-    override fun sendMessage(dialogId: String, message: String): RecordMetadata? {
-        val record = ProducerRecord(topicName, dialogId, message)
+    override fun sendMessage(message: String): RecordMetadata? {
+        val record = ProducerRecord<String, String>(topicName, message)
         val metadata = kafkaProducer.send(record).get()
 
-        logger.info("Dialog: Skrevet dialogId $dialogId til Kafka-topic ${metadata.topic()} med offset ${metadata.offset()}")
+        logger.info("Dialog: Skrevet til Kafka-topic ${metadata.topic()} med offset ${metadata.offset()}")
 
         return metadata
     }

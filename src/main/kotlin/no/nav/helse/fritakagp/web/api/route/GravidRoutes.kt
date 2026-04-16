@@ -231,7 +231,7 @@ fun Route.gravidRoutes(
                 )
                 bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id))
+                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id, forrigeKrav.id))
                 )
                 bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                     maksAntallForsoek = 10,

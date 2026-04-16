@@ -117,7 +117,7 @@ fun prodConfig(env: Env.Prod): Module = module {
         )
     } bind GravidKravKvitteringSender::class
 
-    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get()) }
+    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get(), dialogProducer = get()) }
 
     single {
         KroniskSoeknadAltinnKvitteringSender(

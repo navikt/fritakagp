@@ -114,7 +114,7 @@ fun preprodConfig(env: Env.Preprod): Module = module {
         )
     } bind GravidKravKvitteringSender::class
 
-    single { GravidKravKvitteringProcessor(get(), get(), get()) }
+    single { GravidKravKvitteringProcessor(get(), get(), get(), get()) }
 
     single {
         KroniskSoeknadAltinnKvitteringSender(

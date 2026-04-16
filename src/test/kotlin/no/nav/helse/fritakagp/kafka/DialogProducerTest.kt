@@ -35,13 +35,12 @@ class DialogProducerTest {
             props = Properties()
         ) { producer }
 
-        val actualMetadata = requireNotNull(dialogProducer.sendMessage("dialog-1", "melding"))
+        val actualMetadata = requireNotNull(dialogProducer.sendMessage("dialog-1"))
         val record = requireNotNull(recordSlot.captured)
 
         assertNotNull(actualMetadata)
         assertEquals(DEFAULT_DIALOG_TOPIC_NAME, actualMetadata.topic())
         assertEquals(DEFAULT_DIALOG_TOPIC_NAME, record.topic())
-        assertEquals("dialog-1", record.key())
-        assertEquals("melding", record.value())
+        assertEquals("dialog-1", record.value())
     }
 }

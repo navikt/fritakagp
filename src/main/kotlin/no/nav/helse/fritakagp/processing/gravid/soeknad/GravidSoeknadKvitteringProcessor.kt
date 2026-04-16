@@ -7,11 +7,10 @@ import no.nav.helse.fritakagp.GravidSoeknadMetrics
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogSender
-import no.nav.helse.fritakagp.kafka.GravidSoeknadMelding
+import no.nav.helse.fritakagp.kafka.GravidSoeknad
 import no.nav.helsearbeidsgiver.utils.json.toJson
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
-import kotlin.jvm.java
 
 class GravidSoeknadKvitteringProcessor(
     private val gravidSoeknadKvitteringSender: GravidSoeknadKvitteringSender,
@@ -30,9 +29,9 @@ class GravidSoeknadKvitteringProcessor(
         val kvitteringJobbData = om.readValue(jobb.data, Jobbdata::class.java)
         val soeknad = db.getById(kvitteringJobbData.soeknadId)
             ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
-
-        val gravidSoeknadMelding = GravidSoeknadMelding(soeknad.id, Orgnr(soeknad.virksomhetsnummer), soeknad.navn, soeknad.identitetsnummer)
-        dialogProducer.sendMessage(soeknad.id.toString(), gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
+        val navn = soeknad.navn ?: "Ukjent"
+        val gravidSoeknadMelding = GravidSoeknad(soeknad.id, Orgnr(soeknad.virksomhetsnummer), navn, soeknad.identitetsnummer)
+        dialogProducer.sendMessage(gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
 
         GravidSoeknadMetrics.tellKvitteringSendt()
     }
