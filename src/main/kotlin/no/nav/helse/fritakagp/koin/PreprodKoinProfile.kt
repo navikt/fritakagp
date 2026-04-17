@@ -103,7 +103,7 @@ fun preprodConfig(env: Env.Preprod): Module = module {
         )
     } bind GravidSoeknadKvitteringSender::class
 
-    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { GravidSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single {
         GravidKravAltinnKvitteringSender(
@@ -114,7 +114,7 @@ fun preprodConfig(env: Env.Preprod): Module = module {
         )
     } bind GravidKravKvitteringSender::class
 
-    single { GravidKravKvitteringProcessor(get(), get(), get(), get()) }
+    single { GravidKravKvitteringProcessor(get(), get(), get()) }
 
     single {
         KroniskSoeknadAltinnKvitteringSender(
@@ -124,7 +124,7 @@ fun preprodConfig(env: Env.Preprod): Module = module {
             env.altinnMeldingPassword
         )
     } bind KroniskSoeknadKvitteringSender::class
-    single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { KroniskSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single {
         KroniskKravAltinnKvitteringSender(
@@ -134,7 +134,7 @@ fun preprodConfig(env: Env.Preprod): Module = module {
             env.altinnMeldingPassword
         )
     } bind KroniskKravKvitteringSender::class
-    single { KroniskKravKvitteringProcessor(kroniskKravKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { KroniskKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single {
         val azureAuthClient: AuthClient = get()

@@ -16,7 +16,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class GravidKravKvitteringProcessor(
-    private val gravidKravKvitteringSender: GravidKravKvitteringSender,
     private val db: GravidKravRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
@@ -55,7 +54,6 @@ class GravidKravKvitteringProcessor(
         }
 
         dialogSender.sendMessage(gravidKrav.toJson(FritakKravMelding.serializer()).toString())
-        gravidKravKvitteringSender.send(krav)
         GravidKravMetrics.tellKvitteringSendt()
     }
 
