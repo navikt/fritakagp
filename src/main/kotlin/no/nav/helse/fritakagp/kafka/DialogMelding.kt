@@ -35,7 +35,7 @@ data class GravidSoeknad(
 
 @Serializable
 @SerialName("KroniskSoeknad")
-data class KroniskSoeknad(
+data class KroniskSoeknadOpprettet(
     val id: UUID,
     val orgnr: Orgnr,
     val navn: String,

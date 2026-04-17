@@ -81,14 +81,14 @@ fun localConfig(env: Env.Local): Module = module {
     single { KroniskKravEndreProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
 
     single { GravidSoeknadKvitteringSenderDummy() } bind GravidSoeknadKvitteringSender::class
-    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogProducer = get()) }
+    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
     single { GravidKravKvitteringSenderDummy() } bind GravidKravKvitteringSender::class
-    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get(), dialogProducer = get()) }
+    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
 
     single { KroniskSoeknadKvitteringSenderDummy() } bind KroniskSoeknadKvitteringSender::class
-    single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get()) }
+    single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
     single { KroniskKravKvitteringSenderDummy() } bind KroniskKravKvitteringSender::class
-    single { KroniskKravKvitteringProcessor(kroniskKravKvitteringSender = get(), db = get(), om = get()) }
+    single { KroniskKravKvitteringProcessor(kroniskKravKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
 
     single { PdlService(get()) }
 

@@ -19,7 +19,7 @@ class GravidKravKvitteringProcessor(
     private val gravidKravKvitteringSender: GravidKravKvitteringSender,
     private val db: GravidKravRepository,
     private val om: ObjectMapper,
-    private val dialogProducer: DialogSender
+    private val dialogSender: DialogSender
 ) : BakgrunnsjobbProsesserer {
 
     companion object {
@@ -54,7 +54,7 @@ class GravidKravKvitteringProcessor(
             else -> throw IllegalArgumentException("Ugyldig kravstatus for kvittering: ${krav.status}")
         }
 
-        dialogProducer.sendMessage(gravidKrav.toJson(FritakKravMelding.serializer()).toString())
+        dialogSender.sendMessage(gravidKrav.toJson(FritakKravMelding.serializer()).toString())
         gravidKravKvitteringSender.send(krav)
         GravidKravMetrics.tellKvitteringSendt()
     }

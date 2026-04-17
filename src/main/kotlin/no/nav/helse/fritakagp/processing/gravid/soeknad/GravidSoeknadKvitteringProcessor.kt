@@ -16,7 +16,7 @@ class GravidSoeknadKvitteringProcessor(
     private val gravidSoeknadKvitteringSender: GravidSoeknadKvitteringSender,
     private val db: GravidSoeknadRepository,
     private val om: ObjectMapper,
-    private val dialogProducer: DialogSender
+    private val dialogSender: DialogSender
 ) : BakgrunnsjobbProsesserer {
 
     companion object {
@@ -31,7 +31,7 @@ class GravidSoeknadKvitteringProcessor(
             ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
         val navn = soeknad.navn ?: "Ukjent"
         val gravidSoeknadMelding = GravidSoeknad(soeknad.id, Orgnr(soeknad.virksomhetsnummer), navn, soeknad.identitetsnummer)
-        dialogProducer.sendMessage(gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
+        dialogSender.sendMessage(gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
 
         GravidSoeknadMetrics.tellKvitteringSendt()
     }

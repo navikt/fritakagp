@@ -318,7 +318,7 @@ fun Route.kroniskRoutes(
                     )
                     bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id))
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id, forrigeKrav.id))
                     )
                     bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                         maksAntallForsoek = 10,
