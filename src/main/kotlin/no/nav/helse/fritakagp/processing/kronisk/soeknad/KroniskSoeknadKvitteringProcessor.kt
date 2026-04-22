@@ -9,7 +9,7 @@ import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helse.fritakagp.kafka.KroniskSoeknadOpprettet
-import no.nav.helsearbeidsgiver.utils.json.toJson
+import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
@@ -31,7 +31,7 @@ class KroniskSoeknadKvitteringProcessor(
             ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
         val navn = soeknad.navn ?: "Ukjent"
         val kroniskSoeknad = KroniskSoeknadOpprettet(soeknad.id, Orgnr(soeknad.virksomhetsnummer), navn, soeknad.identitetsnummer)
-        dialogSender.sendMessage(kroniskSoeknad.toJson(DialogMelding.serializer()).toString())
+        dialogSender.sendMessage(kroniskSoeknad.toJsonStr(DialogMelding.serializer()))
         KroniskSoeknadMetrics.tellKvitteringSendt()
     }
 

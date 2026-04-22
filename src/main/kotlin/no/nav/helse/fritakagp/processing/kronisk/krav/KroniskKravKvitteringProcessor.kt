@@ -8,10 +8,10 @@ import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helse.fritakagp.kafka.FritakKravMelding
-import no.nav.helse.fritakagp.kafka.KroniskKrav
 import no.nav.helse.fritakagp.kafka.KroniskKravEndret
+import no.nav.helse.fritakagp.kafka.KroniskKravOpprettet
 import no.nav.helse.fritakagp.kafka.KroniskKravSlettet
-import no.nav.helsearbeidsgiver.utils.json.toJson
+import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
@@ -36,15 +36,15 @@ class KroniskKravKvitteringProcessor(
         val orgnr = Orgnr(krav.virksomhetsnummer)
         val fnr = krav.identitetsnummer
 
-        val gravidKrav = when (krav.status) {
-            KravStatus.OPPRETTET -> KroniskKrav(id, orgnr, navn, fnr)
+        val kroniskKrav = when (krav.status) {
+            KravStatus.OPPRETTET -> KroniskKravOpprettet(id, orgnr, navn, fnr)
             KravStatus.OPPDATERT -> KroniskKravEndret(
                 id,
                 orgnr,
                 navn,
                 fnr,
                 forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
-                    "forrigeKrav må være satt for status ENDRET"
+                    "forrigeKrav må være satt for status OPPDATERT"
                 }
             )
 
@@ -52,7 +52,7 @@ class KroniskKravKvitteringProcessor(
             else -> throw IllegalArgumentException("Ugyldig kravstatus for kvittering: ${krav.status}")
         }
 
-        dialogSender.sendMessage(gravidKrav.toJson(FritakKravMelding.serializer()).toString())
+        dialogSender.sendMessage(kroniskKrav.toJsonStr(FritakKravMelding.serializer()))
         KroniskKravMetrics.tellKvitteringSendt()
     }
 

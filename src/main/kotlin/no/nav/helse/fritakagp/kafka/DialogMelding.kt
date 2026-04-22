@@ -22,29 +22,34 @@ sealed class FritakKravMelding : DialogMelding() {
 }
 
 @Serializable
-sealed class FritakSoeknadMelding : DialogMelding()
+sealed class FritakSoeknadMelding : DialogMelding() {
+    abstract val id: UUID
+    abstract val orgnr: Orgnr
+    abstract val navn: String
+    abstract val fnr: String
+}
 
 @Serializable
-@SerialName("GravidSoeknad")
-data class GravidSoeknad(
-    val id: UUID,
-    val orgnr: Orgnr,
-    val navn: String,
-    val fnr: String
+@SerialName("GravidSoeknadOpprettet")
+data class GravidSoeknadOpprettet(
+    override val id: UUID,
+    override val orgnr: Orgnr,
+    override val navn: String,
+    override val fnr: String
 ) : FritakSoeknadMelding()
 
 @Serializable
-@SerialName("KroniskSoeknad")
+@SerialName("KroniskSoeknadOpprettet")
 data class KroniskSoeknadOpprettet(
-    val id: UUID,
-    val orgnr: Orgnr,
-    val navn: String,
-    val fnr: String
+    override val id: UUID,
+    override val orgnr: Orgnr,
+    override val navn: String,
+    override val fnr: String
 ) : FritakSoeknadMelding()
 
 @Serializable
-@SerialName("KroniskKrav")
-data class KroniskKrav(
+@SerialName("KroniskKravOpprettet")
+data class KroniskKravOpprettet(
     override val id: UUID,
     override val orgnr: Orgnr,
     override val navn: String,
@@ -71,8 +76,8 @@ data class KroniskKravSlettet(
 ) : FritakKravMelding()
 
 @Serializable
-@SerialName("GravidKrav")
-data class GravidKrav(
+@SerialName("GravidKravOpprettet")
+data class GravidKravOpprettet(
     override val id: UUID,
     override val orgnr: Orgnr,
     override val navn: String,
