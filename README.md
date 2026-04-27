@@ -10,7 +10,7 @@ For å kjøre lokalt kan du starte  `docker compose up` fra docker/local før du
 http://localhost:8080/local/token-please?subject=12345678910
 
 Kopier token og sett som bearer token i feks Postman. 
-Deretter kan du kalle: 
+Deretter kan du kalle:  
 
 http://localhost:8080/fritak-agp-api/api/v1/arbeidsgivere
 
