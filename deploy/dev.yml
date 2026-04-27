@@ -24,8 +24,11 @@ accessInbound:
   apps:
     - name: fritak-agp-frontend
       namespace: helsearbeidsgiver
+    - application: hag-dokument-proxy
+      namespace: helsearbeidsgiver
     - name: tokenx-token-generator
       namespace: nais
+
 
 envFrom:
   # servicebrukerens passord som er  hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
