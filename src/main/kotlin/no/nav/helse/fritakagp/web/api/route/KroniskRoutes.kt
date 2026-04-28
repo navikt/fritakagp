@@ -91,10 +91,14 @@ fun Route.kroniskRoutes(
                     logger.info("Hent kronisk søknad fra database.")
                     val soeknad = kroniskSoeknadRepo.getById(soeknadId)
 
-                    if (soeknad == null || soeknad.identitetsnummer != innloggetFnr) {
-                        logger.warn("Kronisk søknad ikke funnet eller matcher ikke innlogget fnr.")
+                    if (soeknad == null) {
+                        logger.warn("Kronisk søknad ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
+                        if (soeknad.identitetsnummer != innloggetFnr) {
+                            logger.info("Fnr på kronisk søknad matcher ikke innlogget fnr, sjekker om org har tilgang.")
+                            authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
+                        }
                         logger.info("Hent personinfo fra PDL.")
                         soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)

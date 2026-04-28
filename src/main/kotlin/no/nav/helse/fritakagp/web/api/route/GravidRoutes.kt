@@ -77,9 +77,12 @@ fun Route.gravidRoutes(
 
                 val innloggetFnr = hentFnrFraLoginToken()
                 val soeknad = gravidSoeknadRepo.getById(soeknadId)
-                if (soeknad == null || soeknad.identitetsnummer != innloggetFnr) {
+                if (soeknad == null) {
                     call.respond(HttpStatusCode.NotFound)
                 } else {
+                    if (soeknad.identitetsnummer != innloggetFnr) {
+                        authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
+                    }
                     soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                     soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)
 

@@ -24,6 +24,8 @@ accessInbound:
   apps:
     - name: fritak-agp-frontend
       namespace: helsearbeidsgiver
+    - name: hag-dokument-proxy
+      namespace: helsearbeidsgiver
     - name: tokenx-token-generator
       namespace: nais
 
