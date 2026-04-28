@@ -13,6 +13,7 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class GravidSoeknadKvitteringProcessor(
+    private val gravidSoeknadKvitteringSender: GravidSoeknadKvitteringSender,
     private val db: GravidSoeknadRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
@@ -30,7 +31,11 @@ class GravidSoeknadKvitteringProcessor(
             ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
         val navn = soeknad.navn ?: "Ukjent"
         val gravidSoeknadMelding = GravidSoeknadOpprettet(soeknad.id, Orgnr(soeknad.virksomhetsnummer), navn, soeknad.identitetsnummer)
+
         dialogSender.sendMessage(gravidSoeknadMelding.toJsonStr(DialogMelding.serializer()))
+
+        // TODO denne fjernes når vi går over til Dialogporten
+        gravidSoeknadKvitteringSender.send(soeknad)
 
         GravidSoeknadMetrics.tellKvitteringSendt()
     }

@@ -14,6 +14,7 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class KroniskSoeknadKvitteringProcessor(
+    private val kroniskSoeknadKvitteringSender: KroniskSoeknadKvitteringSender,
     private val db: KroniskSoeknadRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
@@ -31,7 +32,12 @@ class KroniskSoeknadKvitteringProcessor(
             ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
         val navn = soeknad.navn ?: "Ukjent"
         val kroniskSoeknad = KroniskSoeknadOpprettet(soeknad.id, Orgnr(soeknad.virksomhetsnummer), navn, soeknad.identitetsnummer)
+
         dialogSender.sendMessage(kroniskSoeknad.toJsonStr(DialogMelding.serializer()))
+
+        // TODO denne fjernes når vi går over til Dialogporten
+        kroniskSoeknadKvitteringSender.send(soeknad)
+
         KroniskSoeknadMetrics.tellKvitteringSendt()
     }
 

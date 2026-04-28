@@ -16,11 +16,11 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class GravidKravKvitteringProcessor(
+    private val gravidKravKvitteringSender: GravidKravKvitteringSender,
     private val db: GravidKravRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
 ) : BakgrunnsjobbProsesserer {
-
     companion object {
         const val JOB_TYPE = "gravid-krav-altinn-kvittering"
     }
@@ -29,31 +29,48 @@ class GravidKravKvitteringProcessor(
 
     override fun prosesser(jobb: Bakgrunnsjobb) {
         val kvitteringJobbData = om.readValue(jobb.data, Jobbdata::class.java)
-        val krav = db.getById(kvitteringJobbData.kravId)
-            ?: throw IllegalArgumentException("Fant ikke kravet i jobbdataene ${jobb.data}")
+        val krav =
+            db.getById(kvitteringJobbData.kravId)
+                ?: throw IllegalArgumentException("Fant ikke kravet i jobbdataene ${jobb.data}")
 
         val navn = krav.navn ?: "Ukjent"
         val id = krav.id
         val orgnr = Orgnr(krav.virksomhetsnummer)
         val fnr = krav.identitetsnummer
 
-        val gravidKrav = when (krav.status) {
-            KravStatus.OPPRETTET -> GravidKravOpprettet(id, orgnr, navn, fnr)
-            KravStatus.OPPDATERT -> GravidKravEndret(
-                id,
-                orgnr,
-                navn,
-                fnr,
-                forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
-                    "forrigeKrav må være satt for status OPPDATERT"
+        val gravidKrav =
+            when (krav.status) {
+                KravStatus.OPPRETTET -> {
+                    GravidKravOpprettet(id, orgnr, navn, fnr)
                 }
-            )
 
-            KravStatus.SLETTET -> GravidKravSlettet(id, orgnr, navn, fnr)
-            else -> throw IllegalArgumentException("Ugyldig kravstatus for kvittering: ${krav.status}")
-        }
+                KravStatus.OPPDATERT -> {
+                    GravidKravEndret(
+                        id,
+                        orgnr,
+                        navn,
+                        fnr,
+                        forrigeKrav =
+                        requireNotNull(kvitteringJobbData.forrigeKrav) {
+                            "forrigeKrav må være satt for status OPPDATERT"
+                        }
+                    )
+                }
+
+                KravStatus.SLETTET -> {
+                    GravidKravSlettet(id, orgnr, navn, fnr)
+                }
+
+                else -> {
+                    throw IllegalArgumentException("Ugyldig kravstatus for kvittering: ${krav.status}")
+                }
+            }
 
         dialogSender.sendMessage(gravidKrav.toJsonStr(FritakKravMelding.serializer()))
+
+        // TODO denne fjernes når vi går over til Dialogporten
+        gravidKravKvitteringSender.send(krav)
+
         GravidKravMetrics.tellKvitteringSendt()
     }
 
