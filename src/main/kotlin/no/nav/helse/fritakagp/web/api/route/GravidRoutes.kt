@@ -80,9 +80,8 @@ fun Route.gravidRoutes(
                 if (soeknad == null) {
                     call.respond(HttpStatusCode.NotFound)
                 } else {
-                    if (soeknad.identitetsnummer != innloggetFnr) {
-                        authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
-                    }
+                    authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
+
                     soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                     soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)
 
