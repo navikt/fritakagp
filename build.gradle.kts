@@ -78,6 +78,8 @@ tasks {
         include("no/nav/helse/slowtests/**")
         outputs.upToDateWhen { false }
         group = "verification"
+        testClassesDirs = sourceSets["test"].output.classesDirs
+        classpath = sourceSets["test"].runtimeClasspath
     }
 
     jacocoTestReport {

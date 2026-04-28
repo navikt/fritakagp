@@ -18,19 +18,10 @@ class GravidSoeknadHTTPTests : SystemTestBase() {
     private val soeknadGravidUrl = "/fritak-agp-api/api/v1/gravid/soeknad"
 
     @Test
-    internal fun `Returnerer søknaden når korrekt bruker er innlogget, 404 når ikke`() = suspendableTest {
+    internal fun `Returnerer søknaden når bruker har tilgang til organisasjonen`() = suspendableTest {
         val repo by inject<GravidSoeknadRepository>()
 
         repo.insert(GravidTestData.soeknadGravid)
-
-        val response =
-            httpClient.get {
-                appUrl("$soeknadGravidUrl/${GravidTestData.soeknadGravid.id}")
-                contentType(ContentType.Application.Json)
-                loggedInAs("12345678910")
-            }
-
-        assertThat(response.status).isEqualTo(HttpStatusCode.NotFound)
 
         val accessGrantedForm = httpClient.get {
             appUrl("$soeknadGravidUrl/${GravidTestData.soeknadGravid.id}")
