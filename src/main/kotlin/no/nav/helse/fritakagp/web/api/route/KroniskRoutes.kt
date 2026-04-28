@@ -95,7 +95,6 @@ fun Route.kroniskRoutes(
                         logger.warn("Kronisk søknad ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
-
                         logger.info("Sjekker om org har tilgang til kronisk søknad.")
                         authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
 
