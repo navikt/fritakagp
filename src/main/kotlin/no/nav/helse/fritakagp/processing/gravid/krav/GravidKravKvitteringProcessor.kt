@@ -49,14 +49,16 @@ class GravidKravKvitteringProcessor(
 
                 KravStatus.OPPDATERT -> {
                     DialogMelding(
-                        type = DialogMeldingType.GravidKravEndret,
+                        type = DialogMeldingType.GravidKravEndret(
+                            forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
+                                "forrigeKrav må være satt for status OPPDATERT"
+                            }
+                        ),
                         id = id,
                         orgnr = orgnr,
                         navn = navn,
-                        fnr = fnr,
-                        forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
-                            "forrigeKrav må være satt for status OPPDATERT"
-                        }
+                        fnr = fnr
+
                     )
                 }
 

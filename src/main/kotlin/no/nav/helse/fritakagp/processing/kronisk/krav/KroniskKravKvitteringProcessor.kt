@@ -44,14 +44,16 @@ class KroniskKravKvitteringProcessor(
                 fnr = fnr
             )
             KravStatus.OPPDATERT -> DialogMelding(
-                type = DialogMeldingType.KroniskKravEndret,
+                type = DialogMeldingType.KroniskKravEndret(
+                    forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
+                        "forrigeKrav må være satt for status OPPDATERT"
+                    }
+                ),
                 id = id,
                 orgnr = orgnr,
                 navn = navn,
-                fnr = fnr,
-                forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
-                    "forrigeKrav må være satt for status OPPDATERT"
-                }
+                fnr = fnr
+
             )
 
             KravStatus.SLETTET -> DialogMelding(

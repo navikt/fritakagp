@@ -97,12 +97,12 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.KroniskKravEndret,
+            type = DialogMeldingType.KroniskKravEndret(forrigeKrav = forrigeKravId),
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
-            fnr = testKrav.identitetsnummer,
-            forrigeKrav = forrigeKravId
+            fnr = testKrav.identitetsnummer
+
         ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }

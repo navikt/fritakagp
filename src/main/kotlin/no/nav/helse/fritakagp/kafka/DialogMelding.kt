@@ -10,15 +10,28 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 @Serializable
-enum class DialogMeldingType {
-    GravidSoeknadOpprettet,
-    KroniskSoeknadOpprettet,
-    KroniskKravOpprettet,
-    KroniskKravEndret,
-    KroniskKravSlettet,
-    GravidKravOpprettet,
-    GravidKravEndret,
-    GravidKravSlettet
+sealed class DialogMeldingType {
+    @Serializable
+    data object GravidSoeknadOpprettet : DialogMeldingType()
+
+    @Serializable
+    data object KroniskSoeknadOpprettet : DialogMeldingType()
+
+    @Serializable
+    data object KroniskKravOpprettet : DialogMeldingType()
+
+    @Serializable
+    data class KroniskKravEndret(val forrigeKrav: UUID) : DialogMeldingType()
+
+    @Serializable
+    data object KroniskKravSlettet : DialogMeldingType()
+
+    @Serializable
+    data object GravidKravOpprettet : DialogMeldingType()
+
+    @Serializable data class GravidKravEndret(val forrigeKrav: UUID) : DialogMeldingType()
+
+    @Serializable data object GravidKravSlettet : DialogMeldingType()
 }
 
 @Serializable
@@ -27,6 +40,5 @@ data class DialogMelding(
     val id: UUID,
     val orgnr: Orgnr,
     val navn: String,
-    val fnr: String,
-    val forrigeKrav: UUID? = null
+    val fnr: String
 )
