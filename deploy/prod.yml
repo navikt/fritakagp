@@ -23,6 +23,8 @@ accessOutbound:
     - g.nav.no
 accessInbound:
   apps:
+    - name: hag-dokument-proxy
+      namespace: helsearbeidsgiver
     - name: fritak-agp-frontend
       namespace: helsearbeidsgiver
 envFrom:

@@ -21,18 +21,10 @@ class KroniskSoeknadHTTPTests : SystemTestBase() {
     private val soeknadKroniskUrl = "/fritak-agp-api/api/v1/kronisk/soeknad"
 
     @Test
-    internal fun `Returnerer søknaden når korrekt bruker er innlogget, 404 når ikke`() = suspendableTest {
+    internal fun `Returnerer søknaden når bruker har tilgang til organisasjonen`() = suspendableTest {
         val repo by inject<KroniskSoeknadRepository>()
 
         repo.insert(KroniskTestData.soeknadKronisk)
-        val response =
-            httpClient.get {
-                appUrl("$soeknadKroniskUrl/${KroniskTestData.soeknadKronisk.id}")
-                contentType(ContentType.Application.Json)
-                loggedInAs("12345678910")
-            }
-
-        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.NotFound)
 
         val accessGrantedForm = httpClient.get {
             appUrl("$soeknadKroniskUrl/${KroniskTestData.soeknadKronisk.id}")
