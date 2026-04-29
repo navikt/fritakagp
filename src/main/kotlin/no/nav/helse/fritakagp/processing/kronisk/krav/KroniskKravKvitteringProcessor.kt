@@ -7,7 +7,6 @@ import no.nav.helse.fritakagp.KroniskKravMetrics
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.kafka.DialogMelding
-import no.nav.helse.fritakagp.kafka.DialogMeldingType
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -37,14 +36,14 @@ class KroniskKravKvitteringProcessor(
 
         val kroniskKrav = when (krav.status) {
             KravStatus.OPPRETTET -> DialogMelding(
-                type = DialogMeldingType.KroniskKravOpprettet,
+                type = DialogMelding.Type.KroniskKravOpprettet,
                 id = id,
                 orgnr = orgnr,
                 navn = navn,
                 fnr = fnr
             )
             KravStatus.OPPDATERT -> DialogMelding(
-                type = DialogMeldingType.KroniskKravEndret(
+                type = DialogMelding.Type.KroniskKravEndret(
                     forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
                         "forrigeKrav må være satt for status OPPDATERT"
                     }
@@ -57,7 +56,7 @@ class KroniskKravKvitteringProcessor(
             )
 
             KravStatus.SLETTET -> DialogMelding(
-                type = DialogMeldingType.KroniskKravSlettet,
+                type = DialogMelding.Type.KroniskKravSlettet,
                 id = id,
                 orgnr = orgnr,
                 navn = navn,

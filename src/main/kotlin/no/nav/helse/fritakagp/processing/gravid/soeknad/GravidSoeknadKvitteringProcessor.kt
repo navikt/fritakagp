@@ -6,7 +6,6 @@ import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.helse.fritakagp.GravidSoeknadMetrics
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.kafka.DialogMelding
-import no.nav.helse.fritakagp.kafka.DialogMeldingType
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -31,7 +30,7 @@ class GravidSoeknadKvitteringProcessor(
             ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
         val navn = soeknad.navn ?: "Ukjent"
         val gravidSoeknadMelding = DialogMelding(
-            type = DialogMeldingType.GravidSoeknadOpprettet,
+            type = DialogMelding.Type.GravidSoeknadOpprettet,
             id = soeknad.id,
             orgnr = Orgnr(soeknad.virksomhetsnummer),
             navn = navn,

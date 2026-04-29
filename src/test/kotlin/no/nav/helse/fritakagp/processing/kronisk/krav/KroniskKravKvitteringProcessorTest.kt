@@ -9,7 +9,6 @@ import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.kafka.DialogMelding
-import no.nav.helse.fritakagp.kafka.DialogMeldingType
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
@@ -62,7 +61,7 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.KroniskKravOpprettet,
+            type = DialogMelding.Type.KroniskKravOpprettet,
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
@@ -97,7 +96,7 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.KroniskKravEndret(forrigeKrav = forrigeKravId),
+            type = DialogMelding.Type.KroniskKravEndret(forrigeKrav = forrigeKravId),
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
@@ -138,7 +137,7 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.KroniskKravSlettet,
+            type = DialogMelding.Type.KroniskKravSlettet,
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
@@ -176,7 +175,7 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.KroniskKravOpprettet,
+            type = DialogMelding.Type.KroniskKravOpprettet,
             id = kravUtenNavn.id,
             orgnr = Orgnr(kravUtenNavn.virksomhetsnummer),
             navn = "Ukjent",

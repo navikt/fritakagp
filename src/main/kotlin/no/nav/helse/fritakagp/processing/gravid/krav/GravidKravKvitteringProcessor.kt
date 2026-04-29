@@ -7,7 +7,6 @@ import no.nav.helse.fritakagp.GravidKravMetrics
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.kafka.DialogMelding
-import no.nav.helse.fritakagp.kafka.DialogMeldingType
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -40,7 +39,7 @@ class GravidKravKvitteringProcessor(
             when (krav.status) {
                 KravStatus.OPPRETTET ->
                     DialogMelding(
-                        type = DialogMeldingType.GravidKravOpprettet,
+                        type = DialogMelding.Type.GravidKravOpprettet,
                         id = id,
                         orgnr = orgnr,
                         navn = navn,
@@ -49,7 +48,7 @@ class GravidKravKvitteringProcessor(
 
                 KravStatus.OPPDATERT -> {
                     DialogMelding(
-                        type = DialogMeldingType.GravidKravEndret(
+                        type = DialogMelding.Type.GravidKravEndret(
                             forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
                                 "forrigeKrav må være satt for status OPPDATERT"
                             }
@@ -64,7 +63,7 @@ class GravidKravKvitteringProcessor(
 
                 KravStatus.SLETTET -> {
                     DialogMelding(
-                        type = DialogMeldingType.GravidKravSlettet,
+                        type = DialogMelding.Type.GravidKravSlettet,
                         id = id,
                         orgnr = orgnr,
                         navn = navn,

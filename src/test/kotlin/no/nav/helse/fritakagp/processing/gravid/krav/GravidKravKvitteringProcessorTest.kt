@@ -9,7 +9,6 @@ import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.kafka.DialogMelding
-import no.nav.helse.fritakagp.kafka.DialogMeldingType
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
@@ -67,7 +66,7 @@ internal class GravidKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.GravidKravOpprettet,
+            type = DialogMelding.Type.GravidKravOpprettet,
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
@@ -109,7 +108,7 @@ internal class GravidKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.GravidKravEndret(forrigeKrav = forrigeKravId),
+            type = DialogMelding.Type.GravidKravEndret(forrigeKrav = forrigeKravId),
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
@@ -154,7 +153,7 @@ internal class GravidKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.GravidKravSlettet,
+            type = DialogMelding.Type.GravidKravSlettet,
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
@@ -193,7 +192,7 @@ internal class GravidKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.GravidKravOpprettet,
+            type = DialogMelding.Type.GravidKravOpprettet,
             id = kravMedNavn.id,
             orgnr = Orgnr(kravMedNavn.virksomhetsnummer),
             navn = "Ola Nordmann",
@@ -212,7 +211,7 @@ internal class GravidKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         val expectedMessage = DialogMelding(
-            type = DialogMeldingType.GravidKravOpprettet,
+            type = DialogMelding.Type.GravidKravOpprettet,
             id = kravUtenNavn.id,
             orgnr = Orgnr(kravUtenNavn.virksomhetsnummer),
             navn = "Ukjent",
