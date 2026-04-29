@@ -8,11 +8,9 @@ import no.nav.helse.KroniskTestData
 import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
+import no.nav.helse.fritakagp.kafka.DialogMelding
+import no.nav.helse.fritakagp.kafka.DialogMeldingType
 import no.nav.helse.fritakagp.kafka.DialogSender
-import no.nav.helse.fritakagp.kafka.FritakKravMelding
-import no.nav.helse.fritakagp.kafka.KroniskKravEndret
-import no.nav.helse.fritakagp.kafka.KroniskKravOpprettet
-import no.nav.helse.fritakagp.kafka.KroniskKravSlettet
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -63,12 +61,13 @@ internal class KroniskKravKvitteringProcessorTest {
 
         processor.prosesser(jobb)
 
-        val expectedMessage = KroniskKravOpprettet(
+        val expectedMessage = DialogMelding(
+            type = DialogMeldingType.KroniskKravOpprettet,
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
             fnr = testKrav.identitetsnummer
-        ).toJsonStr(FritakKravMelding.serializer())
+        ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -97,13 +96,14 @@ internal class KroniskKravKvitteringProcessorTest {
 
         processor.prosesser(jobb)
 
-        val expectedMessage = KroniskKravEndret(
+        val expectedMessage = DialogMelding(
+            type = DialogMeldingType.KroniskKravEndret,
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
             fnr = testKrav.identitetsnummer,
             forrigeKrav = forrigeKravId
-        ).toJsonStr(FritakKravMelding.serializer())
+        ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -137,12 +137,13 @@ internal class KroniskKravKvitteringProcessorTest {
 
         processor.prosesser(jobb)
 
-        val expectedMessage = KroniskKravSlettet(
+        val expectedMessage = DialogMelding(
+            type = DialogMeldingType.KroniskKravSlettet,
             id = testKrav.id,
             orgnr = Orgnr(testKrav.virksomhetsnummer),
             navn = testKrav.navn!!,
             fnr = testKrav.identitetsnummer
-        ).toJsonStr(FritakKravMelding.serializer())
+        ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -174,12 +175,13 @@ internal class KroniskKravKvitteringProcessorTest {
 
         processor.prosesser(jobb)
 
-        val expectedMessage = KroniskKravOpprettet(
+        val expectedMessage = DialogMelding(
+            type = DialogMeldingType.KroniskKravOpprettet,
             id = kravUtenNavn.id,
             orgnr = Orgnr(kravUtenNavn.virksomhetsnummer),
             navn = "Ukjent",
             fnr = kravUtenNavn.identitetsnummer
-        ).toJsonStr(FritakKravMelding.serializer())
+        ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }

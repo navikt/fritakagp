@@ -6,11 +6,9 @@ import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.helse.fritakagp.GravidKravMetrics
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
+import no.nav.helse.fritakagp.kafka.DialogMelding
+import no.nav.helse.fritakagp.kafka.DialogMeldingType
 import no.nav.helse.fritakagp.kafka.DialogSender
-import no.nav.helse.fritakagp.kafka.FritakKravMelding
-import no.nav.helse.fritakagp.kafka.GravidKravEndret
-import no.nav.helse.fritakagp.kafka.GravidKravOpprettet
-import no.nav.helse.fritakagp.kafka.GravidKravSlettet
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
@@ -40,25 +38,36 @@ class GravidKravKvitteringProcessor(
 
         val gravidKrav =
             when (krav.status) {
-                KravStatus.OPPRETTET -> {
-                    GravidKravOpprettet(id, orgnr, navn, fnr)
-                }
+                KravStatus.OPPRETTET ->
+                    DialogMelding(
+                        type = DialogMeldingType.GravidKravOpprettet,
+                        id = id,
+                        orgnr = orgnr,
+                        navn = navn,
+                        fnr = fnr
+                    )
 
                 KravStatus.OPPDATERT -> {
-                    GravidKravEndret(
-                        id,
-                        orgnr,
-                        navn,
-                        fnr,
-                        forrigeKrav =
-                        requireNotNull(kvitteringJobbData.forrigeKrav) {
+                    DialogMelding(
+                        type = DialogMeldingType.GravidKravEndret,
+                        id = id,
+                        orgnr = orgnr,
+                        navn = navn,
+                        fnr = fnr,
+                        forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
                             "forrigeKrav må være satt for status OPPDATERT"
                         }
                     )
                 }
 
                 KravStatus.SLETTET -> {
-                    GravidKravSlettet(id, orgnr, navn, fnr)
+                    DialogMelding(
+                        type = DialogMeldingType.GravidKravSlettet,
+                        id = id,
+                        orgnr = orgnr,
+                        navn = navn,
+                        fnr = fnr
+                    )
                 }
 
                 else -> {
@@ -66,7 +75,7 @@ class GravidKravKvitteringProcessor(
                 }
             }
 
-        dialogSender.sendMessage(gravidKrav.toJsonStr(FritakKravMelding.serializer()))
+        dialogSender.sendMessage(gravidKrav.toJsonStr(DialogMelding.serializer()))
 
         // TODO denne fjernes når vi går over til Dialogporten
         gravidKravKvitteringSender.send(krav)
