@@ -11,9 +11,10 @@ import no.nav.helse.fritakagp.kafka.FritakKravMelding
 import no.nav.helse.fritakagp.kafka.KroniskKravEndret
 import no.nav.helse.fritakagp.kafka.KroniskKravOpprettet
 import no.nav.helse.fritakagp.kafka.KroniskKravSlettet
+import no.nav.helse.fritakagp.processing.Jobb
+import no.nav.helse.fritakagp.processing.JobbdataMedEndring
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
-import java.util.UUID
 
 class KroniskKravKvitteringProcessor(
     private val kroniskKravKvitteringSender: KroniskKravKvitteringSender,
@@ -29,7 +30,7 @@ class KroniskKravKvitteringProcessor(
     override val type: String get() = JOB_TYPE
 
     override fun prosesser(jobb: Bakgrunnsjobb) {
-        val kvitteringJobbData = om.readValue(jobb.data, Jobbdata::class.java)
+        val kvitteringJobbData = om.readValue(jobb.data, Jobb::class.java)
         val krav = db.getById(kvitteringJobbData.kravId)
             ?: throw IllegalArgumentException("Fant ikke kravet i jobbdatanene ${jobb.data}")
         val navn = krav.navn ?: "Ukjent"
@@ -44,9 +45,7 @@ class KroniskKravKvitteringProcessor(
                 orgnr,
                 navn,
                 fnr,
-                forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
-                    "forrigeKrav må være satt for status OPPDATERT"
-                }
+                forrigeKrav = (kvitteringJobbData as JobbdataMedEndring).forrigeKrav
             )
 
             KravStatus.SLETTET -> KroniskKravSlettet(id, orgnr, navn, fnr)
@@ -60,9 +59,4 @@ class KroniskKravKvitteringProcessor(
 
         KroniskKravMetrics.tellKvitteringSendt()
     }
-
-    data class Jobbdata(
-        val kravId: UUID,
-        val forrigeKrav: UUID? = null
-    )
 }

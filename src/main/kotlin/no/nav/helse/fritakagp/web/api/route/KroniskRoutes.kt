@@ -22,6 +22,8 @@ import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
+import no.nav.helse.fritakagp.processing.Jobbdata
+import no.nav.helse.fritakagp.processing.JobbdataMedEndring
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravEndreProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringProcessor
@@ -231,7 +233,7 @@ fun Route.kroniskRoutes(
                     )
                     bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
+                        data = om.writeValueAsString(Jobbdata(krav.id))
                     )
                     bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                         maksAntallForsoek = 10,
@@ -321,7 +323,7 @@ fun Route.kroniskRoutes(
                     )
                     bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id, forrigeKrav.id))
+                        data = om.writeValueAsString(JobbdataMedEndring(kravTilOppdatering.id, forrigeKrav.id))
                     )
                     bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                         maksAntallForsoek = 10,
@@ -375,7 +377,7 @@ fun Route.kroniskRoutes(
                     )
                     bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
+                        data = om.writeValueAsString(Jobbdata(krav.id))
                     )
 
                     logger.info("Kronisk krav slettet OK.")

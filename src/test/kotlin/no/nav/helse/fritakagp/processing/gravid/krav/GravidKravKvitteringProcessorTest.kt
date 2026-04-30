@@ -14,6 +14,8 @@ import no.nav.helse.fritakagp.kafka.GravidKravEndret
 import no.nav.helse.fritakagp.kafka.GravidKravOpprettet
 import no.nav.helse.fritakagp.kafka.GravidKravSlettet
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
+import no.nav.helse.fritakagp.processing.Jobbdata
+import no.nav.helse.fritakagp.processing.JobbdataMedEndring
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.junit.jupiter.api.BeforeEach
@@ -46,7 +48,7 @@ internal class GravidKravKvitteringProcessorTest {
         every { repositoryMock.getById(testKrav.id) } returns testKrav
         jobb = BakgrunnsJobbUtils.testJob(
             objectMapper.writeValueAsString(
-                GravidKravKvitteringProcessor.Jobbdata(testKrav.id)
+                Jobbdata(testKrav.id)
             )
         )
     }
@@ -85,7 +87,7 @@ internal class GravidKravKvitteringProcessorTest {
 
         jobb = BakgrunnsJobbUtils.testJob(
             objectMapper.writeValueAsString(
-                GravidKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId)
+                JobbdataMedEndring(testKrav.id, forrigeKravId)
             )
         )
 
@@ -103,7 +105,7 @@ internal class GravidKravKvitteringProcessorTest {
 
         jobb = BakgrunnsJobbUtils.testJob(
             objectMapper.writeValueAsString(
-                GravidKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId)
+                JobbdataMedEndring(testKrav.id, forrigeKravId)
             )
         )
 
@@ -126,7 +128,7 @@ internal class GravidKravKvitteringProcessorTest {
 
         jobb = BakgrunnsJobbUtils.testJob(
             objectMapper.writeValueAsString(
-                GravidKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKrav = null)
+                Jobbdata(testKrav.id)
             )
         )
 

@@ -14,6 +14,8 @@ import no.nav.helse.fritakagp.kafka.KroniskKravEndret
 import no.nav.helse.fritakagp.kafka.KroniskKravOpprettet
 import no.nav.helse.fritakagp.kafka.KroniskKravSlettet
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
+import no.nav.helse.fritakagp.processing.Jobbdata
+import no.nav.helse.fritakagp.processing.JobbdataMedEndring
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.junit.jupiter.api.BeforeEach
@@ -43,7 +45,7 @@ internal class KroniskKravKvitteringProcessorTest {
     fun setup() {
         every { repositoryMock.getById(testKrav.id) } returns testKrav
         jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id))
+            objectMapper.writeValueAsString(Jobbdata(testKrav.id))
         )
     }
 
@@ -78,7 +80,7 @@ internal class KroniskKravKvitteringProcessorTest {
         testKrav.status = KravStatus.OPPDATERT
         val forrigeKravId = UUID.randomUUID()
         jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId))
+            objectMapper.writeValueAsString(JobbdataMedEndring(testKrav.id, forrigeKravId))
         )
 
         processor.prosesser(jobb)
@@ -92,7 +94,7 @@ internal class KroniskKravKvitteringProcessorTest {
         testKrav.status = KravStatus.OPPDATERT
         val forrigeKravId = UUID.randomUUID()
         jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId))
+            objectMapper.writeValueAsString(JobbdataMedEndring(testKrav.id, forrigeKravId))
         )
 
         processor.prosesser(jobb)
@@ -112,7 +114,7 @@ internal class KroniskKravKvitteringProcessorTest {
     fun `skal kaste exception nar forrigeKrav mangler for OPPDATERT status`() {
         testKrav.status = KravStatus.OPPDATERT
         jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKrav = null))
+            objectMapper.writeValueAsString(Jobbdata(testKrav.id))
         )
 
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }

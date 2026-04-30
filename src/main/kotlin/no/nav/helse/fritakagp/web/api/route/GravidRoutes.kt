@@ -22,6 +22,8 @@ import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.integration.gcp.BucketStorage
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
+import no.nav.helse.fritakagp.processing.Jobbdata
+import no.nav.helse.fritakagp.processing.JobbdataMedEndring
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravEndreProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcessor
@@ -165,7 +167,7 @@ fun Route.gravidRoutes(
                 )
                 bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
+                    data = om.writeValueAsString(Jobbdata(krav.id))
                 )
                 bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                     maksAntallForsoek = 10,
@@ -233,7 +235,7 @@ fun Route.gravidRoutes(
                 )
                 bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id, forrigeKrav.id))
+                    data = om.writeValueAsString(JobbdataMedEndring(kravTilOppdatering.id, forrigeKrav.id))
                 )
                 bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                     maksAntallForsoek = 10,
@@ -272,7 +274,7 @@ fun Route.gravidRoutes(
                 )
                 bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
+                    data = om.writeValueAsString(Jobbdata(krav.id))
                 )
                 call.respond(HttpStatusCode.OK)
             }

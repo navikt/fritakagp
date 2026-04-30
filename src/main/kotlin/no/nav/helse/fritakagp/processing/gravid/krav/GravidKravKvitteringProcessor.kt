@@ -11,9 +11,11 @@ import no.nav.helse.fritakagp.kafka.FritakKravMelding
 import no.nav.helse.fritakagp.kafka.GravidKravEndret
 import no.nav.helse.fritakagp.kafka.GravidKravOpprettet
 import no.nav.helse.fritakagp.kafka.GravidKravSlettet
+import no.nav.helse.fritakagp.processing.Jobb
+import no.nav.helse.fritakagp.processing.JobbdataMedEndring
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
-import java.util.UUID
+import kotlin.jvm.java
 
 class GravidKravKvitteringProcessor(
     private val gravidKravKvitteringSender: GravidKravKvitteringSender,
@@ -28,7 +30,7 @@ class GravidKravKvitteringProcessor(
     override val type: String get() = JOB_TYPE
 
     override fun prosesser(jobb: Bakgrunnsjobb) {
-        val kvitteringJobbData = om.readValue(jobb.data, Jobbdata::class.java)
+        val kvitteringJobbData = om.readValue(jobb.data, Jobb::class.java)
         val krav =
             db.getById(kvitteringJobbData.kravId)
                 ?: throw IllegalArgumentException("Fant ikke kravet i jobbdataene ${jobb.data}")
@@ -51,9 +53,7 @@ class GravidKravKvitteringProcessor(
                         navn,
                         fnr,
                         forrigeKrav =
-                        requireNotNull(kvitteringJobbData.forrigeKrav) {
-                            "forrigeKrav må være satt for status OPPDATERT"
-                        }
+                        (kvitteringJobbData as JobbdataMedEndring).forrigeKrav
                     )
                 }
 
@@ -73,9 +73,4 @@ class GravidKravKvitteringProcessor(
 
         GravidKravMetrics.tellKvitteringSendt()
     }
-
-    data class Jobbdata(
-        val kravId: UUID,
-        val forrigeKrav: UUID? = null
-    )
 }
