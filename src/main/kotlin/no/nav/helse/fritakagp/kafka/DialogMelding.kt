@@ -2,7 +2,6 @@
 
 package no.nav.helse.fritakagp.kafka
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import no.nav.helsearbeidsgiver.utils.json.serializer.UuidSerializer
@@ -19,22 +18,11 @@ data class DialogMelding(
 ) {
     @Serializable
     enum class Type {
-        @SerialName("GravidSoeknadOpprettet")
-        GravidSoeknadOpprettet,
-
-        @SerialName("KroniskSoeknadOpprettet")
         KroniskSoeknadOpprettet,
-
-        @SerialName("KroniskKravOpprettet")
         KroniskKravOpprettet,
-
-        @SerialName("KroniskKravSlettet")
         KroniskKravSlettet,
-
-        @SerialName("GravidKravOpprettet")
+        GravidSoeknadOpprettet,
         GravidKravOpprettet,
-
-        @SerialName("GravidKravSlettet")
         GravidKravSlettet
     }
 }
