@@ -6,11 +6,9 @@ import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbProsesserer
 import no.nav.helse.fritakagp.KroniskKravMetrics
 import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
+import no.nav.helse.fritakagp.kafka.DialogMelding
+import no.nav.helse.fritakagp.kafka.DialogMeldingMedEndring
 import no.nav.helse.fritakagp.kafka.DialogSender
-import no.nav.helse.fritakagp.kafka.FritakKravMelding
-import no.nav.helse.fritakagp.kafka.KroniskKravEndret
-import no.nav.helse.fritakagp.kafka.KroniskKravOpprettet
-import no.nav.helse.fritakagp.kafka.KroniskKravSlettet
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
@@ -38,22 +36,43 @@ class KroniskKravKvitteringProcessor(
         val fnr = krav.identitetsnummer
 
         val kroniskKrav = when (krav.status) {
-            KravStatus.OPPRETTET -> KroniskKravOpprettet(id, orgnr, navn, fnr)
-            KravStatus.OPPDATERT -> KroniskKravEndret(
-                id,
-                orgnr,
-                navn,
-                fnr,
+            KravStatus.OPPRETTET -> DialogMelding(
+                type = DialogMelding.Type.KroniskKravOpprettet,
+                id = id,
+                orgnr = orgnr,
+                navn = navn,
+                fnr = fnr
+            )
+
+            KravStatus.OPPDATERT -> DialogMeldingMedEndring(
+                type = DialogMeldingMedEndring.Type.KroniskKravEndret,
+                id = id,
+                orgnr = orgnr,
+                navn = navn,
+                fnr = fnr,
                 forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
                     "forrigeKrav må være satt for status OPPDATERT"
                 }
             )
 
-            KravStatus.SLETTET -> KroniskKravSlettet(id, orgnr, navn, fnr)
+            KravStatus.SLETTET -> DialogMelding(
+                type = DialogMelding.Type.KroniskKravSlettet,
+                id = id,
+                orgnr = orgnr,
+                navn = navn,
+                fnr = fnr
+            )
+
             else -> throw IllegalArgumentException("Ugyldig kravstatus for kvittering: ${krav.status}")
         }
 
-        dialogSender.sendMessage(kroniskKrav.toJsonStr(FritakKravMelding.serializer()))
+        val melding = when (kroniskKrav) {
+            is DialogMelding -> kroniskKrav.toJsonStr(DialogMelding.serializer())
+            is DialogMeldingMedEndring -> kroniskKrav.toJsonStr(DialogMeldingMedEndring.serializer())
+            else -> throw IllegalArgumentException("Ugyldig meldingstype")
+        }
+
+        dialogSender.sendMessage(melding)
 
         // TODO denne fjernes når vi går over til Dialogporten
         kroniskKravKvitteringSender.send(krav)

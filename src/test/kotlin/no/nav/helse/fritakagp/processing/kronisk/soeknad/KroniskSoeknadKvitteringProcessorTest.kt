@@ -9,7 +9,6 @@ import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogSender
-import no.nav.helse.fritakagp.kafka.KroniskSoeknadOpprettet
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -46,7 +45,8 @@ internal class KroniskSoeknadKvitteringProcessorTest {
     @Test
     fun `skal sende dialog melding og kvittering`() {
         processor.prosesser(jobb)
-        val expectedMessage = KroniskSoeknadOpprettet(
+        val expectedMessage = DialogMelding(
+            type = DialogMelding.Type.KroniskSoeknadOpprettet,
             id = testSoeknad.id,
             orgnr = Orgnr(testSoeknad.virksomhetsnummer),
             navn = testSoeknad.navn!!,

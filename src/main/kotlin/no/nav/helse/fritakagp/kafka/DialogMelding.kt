@@ -1,104 +1,56 @@
-@file:UseSerializers(LocalDateSerializer::class, UuidSerializer::class)
+@file:UseSerializers(UuidSerializer::class)
 
 package no.nav.helse.fritakagp.kafka
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
-import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateSerializer
 import no.nav.helsearbeidsgiver.utils.json.serializer.UuidSerializer
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 @Serializable
-sealed class DialogMelding
+data class DialogMelding(
+    val type: Type,
+    val id: UUID,
+    val orgnr: Orgnr,
+    val navn: String,
+    val fnr: String
+) {
+    @Serializable
+    enum class Type {
+        @SerialName("GravidSoeknadOpprettet")
+        GravidSoeknadOpprettet,
 
-@Serializable
-sealed class FritakKravMelding : DialogMelding() {
-    abstract val id: UUID
-    abstract val orgnr: Orgnr
-    abstract val navn: String
-    abstract val fnr: String
+        @SerialName("KroniskSoeknadOpprettet")
+        KroniskSoeknadOpprettet,
+
+        @SerialName("KroniskKravOpprettet")
+        KroniskKravOpprettet,
+
+        @SerialName("KroniskKravSlettet")
+        KroniskKravSlettet,
+
+        @SerialName("GravidKravOpprettet")
+        GravidKravOpprettet,
+
+        @SerialName("GravidKravSlettet")
+        GravidKravSlettet
+    }
 }
 
 @Serializable
-sealed class FritakSoeknadMelding : DialogMelding() {
-    abstract val id: UUID
-    abstract val orgnr: Orgnr
-    abstract val navn: String
-    abstract val fnr: String
+data class DialogMeldingMedEndring(
+    val type: Type,
+    val id: UUID,
+    val orgnr: Orgnr,
+    val navn: String,
+    val fnr: String,
+    val forrigeKrav: UUID
+) {
+    @Serializable
+    enum class Type {
+        GravidKravEndret,
+        KroniskKravEndret
+    }
 }
-
-@Serializable
-@SerialName("GravidSoeknadOpprettet")
-data class GravidSoeknadOpprettet(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String
-) : FritakSoeknadMelding()
-
-@Serializable
-@SerialName("KroniskSoeknadOpprettet")
-data class KroniskSoeknadOpprettet(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String
-) : FritakSoeknadMelding()
-
-@Serializable
-@SerialName("KroniskKravOpprettet")
-data class KroniskKravOpprettet(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String
-) : FritakKravMelding()
-
-@Serializable
-@SerialName("KroniskKravEndret")
-data class KroniskKravEndret(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String,
-    val forrigeKrav: UUID
-) : FritakKravMelding()
-
-@Serializable
-@SerialName("KroniskKravSlettet")
-data class KroniskKravSlettet(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String
-) : FritakKravMelding()
-
-@Serializable
-@SerialName("GravidKravOpprettet")
-data class GravidKravOpprettet(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String
-) : FritakKravMelding()
-
-@Serializable
-@SerialName("GravidKravEndret")
-data class GravidKravEndret(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String,
-    val forrigeKrav: UUID
-) : FritakKravMelding()
-
-@Serializable
-@SerialName("GravidKravSlettet")
-data class GravidKravSlettet(
-    override val id: UUID,
-    override val orgnr: Orgnr,
-    override val navn: String,
-    override val fnr: String
-) : FritakKravMelding()
