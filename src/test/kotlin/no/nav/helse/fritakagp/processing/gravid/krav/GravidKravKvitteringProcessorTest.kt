@@ -50,17 +50,6 @@ internal class GravidKravKvitteringProcessorTest {
     }
 
     @Test
-    fun `skal sende dialog melding for OPPRETTET krav`() {
-        testKrav.status = KravStatus.OPPRETTET
-
-        processor.prosesser(jobb)
-
-        verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-
-        verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
-    }
-
-    @Test
     fun `skal sende korrekt dialog melding for OPPRETTET krav`() {
         testKrav.status = KravStatus.OPPRETTET
 
@@ -75,23 +64,6 @@ internal class GravidKravKvitteringProcessorTest {
         ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
-    }
-
-    @Test
-    fun `skal sende dialog melding for ENDRET krav`() {
-        testKrav.status = KravStatus.OPPDATERT
-        val forrigeKravId = UUID.randomUUID()
-
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(
-                GravidKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId)
-            )
-        )
-
-        processor.prosesser(jobb)
-
-        verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-
         verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
     }
 
@@ -118,6 +90,7 @@ internal class GravidKravKvitteringProcessorTest {
         ).toJsonStr(DialogMeldingMedEndring.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
+        verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -137,17 +110,6 @@ internal class GravidKravKvitteringProcessorTest {
     }
 
     @Test
-    fun `skal sende dialog melding for SLETTET krav`() {
-        testKrav.status = KravStatus.SLETTET
-
-        processor.prosesser(jobb)
-
-        verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-
-        verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
-    }
-
-    @Test
     fun `skal sende korrekt dialog melding for SLETTET krav`() {
         testKrav.status = KravStatus.SLETTET
 
@@ -162,6 +124,7 @@ internal class GravidKravKvitteringProcessorTest {
         ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
+        verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test

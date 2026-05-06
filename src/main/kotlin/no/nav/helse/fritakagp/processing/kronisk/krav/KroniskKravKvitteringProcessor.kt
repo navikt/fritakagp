@@ -10,6 +10,7 @@ import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogMeldingMedEndring
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
@@ -51,7 +52,7 @@ class KroniskKravKvitteringProcessor(
                 navn = navn,
                 fnr = fnr,
                 forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
-                    "forrigeKrav må være satt for status OPPDATERT"
+                    "forrigeKrav må være satt for ${krav.id} med status ${krav.status} "
                 }
             )
 
@@ -63,7 +64,7 @@ class KroniskKravKvitteringProcessor(
                 fnr = fnr
             )
 
-            else -> throw IllegalArgumentException("Ugyldig kravstatus for kvittering: ${krav.status}")
+            else -> throw IllegalArgumentException("Ugyldig kravstatus for kravId ${krav.id} kvittering: ${krav.status}")
         }
 
         val melding = when (kroniskKrav) {
@@ -71,7 +72,7 @@ class KroniskKravKvitteringProcessor(
             is DialogMeldingMedEndring -> kroniskKrav.toJsonStr(DialogMeldingMedEndring.serializer())
             else -> throw IllegalArgumentException("Ugyldig meldingstype")
         }
-
+        logger().info("Sender kronisk krav kvittering for krav ${krav.id} til dialogporten")
         dialogSender.sendMessage(melding)
 
         // TODO denne fjernes når vi går over til Dialogporten

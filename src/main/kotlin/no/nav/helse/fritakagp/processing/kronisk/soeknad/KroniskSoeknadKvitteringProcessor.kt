@@ -9,6 +9,7 @@ import no.nav.helse.fritakagp.db.KroniskSoeknadRepository
 import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
@@ -37,7 +38,7 @@ class KroniskSoeknadKvitteringProcessor(
             navn = navn,
             fnr = soeknad.identitetsnummer
         )
-
+        logger().info("Sender kronisk søknad kvittering for søknad ${soeknad.id} til dialogporten")
         dialogSender.sendMessage(kroniskSoeknad.toJsonStr(DialogMelding.serializer()))
 
         // TODO denne fjernes når vi går over til Dialogporten

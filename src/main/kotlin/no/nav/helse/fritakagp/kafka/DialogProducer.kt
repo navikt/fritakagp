@@ -17,7 +17,7 @@ class MockDialogProducer : DialogSender {
     private val logger = this.logger()
 
     override fun sendMessage(message: String): RecordMetadata? {
-        logger.info("Mocked sending av dialogId $message til Kafka-topic $DEFAULT_DIALOG_TOPIC_NAME")
+        logger.info("Mocked sending til Kafka-topic $DEFAULT_DIALOG_TOPIC_NAME")
         return null
     }
 }

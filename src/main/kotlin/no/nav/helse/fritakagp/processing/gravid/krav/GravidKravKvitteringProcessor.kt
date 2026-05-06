@@ -10,6 +10,7 @@ import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogMeldingMedEndring
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
@@ -72,16 +73,16 @@ class GravidKravKvitteringProcessor(
                 }
 
                 else -> {
-                    throw IllegalArgumentException("Ugyldig kravstatus for kvittering: ${krav.status}")
+                    throw IllegalArgumentException("Ugyldig kravstatus for kvittering for ${krav.id} med ${krav.status}")
                 }
             }
 
         val melding = when (gravidKrav) {
             is DialogMelding -> gravidKrav.toJsonStr(DialogMelding.serializer())
             is DialogMeldingMedEndring -> gravidKrav.toJsonStr(DialogMeldingMedEndring.serializer())
-            else -> throw IllegalArgumentException("Ugyldig meldingstype")
+            else -> throw IllegalArgumentException("Ugyldig meldingstype for krevId:$gravidKrav")
         }
-
+        logger().info("Sender gravid krav kvittering for krav ${krav.id} til dialogporten")
         dialogSender.sendMessage(melding)
 
         // TODO denne fjernes når vi går over til Dialogporten
