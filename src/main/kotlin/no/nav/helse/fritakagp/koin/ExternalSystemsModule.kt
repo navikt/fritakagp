@@ -11,6 +11,9 @@ import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
 import no.nav.helse.fritakagp.integration.kafka.brukernotifikasjonKafkaProps
 import no.nav.helse.fritakagp.integration.virusscan.ClamavVirusScannerImp
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
+import no.nav.helse.fritakagp.kafka.DialogSender
+import no.nav.helse.fritakagp.kafka.KafkaConfig
+import no.nav.helse.fritakagp.kafka.KafkaDialogProducer
 import no.nav.helse.fritakagp.web.auth.AuthClient
 import no.nav.helse.fritakagp.web.auth.IdentityProvider
 import no.nav.helsearbeidsgiver.aareg.AaregClient
@@ -86,6 +89,16 @@ fun Module.externalSystemClients(env: Env) {
             env.kafkaTopicNameBrukernotifikasjon
         )
     } bind BrukernotifikasjonSender::class
+
+    single { KafkaConfig() }
+
+    single {
+        val kafkaConfig: KafkaConfig = get()
+        KafkaDialogProducer(
+            topicName = env.kafkaTopicNameDialog,
+            props = kafkaConfig.dialogProducerConfig
+        )
+    } bind DialogSender::class
 
     single { AuthClient(tokenEndpoint = env.tokenEndpoint, tokenExchangeEndpoint = env.tokenExchangeEndpoint) }
 }
