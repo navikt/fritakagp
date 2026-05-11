@@ -190,6 +190,39 @@ fun Route.kroniskRoutes(
                     }
                 }
             }
+            get("/dokument/{id}") {
+                val kravId = requestHandler.lesParameterId(this)
+
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /kronisk/krav/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Hent kronisk krav.")
+
+                    val innloggetFnr = hentFnrFraLoginToken()
+
+                    logger.info("Hent kronisk krav fra database.")
+                    val krav = kroniskKravRepo.getById(kravId)
+
+                    if (krav == null) {
+                        logger.warn("Kronisk krav ikke funnet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        if (krav.identitetsnummer != innloggetFnr) {
+                            logger.info("Fnr på kronisk krav matcher ikke innlogget fnr.")
+                            authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+                        }
+
+                        logger.info("Hent personinfo fra PDL.")
+                        krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+
+                        logger.info("Kronisk krav hentet OK.")
+                        call.respond(HttpStatusCode.OK, krav)
+                    }
+                }
+            }
 
             post {
                 MdcUtils.withLogFields(

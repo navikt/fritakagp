@@ -140,6 +140,24 @@ fun Route.gravidRoutes(
                     call.respond(HttpStatusCode.OK, krav)
                 }
             }
+            get("/dokument/{id}") {
+                val kravId = requestHandler.lesParameterId(this)
+
+                val innloggetFnr = hentFnrFraLoginToken()
+                val krav = gravidKravRepo.getById(kravId)
+
+                if (krav == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                } else {
+                    if (krav.identitetsnummer != innloggetFnr) {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+                    }
+                    krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                    krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+
+                    call.respond(HttpStatusCode.OK, krav)
+                }
+            }
 
             post {
                 val request = requestHandler.lesRequestBody<GravidKravRequest>(this)
