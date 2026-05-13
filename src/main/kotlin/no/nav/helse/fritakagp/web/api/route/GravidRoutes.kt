@@ -153,7 +153,7 @@ fun Route.gravidRoutes(
             get("/dokument/{id}") {
                 val kravId = requestHandler.lesParameterId(this)
                 MdcUtils.withLogFields(
-                    Log.apiRoute("GET /gravid/krav/{id}"),
+                    Log.apiRoute("GET /gravid/krav/dokument/{id}"),
                     Log.kravId(kravId),
                     Log.kontekstId(UUID.randomUUID())
                 ) {

@@ -191,7 +191,7 @@ fun Route.kroniskRoutes(
                 val kravId = requestHandler.lesParameterId(this)
 
                 MdcUtils.withLogFields(
-                    Log.apiRoute("GET /kronisk/krav/{id}"),
+                    Log.apiRoute("GET /kronisk/krav/dokument/{id}"),
                     Log.kravId(kravId),
                     Log.kontekstId(UUID.randomUUID())
                 ) {
