@@ -170,26 +170,22 @@ fun Route.kroniskRoutes(
                     val krav = kroniskKravRepo.getById(kravId)
 
                     if (krav == null) {
-                        logger.warn("Kronisk krav ikke funnet.")
+                        logger.warn("Kronisk krav med id $kravId ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else if (!erSlettet && krav.status == KravStatus.SLETTET) {
-                        logger.warn("Kronisk krav er slettet.")
+                        logger.warn("Kronisk krav med id $kravId er slettet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
-                        if (krav.identitetsnummer != innloggetFnr) {
-                            logger.info("Fnr på kronisk krav matcher ikke innlogget fnr.")
-                            authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
-                        }
-
                         logger.info("Hent personinfo fra PDL.")
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
 
-                        logger.info("Kronisk krav hentet OK.")
+                        logger.info("Kronisk krav med $kravId hentet OK.")
                         call.respond(HttpStatusCode.OK, krav)
                     }
                 }
             }
+            // Dette endepunktet brukes til PDF-generering og henter i tillegg soft-deleted krav. Denne skal erstatte den gamle routen på sikt, men da må frontend-koden i så fall håndtere at soft-deleted krav også hentes.
             get("/dokument/{id}") {
                 val kravId = requestHandler.lesParameterId(this)
 
@@ -198,27 +194,21 @@ fun Route.kroniskRoutes(
                     Log.kravId(kravId),
                     Log.kontekstId(UUID.randomUUID())
                 ) {
-                    logger.info("Hent kronisk krav.")
+                    logger.info("Hent kronisk krav med id $kravId")
 
                     val innloggetFnr = hentFnrFraLoginToken()
 
-                    logger.info("Hent kronisk krav fra database.")
                     val krav = kroniskKravRepo.getById(kravId)
 
                     if (krav == null) {
-                        logger.warn("Kronisk krav ikke funnet.")
+                        logger.warn("Kronisk krav med id $kravId ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
-                        if (krav.identitetsnummer != innloggetFnr) {
-                            logger.info("Fnr på kronisk krav matcher ikke innlogget fnr.")
-                            authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
-                        }
-
                         logger.info("Hent personinfo fra PDL.")
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
 
-                        logger.info("Kronisk krav hentet OK.")
+                        logger.info("Kronisk krav med $kravId hentet OK.")
                         call.respond(HttpStatusCode.OK, krav)
                     }
                 }
