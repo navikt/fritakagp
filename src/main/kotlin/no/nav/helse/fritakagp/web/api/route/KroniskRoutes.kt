@@ -176,6 +176,7 @@ fun Route.kroniskRoutes(
                         logger.warn("Kronisk krav med id $kravId er slettet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
                         logger.info("Hent personinfo fra PDL.")
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
@@ -204,6 +205,8 @@ fun Route.kroniskRoutes(
                         logger.warn("Kronisk krav med id $kravId ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+
                         logger.info("Hent personinfo fra PDL.")
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)

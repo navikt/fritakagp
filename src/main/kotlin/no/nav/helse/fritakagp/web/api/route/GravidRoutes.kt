@@ -140,6 +140,8 @@ fun Route.gravidRoutes(
                         logger.warn("Gravid krav med id $kravId er slettet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
                         logger.info("Gravid krav med $kravId hentet OK.")
@@ -163,6 +165,8 @@ fun Route.gravidRoutes(
                         logger.warn("Gravid krav med id $kravId ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
                         logger.info("Gravid krav med $kravId hentet OK.")
