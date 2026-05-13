@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.fritakagp.GravidKravMetrics
 import no.nav.helse.fritakagp.GravidSoeknadMetrics
+import no.nav.helse.fritakagp.Log
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepBeregning
@@ -40,6 +41,7 @@ import no.nav.helse.fritakagp.web.auth.hentFnrFraLoginToken
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
+import no.nav.helsearbeidsgiver.utils.log.MdcUtils
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -122,22 +124,54 @@ fun Route.gravidRoutes(
         route("/krav") {
             get("/{id}") {
                 val kravId = requestHandler.lesParameterId(this)
-
-                val innloggetFnr = hentFnrFraLoginToken()
-                val krav = gravidKravRepo.getById(kravId)
-                val slettet = call.request.queryParameters.contains("slettet")
-                if (krav == null) {
-                    call.respond(HttpStatusCode.NotFound)
-                } else if (!slettet && krav.status == KravStatus.SLETTET) {
-                    call.respond(HttpStatusCode.NotFound)
-                } else {
-                    if (krav.identitetsnummer != innloggetFnr) {
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /gravid/krav/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Hent gravid krav med id $kravId")
+                    val innloggetFnr = hentFnrFraLoginToken()
+                    val krav = gravidKravRepo.getById(kravId)
+                    val slettet = call.request.queryParameters.contains("slettet")
+                    if (krav == null) {
+                        logger.warn("Gravid krav med id $kravId ikke funnet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else if (!slettet && krav.status == KravStatus.SLETTET) {
+                        logger.warn("Gravid krav med id $kravId er slettet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
                         authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
-                    }
-                    krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
-                    krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
 
-                    call.respond(HttpStatusCode.OK, krav)
+                        krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+                        logger.info("Gravid krav med $kravId hentet OK.")
+                        call.respond(HttpStatusCode.OK, krav)
+                    }
+                }
+            }
+            // Dette endepunktet brukes til PDF-generering og henter i tillegg soft-deleted krav. Denne skal erstatte den gamle routen på sikt, men da må frontend-koden i så fall håndtere at soft-deleted krav også hentes.
+            get("/dokument/{id}") {
+                val kravId = requestHandler.lesParameterId(this)
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /gravid/krav/dokument/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID())
+                ) {
+                    logger.info("Hent gravid krav med id $kravId")
+                    val innloggetFnr = hentFnrFraLoginToken()
+                    val krav = gravidKravRepo.getById(kravId)
+
+                    if (krav == null) {
+                        logger.warn("Gravid krav med id $kravId ikke funnet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+
+                        krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+                        logger.info("Gravid krav med $kravId hentet OK.")
+                        call.respond(HttpStatusCode.OK, krav)
+                    }
                 }
             }
 
