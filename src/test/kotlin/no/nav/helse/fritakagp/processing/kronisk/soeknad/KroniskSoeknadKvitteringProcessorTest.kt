@@ -53,7 +53,6 @@ internal class KroniskSoeknadKvitteringProcessorTest {
             fnr = testSoeknad.identitetsnummer
         ).toJsonStr(DialogMelding.serializer())
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
-        verify(exactly = 1) { kroniskSoeknadKvitteringSenderMock.send(testSoeknad) }
     }
 
     @Test

@@ -40,9 +40,6 @@ class GravidSoeknadKvitteringProcessor(
         logger().info("Sender gravid søknad kvittering for søknad ${soeknad.id} til dialogporten")
         dialogSender.sendMessage(gravidSoeknadMelding.toJsonStr(DialogMelding.serializer()))
 
-        // TODO denne fjernes når vi går over til Dialogporten
-        gravidSoeknadKvitteringSender.send(soeknad)
-
         GravidSoeknadMetrics.tellKvitteringSendt()
     }
 

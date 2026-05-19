@@ -41,9 +41,6 @@ class KroniskSoeknadKvitteringProcessor(
         logger().info("Sender kronisk søknad kvittering for søknad ${soeknad.id} til dialogporten")
         dialogSender.sendMessage(kroniskSoeknad.toJsonStr(DialogMelding.serializer()))
 
-        // TODO denne fjernes når vi går over til Dialogporten
-        kroniskSoeknadKvitteringSender.send(soeknad)
-
         KroniskSoeknadMetrics.tellKvitteringSendt()
     }
 

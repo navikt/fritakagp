@@ -52,7 +52,6 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 1) { kroniskKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -83,7 +82,6 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 1) { kroniskKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -128,7 +126,6 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 1) { kroniskKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test

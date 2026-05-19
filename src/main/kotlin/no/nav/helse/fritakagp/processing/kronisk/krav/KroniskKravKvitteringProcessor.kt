@@ -75,9 +75,6 @@ class KroniskKravKvitteringProcessor(
         logger().info("Sender kronisk krav kvittering for krav ${krav.id} til dialogporten")
         dialogSender.sendMessage(melding)
 
-        // TODO denne fjernes når vi går over til Dialogporten
-        kroniskKravKvitteringSender.send(krav)
-
         KroniskKravMetrics.tellKvitteringSendt()
     }
 

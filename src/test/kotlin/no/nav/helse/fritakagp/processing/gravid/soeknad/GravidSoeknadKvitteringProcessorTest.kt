@@ -55,7 +55,6 @@ internal class GravidSoeknadKvitteringProcessorTest {
         ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
-        verify(exactly = 1) { gravidSoeknadKvitteringSenderMock.send(testSoeknad) }
     }
 
     @Test

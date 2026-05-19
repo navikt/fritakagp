@@ -85,9 +85,6 @@ class GravidKravKvitteringProcessor(
         logger().info("Sender gravid krav kvittering for krav ${krav.id} til dialogporten")
         dialogSender.sendMessage(melding)
 
-        // TODO denne fjernes når vi går over til Dialogporten
-        gravidKravKvitteringSender.send(krav)
-
         GravidKravMetrics.tellKvitteringSendt()
     }
 
