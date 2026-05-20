@@ -15,7 +15,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class KroniskKravKvitteringProcessor(
-    private val kroniskKravKvitteringSender: KroniskKravKvitteringSender,
     private val db: KroniskKravRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender

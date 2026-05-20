@@ -15,7 +15,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class GravidKravKvitteringProcessor(
-    private val gravidKravKvitteringSender: GravidKravKvitteringSender,
     private val db: GravidKravRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
