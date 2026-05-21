@@ -25,10 +25,8 @@ import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOp
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonService
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravEndreProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravSlettProcessor
@@ -105,22 +103,12 @@ fun preprodConfig(env: Env.Preprod): Module = module {
 
     single {
         GravidSoeknadKvitteringProcessor(
-            gravidSoeknadKvitteringSender = get(),
             db = get(),
             om = get(),
             dialogSender = get()
 
         )
     }
-
-    single {
-        GravidKravAltinnKvitteringSender(
-            env.altinnMeldingServiceId,
-            get(),
-            env.altinnMeldingUsername,
-            env.altinnMeldingPassword
-        )
-    } bind GravidKravKvitteringSender::class
 
     single { GravidKravKvitteringProcessor(get(), get(), get()) }
 

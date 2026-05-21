@@ -24,7 +24,6 @@ internal class GravidSoeknadKvitteringProcessorTest {
     private val dialogSenderMock = mockk<DialogSender>(relaxed = true)
 
     private val processor = GravidSoeknadKvitteringProcessor(
-        gravidSoeknadKvitteringSender = gravidSoeknadKvitteringSenderMock,
         db = repositoryMock,
         om = objectMapper,
         dialogSender = dialogSenderMock

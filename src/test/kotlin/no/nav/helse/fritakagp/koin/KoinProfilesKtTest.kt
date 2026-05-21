@@ -22,7 +22,6 @@ import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonPr
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonService
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringProcessor
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravEndreProcessor
@@ -70,7 +69,6 @@ class KoinProfilesKtTest : KoinTest {
     private val kroniskKravEndreProcessor: KroniskKravEndreProcessor by inject()
     private val gravidSoeknadKvitteringSender: GravidSoeknadKvitteringSender by inject()
     private val gravidSoeknadKvitteringProcessor: GravidSoeknadKvitteringProcessor by inject()
-    private val gravidKravKvitteringSender: GravidKravKvitteringSender by inject()
     private val gravidKravKvitteringProcessor: GravidKravKvitteringProcessor by inject()
     private val kroniskSoeknadKvitteringSender: KroniskSoeknadKvitteringSender by inject()
     private val kroniskSoeknadKvitteringProcessor: KroniskSoeknadKvitteringProcessor by inject()
@@ -127,7 +125,6 @@ class KoinProfilesKtTest : KoinTest {
         assertNotNull(kroniskKravEndreProcessor)
         assertNotNull(gravidSoeknadKvitteringSender)
         assertNotNull(gravidSoeknadKvitteringProcessor)
-        assertNotNull(gravidKravKvitteringSender)
         assertNotNull(gravidKravKvitteringProcessor)
         assertNotNull(kroniskSoeknadKvitteringSender)
         assertNotNull(kroniskSoeknadKvitteringProcessor)

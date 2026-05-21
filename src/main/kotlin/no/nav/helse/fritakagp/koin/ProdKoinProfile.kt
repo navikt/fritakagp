@@ -25,10 +25,8 @@ import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOp
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonService
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravEndreProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravSlettProcessor
@@ -106,16 +104,7 @@ fun prodConfig(env: Env.Prod): Module = module {
         )
     } bind GravidSoeknadKvitteringSender::class
 
-    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
-
-    single {
-        GravidKravAltinnKvitteringSender(
-            altinnTjenesteKode = env.altinnMeldingServiceId,
-            iCorrespondenceAgencyExternalBasic = get(),
-            username = env.altinnMeldingUsername,
-            password = env.altinnMeldingPassword
-        )
-    } bind GravidKravKvitteringSender::class
+    single { GravidSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single { GravidKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
