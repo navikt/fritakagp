@@ -38,7 +38,7 @@ data class KroniskSoeknad(
     companion object {
         const val tittel = "Søknad om fritak fra arbeidsgiverperioden - kronisk eller langvarig sykdom"
     }
-    val fravaerPerAar: Map<String, Float>
+    val fravaerPerAar: Set<FravaerPerAar>
         get() = fravaer.tilFravaerPerAar()
 }
 

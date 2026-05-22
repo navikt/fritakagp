@@ -20,8 +20,8 @@ class KroniskSoeknadFravaerPerAarTest {
         val result = soeknad.fravaerPerAar
 
         assertEquals(3, result.size)
-        assertEquals(7F, result["2023"])
-        assertEquals(7.5F, result["2024"])
-        assertEquals(6F, result["2025"])
+        assertEquals(7F, result.first { it.aar == "2023" }.antallDager)
+        assertEquals(7.5F, result.first { it.aar == "2024" }.antallDager)
+        assertEquals(6F, result.first { it.aar == "2025" }.antallDager)
     }
 }
