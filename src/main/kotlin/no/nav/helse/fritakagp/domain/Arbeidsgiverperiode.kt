@@ -12,6 +12,7 @@ data class Arbeidsgiverperiode(
 ) {
     var dagsats: Double = 0.0
     var belop: Double = 0.0
+
     @get:JsonProperty(access = JsonProperty.Access.READ_ONLY)
     val graderingProsent: Double
         get() = gradering * 100
