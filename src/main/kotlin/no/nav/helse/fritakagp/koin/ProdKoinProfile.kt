@@ -19,34 +19,25 @@ import no.nav.helse.fritakagp.domain.BeloepBeregning
 import no.nav.helse.fritakagp.integration.BrregService
 import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.PdlService
-import no.nav.helse.fritakagp.integration.altinncorrespondence.Clients
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOppdaterNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonService
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravEndreProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravSlettProcessor
-import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadProcessor
-import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravEndreProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
 import no.nav.helse.fritakagp.web.auth.AuthClient
@@ -95,54 +86,18 @@ fun prodConfig(env: Env.Prod): Module = module {
     single { KroniskKravSlettProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
     single { KroniskKravEndreProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
 
-    single { Clients.iCorrespondenceExternalBasic(env.altinnMeldingUrl) }
+    single { GravidSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
-    single {
-        GravidSoeknadAltinnKvitteringSender(
-            altinnTjenesteKode = env.altinnMeldingServiceId,
-            iCorrespondenceAgencyExternalBasic = get(),
-            username = env.altinnMeldingUsername,
-            password = env.altinnMeldingPassword
-        )
-    } bind GravidSoeknadKvitteringSender::class
+    single { GravidKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
-    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { KroniskSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
-    single {
-        GravidKravAltinnKvitteringSender(
-            altinnTjenesteKode = env.altinnMeldingServiceId,
-            iCorrespondenceAgencyExternalBasic = get(),
-            username = env.altinnMeldingUsername,
-            password = env.altinnMeldingPassword
-        )
-    } bind GravidKravKvitteringSender::class
-
-    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
-
-    single {
-        KroniskSoeknadAltinnKvitteringSender(
-            altinnTjenesteKode = env.altinnMeldingServiceId,
-            iCorrespondenceAgencyExternalBasic = get(),
-            username = env.altinnMeldingUsername,
-            password = env.altinnMeldingPassword
-        )
-    } bind KroniskSoeknadKvitteringSender::class
-    single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
-
-    single {
-        KroniskKravAltinnKvitteringSender(
-            altinnTjenesteKode = env.altinnMeldingServiceId,
-            iCorrespondenceAgencyExternalBasic = get(),
-            username = env.altinnMeldingUsername,
-            password = env.altinnMeldingPassword
-        )
-    } bind KroniskKravKvitteringSender::class
     single {
         val azureAuthClient: AuthClient = get()
         val altinnMottaker = AltinnMottaker.Altinn3(Altinn3Ressurs.FRITAKAGP)
         ArbeidsgiverNotifikasjonKlient(env.arbeidsgiverNotifikasjonUrl, altinnMottaker, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeArbeidsgivernotifikasjon), Sendevindu.NKS_AAPNINGSTID)
     }
-    single { KroniskKravKvitteringProcessor(kroniskKravKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { KroniskKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
     single { BrukernotifikasjonService(om = get(), sensitivitetNivaa = Sensitivitet.High, frontendAppBaseUrl = env.frontendUrl) }
     single { BrukernotifikasjonProcessorNy(brukerNotifikasjonProducerFactory = get(), brukernotifikasjonService = get()) }
     single { BrukernotifikasjonProcessor(gravidKravRepo = get(), gravidSoeknadRepo = get(), kroniskKravRepo = get(), kroniskSoeknadRepo = get(), om = get(), brukernotifikasjonSender = get(), sensitivitetNivaa = Sensitivitet.High, frontendAppBaseUrl = env.frontendUrl) }

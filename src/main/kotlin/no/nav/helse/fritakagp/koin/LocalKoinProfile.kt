@@ -23,26 +23,18 @@ import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonPr
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonService
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravEndreProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringSender
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringSenderDummy
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravSlettProcessor
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringSender
-import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringSenderDummy
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravEndreProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringSender
-import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringSenderDummy
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSenderDummy
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
 import no.nav.helse.fritakagp.web.auth.AuthClient
@@ -80,15 +72,11 @@ fun localConfig(env: Env.Local): Module = module {
     single { KroniskKravSlettProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
     single { KroniskKravEndreProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
 
-    single { GravidSoeknadKvitteringSenderDummy() } bind GravidSoeknadKvitteringSender::class
-    single { GravidSoeknadKvitteringProcessor(gravidSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
-    single { GravidKravKvitteringSenderDummy() } bind GravidKravKvitteringSender::class
-    single { GravidKravKvitteringProcessor(gravidKravKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { GravidSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
+    single { GravidKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
-    single { KroniskSoeknadKvitteringSenderDummy() } bind KroniskSoeknadKvitteringSender::class
-    single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
-    single { KroniskKravKvitteringSenderDummy() } bind KroniskKravKvitteringSender::class
-    single { KroniskKravKvitteringProcessor(kroniskKravKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { KroniskSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
+    single { KroniskKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single { PdlService(get()) }
 

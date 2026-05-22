@@ -39,11 +39,6 @@ sealed class Env(
 
     // Integrasjoner (URL)
 
-    val altinnMeldingUrl = "altinn_melding.altinn_endpoint".prop()
-    val altinnMeldingServiceId = "altinn_melding.service_id".prop()
-    val altinnMeldingUsername = "altinn_melding.username".prop()
-    val altinnMeldingPassword = "altinn_melding.password".prop()
-
     val altinnServiceOwnerServiceId = "altinn.service_id".prop()
 
     val altinnTilgangerScope = "altinn_tilganger.scope".prop()

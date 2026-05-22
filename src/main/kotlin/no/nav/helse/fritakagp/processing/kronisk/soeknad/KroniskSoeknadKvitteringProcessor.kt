@@ -14,7 +14,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class KroniskSoeknadKvitteringProcessor(
-    private val kroniskSoeknadKvitteringSender: KroniskSoeknadKvitteringSender,
     private val db: KroniskSoeknadRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
@@ -40,9 +39,6 @@ class KroniskSoeknadKvitteringProcessor(
         )
         logger().info("Sender kronisk søknad kvittering for søknad ${soeknad.id} til dialogporten")
         dialogSender.sendMessage(kroniskSoeknad.toJsonStr(DialogMelding.serializer()))
-
-        // TODO denne fjernes når vi går over til Dialogporten
-        kroniskSoeknadKvitteringSender.send(soeknad)
 
         KroniskSoeknadMetrics.tellKvitteringSendt()
     }

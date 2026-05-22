@@ -21,13 +21,11 @@ import java.util.UUID
 
 internal class GravidKravKvitteringProcessorTest {
 
-    private val gravidKravKvitteringSenderMock = mockk<GravidKravKvitteringSender>(relaxed = true)
     private val repositoryMock = mockk<GravidKravRepository>(relaxed = true)
     private val objectMapper: ObjectMapper = customObjectMapper()
     private val dialogSenderMock = mockk<DialogSender>(relaxed = true)
 
     private val processor = GravidKravKvitteringProcessor(
-        gravidKravKvitteringSender = gravidKravKvitteringSenderMock,
         db = repositoryMock,
         om = objectMapper,
         dialogSender = dialogSenderMock
@@ -64,7 +62,6 @@ internal class GravidKravKvitteringProcessorTest {
         ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
-        verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -90,7 +87,6 @@ internal class GravidKravKvitteringProcessorTest {
         ).toJsonStr(DialogMeldingMedEndring.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
-        verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -106,7 +102,6 @@ internal class GravidKravKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { gravidKravKvitteringSenderMock.send(any()) }
     }
 
     @Test
@@ -124,7 +119,6 @@ internal class GravidKravKvitteringProcessorTest {
         ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
-        verify(exactly = 1) { gravidKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -134,7 +128,6 @@ internal class GravidKravKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { gravidKravKvitteringSenderMock.send(any()) }
     }
 
     @Test
@@ -144,7 +137,6 @@ internal class GravidKravKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { gravidKravKvitteringSenderMock.send(any()) }
     }
 
     @Test

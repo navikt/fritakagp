@@ -21,13 +21,11 @@ import java.util.UUID
 
 internal class KroniskKravKvitteringProcessorTest {
 
-    private val kroniskKravKvitteringSenderMock = mockk<KroniskKravKvitteringSender>(relaxed = true)
     private val repositoryMock = mockk<KroniskKravRepository>(relaxed = true)
     private val objectMapper: ObjectMapper = customObjectMapper()
     private val dialogSenderMock = mockk<DialogSender>(relaxed = true)
 
     private val processor = KroniskKravKvitteringProcessor(
-        kroniskKravKvitteringSender = kroniskKravKvitteringSenderMock,
         db = repositoryMock,
         om = objectMapper,
         dialogSender = dialogSenderMock
@@ -52,7 +50,6 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 1) { kroniskKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -83,7 +80,6 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 1) { kroniskKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -118,7 +114,6 @@ internal class KroniskKravKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { kroniskKravKvitteringSenderMock.send(any()) }
     }
 
     @Test
@@ -128,7 +123,6 @@ internal class KroniskKravKvitteringProcessorTest {
         processor.prosesser(jobb)
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 1) { kroniskKravKvitteringSenderMock.send(testKrav) }
     }
 
     @Test
@@ -155,7 +149,6 @@ internal class KroniskKravKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { kroniskKravKvitteringSenderMock.send(any()) }
     }
 
     @Test
@@ -165,7 +158,6 @@ internal class KroniskKravKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { kroniskKravKvitteringSenderMock.send(any()) }
     }
 
     @Test

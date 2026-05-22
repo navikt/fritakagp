@@ -15,7 +15,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class KroniskKravKvitteringProcessor(
-    private val kroniskKravKvitteringSender: KroniskKravKvitteringSender,
     private val db: KroniskKravRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
@@ -74,9 +73,6 @@ class KroniskKravKvitteringProcessor(
         }
         logger().info("Sender kronisk krav kvittering for krav ${krav.id} til dialogporten")
         dialogSender.sendMessage(melding)
-
-        // TODO denne fjernes når vi går over til Dialogporten
-        kroniskKravKvitteringSender.send(krav)
 
         KroniskKravMetrics.tellKvitteringSendt()
     }

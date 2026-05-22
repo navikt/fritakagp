@@ -15,7 +15,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class GravidKravKvitteringProcessor(
-    private val gravidKravKvitteringSender: GravidKravKvitteringSender,
     private val db: GravidKravRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
@@ -84,9 +83,6 @@ class GravidKravKvitteringProcessor(
         }
         logger().info("Sender gravid krav kvittering for krav ${krav.id} til dialogporten")
         dialogSender.sendMessage(melding)
-
-        // TODO denne fjernes når vi går over til Dialogporten
-        gravidKravKvitteringSender.send(krav)
 
         GravidKravMetrics.tellKvitteringSendt()
     }

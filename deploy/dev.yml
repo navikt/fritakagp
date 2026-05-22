@@ -67,8 +67,6 @@ env:
     value: https://pdl-api.dev-fss-pub.nais.io/graphql
   - name: AAREG_URL
     value: https://aareg-services.dev-fss-pub.nais.io
-  - name: ALTINN_ENDPOINT
-    value: https://tt02.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternalBasic.svc
   - name: ENHETSREGISTERET
     value: https://data.brreg.no/enhetsregisteret/api/underenheter
   - name: ALTINN_TILGANGER_SCOPE

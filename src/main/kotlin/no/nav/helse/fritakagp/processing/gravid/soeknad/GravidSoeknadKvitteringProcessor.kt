@@ -13,7 +13,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class GravidSoeknadKvitteringProcessor(
-    private val gravidSoeknadKvitteringSender: GravidSoeknadKvitteringSender,
     private val db: GravidSoeknadRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
@@ -39,9 +38,6 @@ class GravidSoeknadKvitteringProcessor(
         )
         logger().info("Sender gravid søknad kvittering for søknad ${soeknad.id} til dialogporten")
         dialogSender.sendMessage(gravidSoeknadMelding.toJsonStr(DialogMelding.serializer()))
-
-        // TODO denne fjernes når vi går over til Dialogporten
-        gravidSoeknadKvitteringSender.send(soeknad)
 
         GravidSoeknadMetrics.tellKvitteringSendt()
     }

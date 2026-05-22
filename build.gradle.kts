@@ -113,7 +113,6 @@ dependencies {
     val brregClientVersion: String by project
     val confluentVersion: String by project
     val coroutinesVersion: String by project
-    val cxfVersion: String by project
     val dokarkivKlientVersion: String by project
     val flywayVersion: String by project
     val gcpStorageVersion: String by project
@@ -123,8 +122,6 @@ dependencies {
     val janinoVersion: String by project
     val javaxActivationVersion: String by project
     val javaxWsRsApiVersion: String by project
-    val jaxwsToolsVersion: String by project
-    val jaxwsVersion: String by project
     val junitJupiterVersion: String by project
     val kafkaClient: String by project
     val kformatVersion: String by project
@@ -152,9 +149,6 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonModuleKotlinVersion")
     implementation("com.google.cloud:google-cloud-storage:$gcpStorageVersion")
     implementation("com.sun.activation:javax.activation:$javaxActivationVersion")
-    implementation("com.sun.xml.ws:jaxws-tools:$jaxwsToolsVersion") {
-        exclude(group = "com.sun.xml.ws", module = "policy")
-    }
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("de.m3y.kformat:kformat:$kformatVersion")
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
@@ -177,7 +171,6 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("javax.ws.rs:javax.ws.rs-api:$javaxWsRsApiVersion")
-    implementation("javax.xml.ws:jaxws-api:$jaxwsVersion")
 
     implementation("no.nav.helsearbeidsgiver:aareg-client:$aaregClientVersion")
     implementation("no.nav.helsearbeidsgiver:altinn-client:$altinnClientVersion")
@@ -193,11 +186,7 @@ dependencies {
         exclude(group = "io.netty", module = "netty-all")
     }
     implementation("no.nav.security:token-validation-ktor-v3:$tokenSupportVersion")
-    implementation("no.nav.tjenestespesifikasjoner:altinn-correspondence-agency-external-basic:$altinnCorrespondenceAgencyVersion")
     implementation("no.nav.tms.varsel:kotlin-builder:$tmsVarselKotlinBuilderVersion")
-    implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
-    implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")
-    implementation("org.apache.cxf:cxf-rt-transports-http:$cxfVersion")
     implementation("org.apache.kafka:kafka-clients:$kafkaClient")
     implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
     implementation("org.codehaus.janino:janino:$janinoVersion")
