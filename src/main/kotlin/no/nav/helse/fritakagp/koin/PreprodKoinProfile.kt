@@ -19,7 +19,6 @@ import no.nav.helse.fritakagp.domain.BeloepBeregning
 import no.nav.helse.fritakagp.integration.IBrregService
 import no.nav.helse.fritakagp.integration.MockBrregService
 import no.nav.helse.fritakagp.integration.PdlService
-import no.nav.helse.fritakagp.integration.altinncorrespondence.Clients
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOppdaterNotifikasjonProcessor
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessor
@@ -38,9 +37,7 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringProce
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
 import no.nav.helse.fritakagp.web.auth.AuthClient
@@ -86,8 +83,6 @@ fun preprodConfig(env: Env.Preprod): Module = module {
     single { KroniskKravSlettProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
     single { KroniskKravEndreProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
 
-    single { Clients.iCorrespondenceExternalBasic(env.altinnMeldingUrl) }
-
     single {
         GravidSoeknadKvitteringProcessor(
             db = get(),
@@ -99,15 +94,7 @@ fun preprodConfig(env: Env.Preprod): Module = module {
 
     single { GravidKravKvitteringProcessor(get(), get(), get()) }
 
-    single {
-        KroniskSoeknadAltinnKvitteringSender(
-            env.altinnMeldingServiceId,
-            get(),
-            env.altinnMeldingUsername,
-            env.altinnMeldingPassword
-        )
-    } bind KroniskSoeknadKvitteringSender::class
-    single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { KroniskSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single { KroniskKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 

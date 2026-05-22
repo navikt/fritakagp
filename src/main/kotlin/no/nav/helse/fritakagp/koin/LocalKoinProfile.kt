@@ -35,8 +35,6 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSenderDummy
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
 import no.nav.helse.fritakagp.web.auth.AuthClient
@@ -77,8 +75,7 @@ fun localConfig(env: Env.Local): Module = module {
     single { GravidSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
     single { GravidKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
-    single { KroniskSoeknadKvitteringSenderDummy() } bind KroniskSoeknadKvitteringSender::class
-    single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
+    single { KroniskSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
     single { KroniskKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single { PdlService(get()) }

@@ -18,13 +18,11 @@ import org.junit.jupiter.api.assertThrows
 
 internal class KroniskSoeknadKvitteringProcessorTest {
 
-    private val kroniskSoeknadKvitteringSenderMock = mockk<KroniskSoeknadKvitteringSender>(relaxed = true)
     private val repositoryMock = mockk<KroniskSoeknadRepository>(relaxed = true)
     private val objectMapper: ObjectMapper = customObjectMapper()
     private val dialogSenderMock = mockk<DialogSender>(relaxed = true)
 
     private val processor = KroniskSoeknadKvitteringProcessor(
-        kroniskSoeknadKvitteringSender = kroniskSoeknadKvitteringSenderMock,
         db = repositoryMock,
         om = objectMapper,
         dialogSender = dialogSenderMock
@@ -62,6 +60,5 @@ internal class KroniskSoeknadKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { kroniskSoeknadKvitteringSenderMock.send(any()) }
     }
 }

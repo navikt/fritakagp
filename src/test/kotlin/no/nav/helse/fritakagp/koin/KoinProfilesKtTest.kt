@@ -3,7 +3,6 @@ package no.nav.helse.fritakagp.koin
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import no.altinn.services.serviceengine.correspondence._2009._10.ICorrespondenceAgencyExternalBasic
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbRepository
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.fritakagp.Env
@@ -28,7 +27,6 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringProce
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringSender
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -53,7 +51,6 @@ class KoinProfilesKtTest : KoinTest {
     private val dataSource = mockk<DataSource>(relaxed = true)
     private val brukernotifikasjonSender = mockk<BrukernotifikasjonSender>(relaxed = true)
     private val arbeidsgiverNotifikasjonKlient = mockk<ArbeidsgiverNotifikasjonKlient>(relaxed = true)
-    private val iCorrespondenceAgencyExternalBasic = mockk<ICorrespondenceAgencyExternalBasic>(relaxed = true)
 
     private val gravidSoeknadRepository: GravidSoeknadRepository by inject()
     private val kroniskSoeknadRepository: KroniskSoeknadRepository by inject()
@@ -67,7 +64,6 @@ class KoinProfilesKtTest : KoinTest {
     private val kroniskKravEndreProcessor: KroniskKravEndreProcessor by inject()
     private val gravidSoeknadKvitteringProcessor: GravidSoeknadKvitteringProcessor by inject()
     private val gravidKravKvitteringProcessor: GravidKravKvitteringProcessor by inject()
-    private val kroniskSoeknadKvitteringSender: KroniskSoeknadKvitteringSender by inject()
     private val kroniskSoeknadKvitteringProcessor: KroniskSoeknadKvitteringProcessor by inject()
     private val kroniskKravKvitteringProcessor: KroniskKravKvitteringProcessor by inject()
     private val brukernotifikasjonProcessorNy: BrukernotifikasjonProcessorNy by inject()
@@ -121,7 +117,6 @@ class KoinProfilesKtTest : KoinTest {
         assertNotNull(kroniskKravEndreProcessor)
         assertNotNull(gravidSoeknadKvitteringProcessor)
         assertNotNull(gravidKravKvitteringProcessor)
-        assertNotNull(kroniskSoeknadKvitteringSender)
         assertNotNull(kroniskSoeknadKvitteringProcessor)
         assertNotNull(kroniskKravKvitteringProcessor)
         assertNotNull(brukernotifikasjonProcessorNy)
@@ -140,7 +135,6 @@ class KoinProfilesKtTest : KoinTest {
                 single { bucketStorage } bind BucketStorage::class
                 single { brukernotifikasjonSender } bind BrukernotifikasjonSender::class
                 single { arbeidsgiverNotifikasjonKlient } bind ArbeidsgiverNotifikasjonKlient::class
-                single { iCorrespondenceAgencyExternalBasic } bind ICorrespondenceAgencyExternalBasic::class
             }
         return testModule
     }

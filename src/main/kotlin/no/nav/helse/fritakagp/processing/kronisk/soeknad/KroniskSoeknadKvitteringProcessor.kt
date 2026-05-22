@@ -14,7 +14,6 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
 
 class KroniskSoeknadKvitteringProcessor(
-    private val kroniskSoeknadKvitteringSender: KroniskSoeknadKvitteringSender,
     private val db: KroniskSoeknadRepository,
     private val om: ObjectMapper,
     private val dialogSender: DialogSender
