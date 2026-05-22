@@ -30,15 +30,11 @@ import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcess
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravSlettProcessor
-import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringSender
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadPDFGenerator
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadProcessor
-import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravAltinnKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravEndreProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravPDFGenerator
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
@@ -95,15 +91,6 @@ fun prodConfig(env: Env.Prod): Module = module {
 
     single { Clients.iCorrespondenceExternalBasic(env.altinnMeldingUrl) }
 
-    single {
-        GravidSoeknadAltinnKvitteringSender(
-            altinnTjenesteKode = env.altinnMeldingServiceId,
-            iCorrespondenceAgencyExternalBasic = get(),
-            username = env.altinnMeldingUsername,
-            password = env.altinnMeldingPassword
-        )
-    } bind GravidSoeknadKvitteringSender::class
-
     single { GravidSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
 
     single { GravidKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
@@ -118,14 +105,6 @@ fun prodConfig(env: Env.Prod): Module = module {
     } bind KroniskSoeknadKvitteringSender::class
     single { KroniskSoeknadKvitteringProcessor(kroniskSoeknadKvitteringSender = get(), db = get(), om = get(), dialogSender = get()) }
 
-    single {
-        KroniskKravAltinnKvitteringSender(
-            altinnTjenesteKode = env.altinnMeldingServiceId,
-            iCorrespondenceAgencyExternalBasic = get(),
-            username = env.altinnMeldingUsername,
-            password = env.altinnMeldingPassword
-        )
-    } bind KroniskKravKvitteringSender::class
     single {
         val azureAuthClient: AuthClient = get()
         val altinnMottaker = AltinnMottaker.Altinn3(Altinn3Ressurs.FRITAKAGP)

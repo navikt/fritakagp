@@ -18,7 +18,6 @@ import org.junit.jupiter.api.assertThrows
 
 internal class GravidSoeknadKvitteringProcessorTest {
 
-    private val gravidSoeknadKvitteringSenderMock = mockk<GravidSoeknadKvitteringSender>(relaxed = true)
     private val repositoryMock = mockk<GravidSoeknadRepository>(relaxed = true)
     private val objectMapper: ObjectMapper = customObjectMapper()
     private val dialogSenderMock = mockk<DialogSender>(relaxed = true)
@@ -63,6 +62,5 @@ internal class GravidSoeknadKvitteringProcessorTest {
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
         verify(exactly = 0) { dialogSenderMock.sendMessage(any()) }
-        verify(exactly = 0) { gravidSoeknadKvitteringSenderMock.send(any()) }
     }
 }

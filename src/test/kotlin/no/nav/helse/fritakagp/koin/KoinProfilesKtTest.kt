@@ -23,10 +23,8 @@ import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonPr
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonService
 import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravKvitteringProcessor
 import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringProcessor
-import no.nav.helse.fritakagp.processing.gravid.soeknad.GravidSoeknadKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravEndreProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringProcessor
-import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravKvitteringSender
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
@@ -67,12 +65,10 @@ class KoinProfilesKtTest : KoinTest {
     private val kroniskKravProcessor: KroniskKravProcessor by inject()
     private val kroniskKravSlettProcessor: KroniskKravSlettProcessor by inject()
     private val kroniskKravEndreProcessor: KroniskKravEndreProcessor by inject()
-    private val gravidSoeknadKvitteringSender: GravidSoeknadKvitteringSender by inject()
     private val gravidSoeknadKvitteringProcessor: GravidSoeknadKvitteringProcessor by inject()
     private val gravidKravKvitteringProcessor: GravidKravKvitteringProcessor by inject()
     private val kroniskSoeknadKvitteringSender: KroniskSoeknadKvitteringSender by inject()
     private val kroniskSoeknadKvitteringProcessor: KroniskSoeknadKvitteringProcessor by inject()
-    private val kroniskKravKvitteringSender: KroniskKravKvitteringSender by inject()
     private val kroniskKravKvitteringProcessor: KroniskKravKvitteringProcessor by inject()
     private val brukernotifikasjonProcessorNy: BrukernotifikasjonProcessorNy by inject()
     private val brukernotifikasjonProcessor: BrukernotifikasjonProcessor by inject()
@@ -123,12 +119,10 @@ class KoinProfilesKtTest : KoinTest {
         assertNotNull(kroniskKravProcessor)
         assertNotNull(kroniskKravSlettProcessor)
         assertNotNull(kroniskKravEndreProcessor)
-        assertNotNull(gravidSoeknadKvitteringSender)
         assertNotNull(gravidSoeknadKvitteringProcessor)
         assertNotNull(gravidKravKvitteringProcessor)
         assertNotNull(kroniskSoeknadKvitteringSender)
         assertNotNull(kroniskSoeknadKvitteringProcessor)
-        assertNotNull(kroniskKravKvitteringSender)
         assertNotNull(kroniskKravKvitteringProcessor)
         assertNotNull(brukernotifikasjonProcessorNy)
         assertNotNull(brukernotifikasjonProcessor)
