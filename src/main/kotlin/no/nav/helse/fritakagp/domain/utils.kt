@@ -20,6 +20,13 @@ fun sladdFnr(fnr: String): String {
     return fnr.take(6) + "*****"
 }
 
+data class FravaerPerAar(val aar: String, val antallDager: Float)
+
+fun Set<FravaerData>.tilFravaerPerAar(): Set<FravaerPerAar> =
+    groupBy { it.yearMonth.substring(0, 4) }
+        .map { (aar, fravaerData) -> FravaerPerAar(aar, fravaerData.map { it.antallDagerMedFravaer }.sum()) }
+        .toSet()
+
 val TIMESTAMP_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 val TIMESTAMP_FORMAT_MED_KL: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy 'kl.' HH:mm")

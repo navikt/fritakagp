@@ -1,5 +1,6 @@
 package no.nav.helse.fritakagp.domain
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.helse.fritakagp.db.SimpleJsonbEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -38,6 +39,10 @@ data class KroniskSoeknad(
     companion object {
         const val tittel = "Søknad om fritak fra arbeidsgiverperioden - kronisk eller langvarig sykdom"
     }
+
+    @get:JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    val fravaerPerAar: Set<FravaerPerAar>
+        get() = fravaer.tilFravaerPerAar()
 }
 
 data class FravaerData(
