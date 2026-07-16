@@ -7,13 +7,18 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.mockk.every
 import no.nav.helse.GravidTestData
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.GravidKrav
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
+import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
+import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.koin.test.inject
@@ -22,20 +27,33 @@ import java.time.LocalDate
 class GravidKravHTTPTests : SystemTestBase() {
     private val kravGravidUrl = "/fritak-agp-api/api/v1/gravid/krav"
 
+    @AfterEach
+    fun cleanUp() {
+        val repo by inject<GravidKravRepository>()
+        repo.delete(GravidTestData.gravidKrav.id)
+    }
+
     @Test
-    @Disabled
-    internal fun `Returnerer kravet når korrekt bruker er innlogget, 403 når ikke`() = suspendableTest {
+    internal fun `Returnerer 403 når feil bruker er innlogget`() = suspendableTest {
         val repo by inject<GravidKravRepository>()
 
-        repo.insert(GravidTestData.gravidKrav)
+        repo.insert(GravidTestData.gravidKrav.copy(virksomhetsnummer = Orgnr.genererGyldig().verdi))
+        val fnr = Fnr.genererGyldig()
         val response =
             httpClient.get {
                 appUrl("$kravGravidUrl/${GravidTestData.gravidKrav.id}")
                 contentType(ContentType.Application.Json)
-                loggedInAs("123456789")
+                loggedInAs(fnr.verdi)
             }
 
         assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
+    }
+
+    @Test
+    internal fun `Returnerer kravet når korrekt bruker er innlogget`() = suspendableTest {
+        val repo by inject<GravidKravRepository>()
+        val orgnr = Orgnr.genererGyldig().verdi
+        repo.insert(GravidTestData.gravidKrav.copy(virksomhetsnummer = orgnr))
 
         val accessGrantedForm = httpClient.get {
             appUrl("$kravGravidUrl/${GravidTestData.gravidKrav.id}")
@@ -43,7 +61,10 @@ class GravidKravHTTPTests : SystemTestBase() {
             loggedInAs(GravidTestData.gravidKrav.identitetsnummer)
         }
 
-        assertThat(accessGrantedForm).isEqualTo(GravidTestData.gravidKrav)
+        assertThat(accessGrantedForm.body<GravidKrav>())
+            .usingRecursiveComparison()
+            .ignoringFields("referansenummer")
+            .isEqualTo(GravidTestData.gravidKrav.copy(virksomhetsnummer = orgnr))
     }
 
     @Test
