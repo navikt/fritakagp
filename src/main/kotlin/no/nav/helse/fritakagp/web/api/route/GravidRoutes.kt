@@ -82,7 +82,9 @@ fun Route.gravidRoutes(
                 if (soeknad == null) {
                     call.respond(HttpStatusCode.NotFound)
                 } else {
-                    authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
+                    if (soeknad.identitetsnummer != innloggetFnr) {
+                        authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
+                    }
 
                     soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                     soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)
@@ -140,7 +142,9 @@ fun Route.gravidRoutes(
                         logger.warn("Gravid krav med id $kravId er slettet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
-                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+                        if (krav.identitetsnummer != innloggetFnr) {
+                            authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+                        }
 
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
