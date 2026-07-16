@@ -15,12 +15,56 @@ import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.koin.test.inject
 import java.time.LocalDate
+import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
+import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
 class KroniskKravHTTPTests : SystemTestBase() {
     private val kravKroniskUrl = "/fritak-agp-api/api/v1/kronisk/krav"
+
+    @AfterEach
+    fun cleanUp() {
+        val repo by inject<KroniskKravRepository>()
+        repo.delete(KroniskTestData.kroniskKrav.id)
+    }
+
+    @Test
+    internal fun `Returnerer 403 når feil bruker er innlogget`() = suspendableTest {
+        val repo by inject<KroniskKravRepository>()
+
+        repo.insert(KroniskTestData.kroniskKrav.copy(virksomhetsnummer = Orgnr.genererGyldig().verdi))
+        val fnr = Fnr.genererGyldig()
+        val response = httpClient.get {
+            appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}")
+            contentType(ContentType.Application.Json)
+            loggedInAs(fnr.verdi)
+        }
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
+    }
+
+    @Test
+    internal fun `Returnerer kravet når korrekt bruker er innlogget`() = suspendableTest {
+        val repo by inject<KroniskKravRepository>()
+
+        val orgnr = Orgnr.genererGyldig().verdi
+        repo.insert(KroniskTestData.kroniskKrav.copy(virksomhetsnummer = orgnr))
+
+        val response = httpClient.get {
+            appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}")
+            contentType(ContentType.Application.Json)
+            loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
+        }
+
+        assertThat(response.body<KroniskKrav>())
+            .usingRecursiveComparison()
+            .ignoringFields("referansenummer")
+            .isEqualTo(KroniskTestData.kroniskKrav.copy(virksomhetsnummer = orgnr))
+    }
 
     @Test
     fun `Gir not found når kravet er slettet`() = suspendableTest {
@@ -168,5 +212,6 @@ class KroniskKravHTTPTests : SystemTestBase() {
             setBody(KroniskTestData.kroniskKravRequestValid)
         }
         assertThat(response.status).isEqualTo(HttpStatusCode.Conflict)
+        repo.delete(krav.id)
     }
 }
