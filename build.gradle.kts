@@ -106,7 +106,6 @@ tasks {
 dependencies {
     val aaregClientVersion: String by project
     val altinnClientVersion: String by project
-    val altinnCorrespondenceAgencyVersion: String by project
     val arbeidsgiverNotifikasjonKlientVersion: String by project
     val assertJVersion: String by project
     val bakgrunnsjobbVersion: String by project
