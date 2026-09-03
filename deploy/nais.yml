@@ -67,7 +67,6 @@ spec:
     {{#if bucketName}}
     buckets:
       - name: {{ bucketName }}
-        uniformBucketLevelAccess: true
     {{/if}}
 
   ingresses:
