@@ -58,16 +58,17 @@ spec:
         diskAutoresize: true
         flags:
           - name: cloudsql.enable_pgaudit
-            value: "true"
+            value: "on"
           - name: pgaudit.log
             value: "write,ddl,role"
           - name: pgaudit.log_parameter
+            value: "on"
+          - name: pgaudit.log_relation
             value: "on"
 
     {{#if bucketName}}
     buckets:
       - name: {{ bucketName }}
-        uniformBucketLevelAccess: true
     {{/if}}
 
   ingresses:
