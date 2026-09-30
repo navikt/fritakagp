@@ -1,7 +1,7 @@
 pluginManagement {
     plugins {
-        val kotlinVersion: String by settings
-        val ktlintVersion: String by settings
+        val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
+        val ktlintVersion = providers.gradleProperty("ktlintVersion").get()
 
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.serialization") version kotlinVersion

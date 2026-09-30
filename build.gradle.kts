@@ -17,7 +17,7 @@ kotlin {
 }
 
 repositories {
-    val githubPassword: String by project
+    val githubPassword = project.property("githubPassword") as String
 
     mavenCentral()
     maven(url = "https://packages.confluent.io/maven/")
@@ -93,42 +93,42 @@ tasks {
 }
 
 dependencies {
-    val aaregClientVersion: String by project
-    val altinnClientVersion: String by project
-    val arbeidsgiverNotifikasjonKlientVersion: String by project
-    val assertJVersion: String by project
-    val bakgrunnsjobbVersion: String by project
-    val brregClientVersion: String by project
-    val confluentVersion: String by project
-    val coroutinesVersion: String by project
-    val dokarkivKlientVersion: String by project
-    val flywayVersion: String by project
-    val gcpStorageVersion: String by project
-    val hikariVersion: String by project
-    val jacksonModuleKotlinVersion: String by project
-    val jacksonVersion: String by project
-    val janinoVersion: String by project
-    val javaxActivationVersion: String by project
-    val javaxWsRsApiVersion: String by project
-    val junitJupiterVersion: String by project
-    val kafkaClient: String by project
-    val kformatVersion: String by project
-    val koinVersion: String by project
-    val kotlinxSerializationVersion: String by project
-    val ktorVersion: String by project
-    val logbackEncoderVersion: String by project
-    val logback_version: String by project
-    val mockOAuth2ServerVersion: String by project
-    val mockkVersion: String by project
-    val pdfboxVersion: String by project
-    val pdlClientVersion: String by project
-    val postgresqlVersion: String by project
-    val prometheusVersion: String by project
-    val slf4jVersion: String by project
-    val tmsVarselKotlinBuilderVersion: String by project
-    val tokenSupportVersion: String by project
-    val utilsVersion: String by project
-    val valiktorVersion: String by project
+    val aaregClientVersion = project.property("aaregClientVersion") as String
+    val altinnClientVersion = project.property("altinnClientVersion") as String
+    val arbeidsgiverNotifikasjonKlientVersion = project.property("arbeidsgiverNotifikasjonKlientVersion") as String
+    val assertJVersion = project.property("assertJVersion") as String
+    val bakgrunnsjobbVersion = project.property("bakgrunnsjobbVersion") as String
+    val brregClientVersion = project.property("brregClientVersion") as String
+    val confluentVersion = project.property("confluentVersion") as String
+    val coroutinesVersion = project.property("coroutinesVersion") as String
+    val dokarkivKlientVersion = project.property("dokarkivKlientVersion") as String
+    val flywayVersion = project.property("flywayVersion") as String
+    val gcpStorageVersion = project.property("gcpStorageVersion") as String
+    val hikariVersion = project.property("hikariVersion") as String
+    val jacksonModuleKotlinVersion = project.property("jacksonModuleKotlinVersion") as String
+    val jacksonVersion = project.property("jacksonVersion") as String
+    val janinoVersion = project.property("janinoVersion") as String
+    val javaxActivationVersion = project.property("javaxActivationVersion") as String
+    val javaxWsRsApiVersion = project.property("javaxWsRsApiVersion") as String
+    val junitJupiterVersion = project.property("junitJupiterVersion") as String
+    val kafkaClient = project.property("kafkaClient") as String
+    val kformatVersion = project.property("kformatVersion") as String
+    val koinVersion = project.property("koinVersion") as String
+    val kotlinxSerializationVersion = project.property("kotlinxSerializationVersion") as String
+    val ktorVersion = project.property("ktorVersion") as String
+    val logbackEncoderVersion = project.property("logbackEncoderVersion") as String
+    val logback_version = project.property("logback_version") as String
+    val mockOAuth2ServerVersion = project.property("mockOAuth2ServerVersion") as String
+    val mockkVersion = project.property("mockkVersion") as String
+    val pdfboxVersion = project.property("pdfboxVersion") as String
+    val pdlClientVersion = project.property("pdlClientVersion") as String
+    val postgresqlVersion = project.property("postgresqlVersion") as String
+    val prometheusVersion = project.property("prometheusVersion") as String
+    val slf4jVersion = project.property("slf4jVersion") as String
+    val tmsVarselKotlinBuilderVersion = project.property("tmsVarselKotlinBuilderVersion") as String
+    val tokenSupportVersion = project.property("tokenSupportVersion") as String
+    val utilsVersion = project.property("utilsVersion") as String
+    val valiktorVersion = project.property("valiktorVersion") as String
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
