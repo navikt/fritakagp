@@ -71,6 +71,7 @@ tasks {
     }
 
     register<Test>("slowTests") {
+        description = "Tester som krever at database- og Kafka-containere"
         include("no/nav/helse/slowtests/**")
         outputs.upToDateWhen { false }
         group = "verification"
