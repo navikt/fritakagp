@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class BrukernotifikasjonProcessorNyTest {
-
     val ksRepo = mockk<KroniskSoeknadRepository>(relaxed = true)
     val kkRepo = mockk<KroniskKravRepository>(relaxed = true)
     val gkRepo = mockk<GravidKravRepository>(relaxed = true)
@@ -42,7 +41,7 @@ internal class BrukernotifikasjonProcessorNyTest {
         mapOf(
             "NAIS_APP_NAME" to "test-app",
             "NAIS_NAMESPACE" to "test-namespace",
-            "NAIS_CLUSTER_NAME" to "dev"
+            "NAIS_CLUSTER_NAME" to "dev",
         ).let { naisEnv ->
             BuilderEnvironment.extend(naisEnv)
         }
@@ -55,11 +54,12 @@ internal class BrukernotifikasjonProcessorNyTest {
 
     @Test
     fun `skal sende kafkamelding med brukernotifikasjon for Kronisk Krav`() {
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(
-                BrukernotifikasjonJobbdata(UUID.randomUUID(), KroniskTestData.validIdentitetsnummer, KroniskTestData.validOrgNr, KroniskKrav, Oppretting)
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(
+                    BrukernotifikasjonJobbdata(UUID.randomUUID(), KroniskTestData.VALID_IDENTITETSNUMMER, KroniskTestData.VALID_ORGNR, KroniskKrav, Oppretting),
+                ),
             )
-        )
         prosessor.prosesser(jobb)
 
         verify(exactly = 1) { kafkaSenderMock.sendMessage(any(), any()) }
@@ -67,11 +67,12 @@ internal class BrukernotifikasjonProcessorNyTest {
 
     @Test
     fun `skal sende kafkamelding med brukernotifikasjon for Kronisk Søknad`() {
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(
-                BrukernotifikasjonJobbdata(UUID.randomUUID(), KroniskTestData.validIdentitetsnummer, KroniskTestData.validOrgNr, KroniskSøknad, Oppretting)
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(
+                    BrukernotifikasjonJobbdata(UUID.randomUUID(), KroniskTestData.VALID_IDENTITETSNUMMER, KroniskTestData.VALID_ORGNR, KroniskSøknad, Oppretting),
+                ),
             )
-        )
         prosessor.prosesser(jobb)
 
         verify(exactly = 1) { kafkaSenderMock.sendMessage(any(), any()) }
@@ -79,11 +80,12 @@ internal class BrukernotifikasjonProcessorNyTest {
 
     @Test
     fun `skal sende kafkamelding med brukernotifikasjon for Gravid Krav`() {
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(
-                BrukernotifikasjonJobbdata(UUID.randomUUID(), GravidTestData.validIdentitetsnummer, GravidTestData.validOrgNr, SkjemaType.GravidKrav, Oppretting)
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(
+                    BrukernotifikasjonJobbdata(UUID.randomUUID(), GravidTestData.VALID_IDENTITETSNUMMER, GravidTestData.VALID_ORGNR, SkjemaType.GravidKrav, Oppretting),
+                ),
             )
-        )
         prosessor.prosesser(jobb)
 
         verify(exactly = 1) { kafkaSenderMock.sendMessage(any(), any()) }
@@ -91,11 +93,12 @@ internal class BrukernotifikasjonProcessorNyTest {
 
     @Test
     fun `skal sende kafkamelding med brukernotifikasjon for Gravid Søknad`() {
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(
-                BrukernotifikasjonJobbdata(UUID.randomUUID(), GravidTestData.validIdentitetsnummer, GravidTestData.validOrgNr, SkjemaType.GravidSøknad, Oppretting)
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(
+                    BrukernotifikasjonJobbdata(UUID.randomUUID(), GravidTestData.VALID_IDENTITETSNUMMER, GravidTestData.VALID_ORGNR, SkjemaType.GravidSøknad, Oppretting),
+                ),
             )
-        )
         prosessor.prosesser(jobb)
 
         verify(exactly = 1) { kafkaSenderMock.sendMessage(any(), any()) }

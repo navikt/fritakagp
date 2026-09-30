@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class AuthClientTest {
-
     fun createAuthClient(): AuthClient {
         val tokenEndpoint = "http://localhost:8080/token"
         val tokenExchangeEndpoint = "http://localhost:8080/token-exchange"
@@ -30,15 +29,17 @@ class AuthClientTest {
     @Test
     fun testTokenReturnSuccess() {
         runBlocking {
-            val mockEngine = MockEngine { _ ->
-                respond(
-                    content = """{"access_token": "token", "expires_in": 3600}""",
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(
-                        "Content-Type" to listOf(ContentType.Application.Json.toString())
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = """{"access_token": "token", "expires_in": 3600}""",
+                        status = HttpStatusCode.OK,
+                        headers =
+                            headersOf(
+                                "Content-Type" to listOf(ContentType.Application.Json.toString()),
+                            ),
                     )
-                )
-            }
+                }
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpclientMock(mockEngine)
                 val response = createAuthClient().token(IdentityProvider.MASKINPORTEN, "test")
@@ -52,15 +53,17 @@ class AuthClientTest {
     @Test
     fun testTokenReturnError() {
         runBlocking {
-            val mockEngine = MockEngine { _ ->
-                respond(
-                    content = """{"error": "invalid_request","error_description": "Invalid request"}""",
-                    status = HttpStatusCode.BadRequest,
-                    headers = headersOf(
-                        "Content-Type" to listOf(ContentType.Application.Json.toString())
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = """{"error": "invalid_request","error_description": "Invalid request"}""",
+                        status = HttpStatusCode.BadRequest,
+                        headers =
+                            headersOf(
+                                "Content-Type" to listOf(ContentType.Application.Json.toString()),
+                            ),
                     )
-                )
-            }
+                }
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpclientMock(mockEngine)
 
@@ -74,12 +77,13 @@ class AuthClientTest {
     }
 }
 
-private fun httpclientMock(mockEngine: MockEngine) = HttpClient(mockEngine) {
-    expectSuccess = true
-    install(ContentNegotiation) {
-        register(ContentType.Application.Json, JacksonConverter(customObjectMapper()))
-        jackson {
-            registerModule(JavaTimeModule())
+private fun httpclientMock(mockEngine: MockEngine) =
+    HttpClient(mockEngine) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(customObjectMapper()))
+            jackson {
+                registerModule(JavaTimeModule())
+            }
         }
     }
-}

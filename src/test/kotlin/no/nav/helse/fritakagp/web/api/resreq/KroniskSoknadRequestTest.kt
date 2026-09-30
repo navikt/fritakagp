@@ -41,18 +41,22 @@ internal class KroniskSoknadRequestTest {
 
     @Test
     fun `Kan ikke ha eldre fraværsdata enn 2 år`() {
-        KroniskTestData.fullValidRequest.copy(
-            fravaer = setOf(
-                FravaerData(LocalDate.now().minusMonths(24).toYearMonthString(), 5F)
-            )
-        ).validate(true)
+        KroniskTestData.fullValidRequest
+            .copy(
+                fravaer =
+                    setOf(
+                        FravaerData(LocalDate.now().minusMonths(24).toYearMonthString(), 5F),
+                    ),
+            ).validate(true)
 
         validationShouldFailFor(KroniskSoknadRequest::fravaer) {
-            KroniskTestData.fullValidRequest.copy(
-                fravaer = setOf(
-                    FravaerData(LocalDate.now().minusMonths(25).toYearMonthString(), 5F)
-                )
-            ).validate(true)
+            KroniskTestData.fullValidRequest
+                .copy(
+                    fravaer =
+                        setOf(
+                            FravaerData(LocalDate.now().minusMonths(25).toYearMonthString(), 5F),
+                        ),
+                ).validate(true)
         }
     }
 
@@ -66,11 +70,13 @@ internal class KroniskSoknadRequestTest {
     @Test
     fun `Kan ikke ha fraværsdata fra fremtiden`() {
         validationShouldFailFor(KroniskSoknadRequest::fravaer) {
-            KroniskTestData.fullValidRequest.copy(
-                fravaer = setOf(
-                    FravaerData(LocalDate.now().plusMonths(1).toYearMonthString(), 5F)
-                )
-            ).validate(true)
+            KroniskTestData.fullValidRequest
+                .copy(
+                    fravaer =
+                        setOf(
+                            FravaerData(LocalDate.now().plusMonths(1).toYearMonthString(), 5F),
+                        ),
+                ).validate(true)
         }
     }
 
@@ -78,11 +84,13 @@ internal class KroniskSoknadRequestTest {
     fun `Kan ikke ha fraværsdager som overstiger antall dager i måneden`() {
         val invalidNumberOfDays = LocalDate.now().lengthOfMonth() + 1F
         validationShouldFailFor(KroniskSoknadRequest::fravaer) {
-            KroniskTestData.fullValidRequest.copy(
-                fravaer = setOf(
-                    FravaerData(LocalDate.now().toYearMonthString(), invalidNumberOfDays)
-                )
-            ).validate(true)
+            KroniskTestData.fullValidRequest
+                .copy(
+                    fravaer =
+                        setOf(
+                            FravaerData(LocalDate.now().toYearMonthString(), invalidNumberOfDays),
+                        ),
+                ).validate(true)
         }
     }
 
@@ -90,39 +98,43 @@ internal class KroniskSoknadRequestTest {
     fun `Antall perioder kan ikke være 0`() {
         val invalidAntallPerioder = 0
         validationShouldFailFor(KroniskSoknadRequest::antallPerioder) {
-            KroniskTestData.fullValidRequest.copy(
-                antallPerioder = invalidAntallPerioder
-            ).validate(true)
+            KroniskTestData.fullValidRequest
+                .copy(
+                    antallPerioder = invalidAntallPerioder,
+                ).validate(true)
         }
     }
 
     @Test
     fun `Gyldig søknad hvor det ikke finnes historisk fravær`() {
-        KroniskTestData.fullValidRequest.copy(
-            ikkeHistoriskFravaer = true,
-            antallPerioder = 0,
-            fravaer = setOf()
-        ).validate(true)
+        KroniskTestData.fullValidRequest
+            .copy(
+                ikkeHistoriskFravaer = true,
+                antallPerioder = 0,
+                fravaer = setOf(),
+            ).validate(true)
     }
 
     @Test
     fun `Kan ikke ha perioder hvor det ikke finnes historisk fravær`() {
         validationShouldFailFor(KroniskSoknadRequest::antallPerioder) {
-            KroniskTestData.fullValidRequest.copy(
-                ikkeHistoriskFravaer = true,
-                antallPerioder = 1,
-                fravaer = setOf()
-            ).validate(true)
+            KroniskTestData.fullValidRequest
+                .copy(
+                    ikkeHistoriskFravaer = true,
+                    antallPerioder = 1,
+                    fravaer = setOf(),
+                ).validate(true)
         }
     }
 
     @Test
     fun `Kan ikke ha fravær hvor det ikke finnes historisk fravær`() {
         validationShouldFailFor(KroniskSoknadRequest::fravaer) {
-            KroniskTestData.fullValidRequest.copy(
-                ikkeHistoriskFravaer = true,
-                antallPerioder = 0
-            ).validate(true)
+            KroniskTestData.fullValidRequest
+                .copy(
+                    ikkeHistoriskFravaer = true,
+                    antallPerioder = 0,
+                ).validate(true)
         }
     }
 }

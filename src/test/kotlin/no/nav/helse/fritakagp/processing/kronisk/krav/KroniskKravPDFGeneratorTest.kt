@@ -12,7 +12,6 @@ import java.nio.file.Files
 import java.time.LocalDateTime
 
 class KroniskKravPDFGeneratorTest {
-
     @Test
     fun testLagPDF() {
         val krav = KroniskTestData.kroniskKrav

@@ -15,48 +15,52 @@ class SlettGravidKravHTTPTests : SystemTestBase() {
     private val kravGravidUrl = "/fritak-agp-api/api/v1/gravid/krav"
 
     @Test
-    internal fun `Skal returnere 200 OK når vi sletter med korrekt bruker innlogget`() = suspendableTest {
-        val repo by inject<GravidKravRepository>()
+    internal fun `Skal returnere 200 OK når vi sletter med korrekt bruker innlogget`() =
+        suspendableTest {
+            val repo by inject<GravidKravRepository>()
 
-        repo.insert(GravidTestData.gravidKrav)
+            repo.insert(GravidTestData.gravidKrav)
 
-        val response = httpClient.delete {
-            appUrl("$kravGravidUrl/${GravidTestData.gravidKrav.id}")
-            contentType(ContentType.Application.Json)
-            loggedInAs(GravidTestData.gravidKrav.identitetsnummer)
+            val response =
+                httpClient.delete {
+                    appUrl("$kravGravidUrl/${GravidTestData.gravidKrav.id}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(GravidTestData.gravidKrav.identitetsnummer)
+                }
+
+            assertThat(response.status).isEqualTo(HttpStatusCode.OK)
         }
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-    }
+    @Test
+    internal fun `Skal returnere 404 når kravet ikke finnes`() =
+        suspendableTest {
+            val repo by inject<GravidKravRepository>()
+
+            repo.insert(GravidTestData.gravidKrav)
+
+            val response =
+                httpClient.delete {
+                    appUrl("$kravGravidUrl/${UUID.randomUUID()}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(GravidTestData.gravidKrav.identitetsnummer)
+                }
+            assertThat(response.status).isEqualTo(HttpStatusCode.NotFound)
+        }
 
     @Test
-    internal fun `Skal returnere 404 når kravet ikke finnes`() = suspendableTest {
-        val repo by inject<GravidKravRepository>()
+    fun `Skal returnere forbidden hvis virksomheten ikke er i auth listen fra altinn`() =
+        suspendableTest {
+            val repo by inject<GravidKravRepository>()
 
-        repo.insert(GravidTestData.gravidKrav)
+            val id = UUID.randomUUID()
 
-        val response =
-            httpClient.delete {
-                appUrl("$kravGravidUrl/${UUID.randomUUID()}")
-                contentType(ContentType.Application.Json)
-                loggedInAs(GravidTestData.gravidKrav.identitetsnummer)
-            }
-        assertThat(response.status).isEqualTo(HttpStatusCode.NotFound)
-    }
-
-    @Test
-    fun `Skal returnere forbidden hvis virksomheten ikke er i auth listen fra altinn`() = suspendableTest {
-        val repo by inject<GravidKravRepository>()
-
-        val id = UUID.randomUUID()
-
-        repo.insert(GravidTestData.gravidKrav.copy(virksomhetsnummer = "123456785", id = id))
-        val response =
-            httpClient.delete {
-                appUrl("$kravGravidUrl/$id")
-                contentType(ContentType.Application.Json)
-                loggedInAs("12345678910")
-            }
-        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
-    }
+            repo.insert(GravidTestData.gravidKrav.copy(virksomhetsnummer = "123456785", id = id))
+            val response =
+                httpClient.delete {
+                    appUrl("$kravGravidUrl/$id")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs("12345678910")
+                }
+            assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
+        }
 }

@@ -13,7 +13,6 @@ import org.koin.core.component.get
 import kotlin.test.assertNotNull
 
 class PostgresKroniskKravRepositoryTest : SystemTestBase() {
-
     lateinit var repo: PostgresKroniskKravRepository
     val testKrav = KroniskTestData.kroniskKrav
 

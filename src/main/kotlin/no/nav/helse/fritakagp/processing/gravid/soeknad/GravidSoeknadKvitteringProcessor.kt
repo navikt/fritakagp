@@ -15,9 +15,8 @@ import java.util.UUID
 class GravidSoeknadKvitteringProcessor(
     private val db: GravidSoeknadRepository,
     private val om: ObjectMapper,
-    private val dialogSender: DialogSender
+    private val dialogSender: DialogSender,
 ) : BakgrunnsjobbProsesserer {
-
     companion object {
         const val JOB_TYPE = "gravid-søknad-altinn-kvittering"
     }
@@ -26,16 +25,18 @@ class GravidSoeknadKvitteringProcessor(
 
     override fun prosesser(jobb: Bakgrunnsjobb) {
         val kvitteringJobbData = om.readValue(jobb.data, Jobbdata::class.java)
-        val soeknad = db.getById(kvitteringJobbData.soeknadId)
-            ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
+        val soeknad =
+            db.getById(kvitteringJobbData.soeknadId)
+                ?: throw IllegalArgumentException("Fant ikke søknaden i jobbdatanene ${jobb.data}")
         val navn = soeknad.navn ?: "Ukjent"
-        val gravidSoeknadMelding = DialogMelding(
-            type = DialogMelding.Type.GravidSoeknadOpprettet,
-            id = soeknad.id,
-            orgnr = Orgnr(soeknad.virksomhetsnummer),
-            navn = navn,
-            fnr = soeknad.identitetsnummer
-        )
+        val gravidSoeknadMelding =
+            DialogMelding(
+                type = DialogMelding.Type.GravidSoeknadOpprettet,
+                id = soeknad.id,
+                orgnr = Orgnr(soeknad.virksomhetsnummer),
+                navn = navn,
+                fnr = soeknad.identitetsnummer,
+            )
         logger().info("Sender gravid søknad kvittering for søknad ${soeknad.id} til dialogporten")
         dialogSender.sendMessage(gravidSoeknadMelding.toJsonStr(DialogMelding.serializer()))
 
@@ -43,6 +44,6 @@ class GravidSoeknadKvitteringProcessor(
     }
 
     data class Jobbdata(
-        val soeknadId: UUID
+        val soeknadId: UUID,
     )
 }

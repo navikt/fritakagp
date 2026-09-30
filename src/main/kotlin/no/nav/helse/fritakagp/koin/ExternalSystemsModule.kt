@@ -34,7 +34,7 @@ fun Module.externalSystemClients(env: Env) {
             baseUrl = env.altinnTilgangerBaseUrl,
             serviceCode = env.altinnServiceOwnerServiceId,
             ressurs = Altinn3Ressurs.FRITAKAGP,
-            cacheConfig = LocalCache.Config(60.minutes, 250)
+            cacheConfig = LocalCache.Config(60.minutes, 250),
         )
     } bind Altinn3OBOClient::class
 
@@ -46,7 +46,7 @@ fun Module.externalSystemClients(env: Env) {
             url = env.pdlUrl,
             behandlingsgrunnlag = Behandlingsgrunnlag.FRITAKAGP,
             cacheConfig = LocalCache.Config(1.days, 10_000),
-            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopePdl)
+            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopePdl),
         )
     } bind PdlClient::class
 
@@ -55,7 +55,7 @@ fun Module.externalSystemClients(env: Env) {
         AaregClient(
             baseUrl = env.aaregUrl,
             cacheConfig = LocalCache.Config(5.minutes, 500),
-            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeAareg)
+            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeAareg),
         )
     } bind AaregClient::class
 
@@ -72,21 +72,21 @@ fun Module.externalSystemClients(env: Env) {
     single {
         ClamavVirusScannerImp(
             get(),
-            env.clamAvUrl
+            env.clamAvUrl,
         )
     } bind VirusScanner::class
 
     single {
         BucketStorageImpl(
             env.gcpBucketName,
-            env.gcpProjectId
+            env.gcpProjectId,
         )
     } bind BucketStorage::class
 
     single {
         BrukernotifikasjonKafkaProducer(
             brukernotifikasjonKafkaProps(),
-            env.kafkaTopicNameBrukernotifikasjon
+            env.kafkaTopicNameBrukernotifikasjon,
         )
     } bind BrukernotifikasjonSender::class
 
@@ -96,7 +96,7 @@ fun Module.externalSystemClients(env: Env) {
         val kafkaConfig: KafkaConfig = get()
         KafkaDialogProducer(
             topicName = env.kafkaTopicNameDialog,
-            props = kafkaConfig.dialogProducerConfig
+            props = kafkaConfig.dialogProducerConfig,
         )
     } bind DialogSender::class
 

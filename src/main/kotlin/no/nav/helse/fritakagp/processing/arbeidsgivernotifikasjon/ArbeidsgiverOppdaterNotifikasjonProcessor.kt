@@ -27,7 +27,7 @@ class ArbeidsgiverOppdaterNotifikasjonProcessor(
     private val gravidKravRepo: GravidKravRepository,
     private val kroniskKravRepo: KroniskKravRepository,
     private val om: ObjectMapper,
-    private val arbeidsgiverNotifikasjonKlient: ArbeidsgiverNotifikasjonKlient
+    private val arbeidsgiverNotifikasjonKlient: ArbeidsgiverNotifikasjonKlient,
 ) : BakgrunnsjobbProsesserer {
     private val logger = this.logger()
 
@@ -41,35 +41,39 @@ class ArbeidsgiverOppdaterNotifikasjonProcessor(
         logger.info("Prosesserer ${jobb.uuid} med type ${jobb.type}")
         val jobbData = om.readValue<JobbData>(jobb.data)
         val tidspunkt = hentOpprettetTidspunkt(jobbData)
-        val resultat = runBlocking {
-            arbeidsgiverNotifikasjonKlient.nyStatusSakByGrupperingsid(
-                grupperingsid = jobbData.skjemaId.toString(),
-                merkelapp = "Fritak arbeidsgiverperiode",
-                status = SaksStatus.MOTTATT,
-                tidspunkt = tidspunkt.atOffset(ZoneOffset.of("+1")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-            )
-        }
+        val resultat =
+            runBlocking {
+                arbeidsgiverNotifikasjonKlient.nyStatusSakByGrupperingsid(
+                    grupperingsid = jobbData.skjemaId.toString(),
+                    merkelapp = "Fritak arbeidsgiverperiode",
+                    status = SaksStatus.MOTTATT,
+                    tidspunkt = tidspunkt.atOffset(ZoneOffset.of("+1")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                )
+            }
         logger.info("Oppdaterte sak med ${jobbData.skjemaId} med ref $resultat")
     }
 
     private fun hentOpprettetTidspunkt(jobbData: JobbData): LocalDateTime {
         if (jobbData.skjemaType == JobbData.SkjemaType.KroniskKrav) {
-            val skjema = kroniskKravRepo.getById(jobbData.skjemaId)
-                ?: throw IllegalArgumentException("Fant ikke $jobbData")
+            val skjema =
+                kroniskKravRepo.getById(jobbData.skjemaId)
+                    ?: throw IllegalArgumentException("Fant ikke $jobbData")
             return skjema.opprettet
         } else {
-            val skjema = gravidKravRepo.getById(jobbData.skjemaId)
-                ?: throw IllegalArgumentException("Fant ikke $jobbData")
+            val skjema =
+                gravidKravRepo.getById(jobbData.skjemaId)
+                    ?: throw IllegalArgumentException("Fant ikke $jobbData")
             return skjema.opprettet
         }
     }
+
     data class JobbData(
         val skjemaId: UUID,
-        val skjemaType: SkjemaType
+        val skjemaType: SkjemaType,
     ) {
         enum class SkjemaType {
             KroniskKrav,
-            GravidKrav
+            GravidKrav,
         }
     }
 }

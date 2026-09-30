@@ -27,29 +27,41 @@ fun Application.configureExceptionHandling() {
     install(StatusPages) {
         val logger = "StatusPages".logger()
 
-        suspend fun handleUnexpectedException(call: ApplicationCall, cause: Throwable) {
+        suspend fun handleUnexpectedException(
+            call: ApplicationCall,
+            cause: Throwable,
+        ) {
             val errorId = UUID.randomUUID()
 
             val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
             logger.error("Uventet feil, $errorId med useragent $userAgent", cause)
-            val problem = Problem(
-                type = URI.create("urn:fritak:uventet-feil"),
-                title = "Uventet feil",
-                detail = cause.message,
-                instance = URI.create("urn:fritak:uventent-feil:$errorId")
-            )
+            val problem =
+                Problem(
+                    type = URI.create("urn:fritak:uventet-feil"),
+                    title = "Uventet feil",
+                    detail = cause.message,
+                    instance = URI.create("urn:fritak:uventent-feil:$errorId"),
+                )
             call.respond(HttpStatusCode.InternalServerError, problem)
         }
 
-        suspend fun handleValidationError(call: ApplicationCall, cause: ConstraintViolationException) {
-            val problems = cause.constraintViolations.map {
-                ValidationProblemDetail(it.constraint.name, it.getContextualMessage(), it.property, it.value)
-            }.toSet()
+        suspend fun handleValidationError(
+            call: ApplicationCall,
+            cause: ConstraintViolationException,
+        ) {
+            val problems =
+                cause.constraintViolations
+                    .map {
+                        ValidationProblemDetail(it.constraint.name, it.getContextualMessage(), it.property, it.value)
+                    }.toSet()
 
             call.respond(HttpStatusCode.UnprocessableEntity, ValidationProblem(problems))
         }
 
-        suspend fun handleBadRequestError(call: ApplicationCall, cause: Exception) {
+        suspend fun handleBadRequestError(
+            call: ApplicationCall,
+            cause: Exception,
+        ) {
             val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
             call.respond(
                 HttpStatusCode.BadRequest,
@@ -59,28 +71,33 @@ fun Application.configureExceptionHandling() {
                             "BadInput",
                             "Feil input",
                             "",
-                            "null"
-                        )
-                    )
-                )
+                            "null",
+                        ),
+                    ),
+                ),
             )
             logger.warn("Feil med validering for $userAgent: ${cause.message}")
         }
 
         exception<InvocationTargetException> { call, cause ->
             when (cause.targetException) {
-                is ConstraintViolationException -> handleValidationError(
-                    call,
-                    cause.targetException as ConstraintViolationException
-                )
-                else -> handleUnexpectedException(call, cause)
+                is ConstraintViolationException -> {
+                    handleValidationError(
+                        call,
+                        cause.targetException as ConstraintViolationException,
+                    )
+                }
+
+                else -> {
+                    handleUnexpectedException(call, cause)
+                }
             }
         }
 
         exception<ManglerAltinnRettigheterException> { call, cause ->
             call.respond(
                 HttpStatusCode.Forbidden,
-                Problem(URI.create("urn:fritak:forbidden"), "Ikke korrekte Altinnrettigheter på valgt virksomhet", HttpStatusCode.Forbidden.value)
+                Problem(URI.create("urn:fritak:forbidden"), "Ikke korrekte Altinnrettigheter på valgt virksomhet", HttpStatusCode.Forbidden.value),
             )
         }
 
@@ -97,10 +114,10 @@ fun Application.configureExceptionHandling() {
                             "ParameterConversion",
                             "Parameteret kunne ikke  konverteres til ${cause.type}",
                             cause.parameterName,
-                            null
-                        )
-                    )
-                )
+                            null,
+                        ),
+                    ),
+                ),
             )
             logger.warn("${cause.parameterName} kunne ikke konverteres")
         }
@@ -126,10 +143,10 @@ fun Application.configureExceptionHandling() {
                             "NotNull",
                             "Det angitte feltet er påkrevd",
                             params.joinToString("."),
-                            "null"
-                        )
-                    )
-                )
+                            "null",
+                        ),
+                    ),
+                ),
             )
             logger.warn("Feil med validering av [${params.joinToString()}] for $userAgent: ${cause.message}")
         }
@@ -142,12 +159,13 @@ fun Application.configureExceptionHandling() {
                 val userAgent = call.request.headers[HttpHeaders.UserAgent] ?: "Ukjent"
                 val locale = call.request.headers[HttpHeaders.AcceptLanguage] ?: "Ukjent"
                 logger.warn("$errorId : $userAgent : $locale", cause)
-                val problem = Problem(
-                    status = HttpStatusCode.BadRequest.value,
-                    title = "Feil ved prosessering av JSON-dataene som ble oppgitt",
-                    detail = cause.message,
-                    instance = URI.create("urn:fritak:json-mapping-error:$errorId")
-                )
+                val problem =
+                    Problem(
+                        status = HttpStatusCode.BadRequest.value,
+                        title = "Feil ved prosessering av JSON-dataene som ble oppgitt",
+                        detail = cause.message,
+                        instance = URI.create("urn:fritak:json-mapping-error:$errorId"),
+                    )
                 call.respond(HttpStatusCode.BadRequest, problem)
             }
         }

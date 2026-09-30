@@ -22,12 +22,13 @@ fun Application.localAuthTokenDispenser(env: Env) {
     routing {
         get("/local/token-please") {
             logger.warn("token-please skal kun kalles lokalt!")
-            val token = server.issueToken(
-                subject = call.request.queryParameters["subject"].toString(),
-                issuerId = Issuers.TOKENX,
-                audience = env.tokenxAcceptedAudience,
-                claims = mapOf("pid" to call.request.queryParameters["subject"].toString())
-            )
+            val token =
+                server.issueToken(
+                    subject = call.request.queryParameters["subject"].toString(),
+                    issuerId = Issuers.TOKENX,
+                    audience = env.tokenxAcceptedAudience,
+                    claims = mapOf("pid" to call.request.queryParameters["subject"].toString()),
+                )
             call.respondText(token.serialize(), ContentType.Text.Plain, HttpStatusCode.OK)
         }
     }

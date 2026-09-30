@@ -42,7 +42,6 @@ import javax.sql.DataSource
 
 @ExtendWith(MockKExtension::class)
 class KoinProfilesKtTest : KoinTest {
-
     private val prod: Env.Prod = mockk(relaxed = true)
     private val preprod: Env.Preprod = mockk(relaxed = true)
     private val local: Env.Local = mockk(relaxed = true)

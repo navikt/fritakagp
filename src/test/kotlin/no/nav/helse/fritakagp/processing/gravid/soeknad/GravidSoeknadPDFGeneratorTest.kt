@@ -11,7 +11,6 @@ import java.awt.Desktop
 import java.nio.file.Files
 
 class GravidSoeknadPDFGeneratorTest {
-
     @Test
     fun testLagPDF() {
         val soeknad = GravidTestData.soeknadGravid

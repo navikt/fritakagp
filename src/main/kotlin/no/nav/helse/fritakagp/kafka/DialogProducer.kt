@@ -25,9 +25,8 @@ class MockDialogProducer : DialogSender {
 class KafkaDialogProducer(
     private val topicName: String = DEFAULT_DIALOG_TOPIC_NAME,
     props: Properties = createKafkaProducerConfig("dialog-producer"),
-    producerFactory: (Properties) -> Producer<String, String> = { KafkaProducer(it) }
+    producerFactory: (Properties) -> Producer<String, String> = { KafkaProducer(it) },
 ) : DialogSender {
-
     private val kafkaProducer: Producer<String, String> = producerFactory(props)
     private val logger = this.logger()
 

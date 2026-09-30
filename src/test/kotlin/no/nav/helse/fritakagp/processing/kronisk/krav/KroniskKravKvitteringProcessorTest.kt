@@ -20,16 +20,16 @@ import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 internal class KroniskKravKvitteringProcessorTest {
-
     private val repositoryMock = mockk<KroniskKravRepository>(relaxed = true)
     private val objectMapper: ObjectMapper = customObjectMapper()
     private val dialogSenderMock = mockk<DialogSender>(relaxed = true)
 
-    private val processor = KroniskKravKvitteringProcessor(
-        db = repositoryMock,
-        om = objectMapper,
-        dialogSender = dialogSenderMock
-    )
+    private val processor =
+        KroniskKravKvitteringProcessor(
+            db = repositoryMock,
+            om = objectMapper,
+            dialogSender = dialogSenderMock,
+        )
 
     private val testKrav = KroniskTestData.kroniskKrav.copy(status = KravStatus.OPPRETTET)
 
@@ -38,9 +38,10 @@ internal class KroniskKravKvitteringProcessorTest {
     @BeforeEach
     fun setup() {
         every { repositoryMock.getById(testKrav.id) } returns testKrav
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id))
-        )
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id)),
+            )
     }
 
     @Test
@@ -58,13 +59,14 @@ internal class KroniskKravKvitteringProcessorTest {
 
         processor.prosesser(jobb)
 
-        val expectedMessage = DialogMelding(
-            type = DialogMelding.Type.KroniskKravOpprettet,
-            id = testKrav.id,
-            orgnr = Orgnr(testKrav.virksomhetsnummer),
-            navn = testKrav.navn!!,
-            fnr = testKrav.identitetsnummer
-        ).toJsonStr(DialogMelding.serializer())
+        val expectedMessage =
+            DialogMelding(
+                type = DialogMelding.Type.KroniskKravOpprettet,
+                id = testKrav.id,
+                orgnr = Orgnr(testKrav.virksomhetsnummer),
+                navn = testKrav.navn!!,
+                fnr = testKrav.identitetsnummer,
+            ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -73,9 +75,10 @@ internal class KroniskKravKvitteringProcessorTest {
     fun `skal sende dialog melding for OPPDATERT krav`() {
         testKrav.status = KravStatus.OPPDATERT
         val forrigeKravId = UUID.randomUUID()
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId))
-        )
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId)),
+            )
 
         processor.prosesser(jobb)
 
@@ -86,20 +89,22 @@ internal class KroniskKravKvitteringProcessorTest {
     fun `skal sende korrekt dialog melding for OPPDATERT krav`() {
         testKrav.status = KravStatus.OPPDATERT
         val forrigeKravId = UUID.randomUUID()
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId))
-        )
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKravId)),
+            )
 
         processor.prosesser(jobb)
 
-        val expectedMessage = DialogMeldingMedEndring(
-            type = DialogMeldingMedEndring.Type.KroniskKravEndret,
-            id = testKrav.id,
-            orgnr = Orgnr(testKrav.virksomhetsnummer),
-            navn = testKrav.navn!!,
-            fnr = testKrav.identitetsnummer,
-            forrigeKrav = forrigeKravId
-        ).toJsonStr(DialogMeldingMedEndring.serializer())
+        val expectedMessage =
+            DialogMeldingMedEndring(
+                type = DialogMeldingMedEndring.Type.KroniskKravEndret,
+                id = testKrav.id,
+                orgnr = Orgnr(testKrav.virksomhetsnummer),
+                navn = testKrav.navn!!,
+                fnr = testKrav.identitetsnummer,
+                forrigeKrav = forrigeKravId,
+            ).toJsonStr(DialogMeldingMedEndring.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -107,9 +112,10 @@ internal class KroniskKravKvitteringProcessorTest {
     @Test
     fun `skal kaste exception nar forrigeKrav mangler for OPPDATERT status`() {
         testKrav.status = KravStatus.OPPDATERT
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKrav = null))
-        )
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(testKrav.id, forrigeKrav = null)),
+            )
 
         assertThrows<IllegalArgumentException> { processor.prosesser(jobb) }
 
@@ -131,13 +137,14 @@ internal class KroniskKravKvitteringProcessorTest {
 
         processor.prosesser(jobb)
 
-        val expectedMessage = DialogMelding(
-            type = DialogMelding.Type.KroniskKravSlettet,
-            id = testKrav.id,
-            orgnr = Orgnr(testKrav.virksomhetsnummer),
-            navn = testKrav.navn!!,
-            fnr = testKrav.identitetsnummer
-        ).toJsonStr(DialogMelding.serializer())
+        val expectedMessage =
+            DialogMelding(
+                type = DialogMelding.Type.KroniskKravSlettet,
+                id = testKrav.id,
+                orgnr = Orgnr(testKrav.virksomhetsnummer),
+                navn = testKrav.navn!!,
+                fnr = testKrav.identitetsnummer,
+            ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -167,13 +174,14 @@ internal class KroniskKravKvitteringProcessorTest {
 
         processor.prosesser(jobb)
 
-        val expectedMessage = DialogMelding(
-            type = DialogMelding.Type.KroniskKravOpprettet,
-            id = kravUtenNavn.id,
-            orgnr = Orgnr(kravUtenNavn.virksomhetsnummer),
-            navn = "Ukjent",
-            fnr = kravUtenNavn.identitetsnummer
-        ).toJsonStr(DialogMelding.serializer())
+        val expectedMessage =
+            DialogMelding(
+                type = DialogMelding.Type.KroniskKravOpprettet,
+                id = kravUtenNavn.id,
+                orgnr = Orgnr(kravUtenNavn.virksomhetsnummer),
+                navn = "Ukjent",
+                fnr = kravUtenNavn.identitetsnummer,
+            ).toJsonStr(DialogMelding.serializer())
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }

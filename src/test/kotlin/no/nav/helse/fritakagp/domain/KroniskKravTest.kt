@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class KroniskKravTest {
-
     @Test
     fun `Duplikatsjekk - orginal skal være lik seg selv`() {
         val krav = KroniskTestData.kroniskKrav

@@ -52,66 +52,66 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import javax.sql.DataSource
 
-fun preprodConfig(env: Env.Preprod): Module = module {
-    externalSystemClients(env)
+fun preprodConfig(env: Env.Preprod): Module =
+    module {
+        externalSystemClients(env)
 
-    single {
-        HikariDataSource(
-            createHikariConfig(
-                env.databaseUrl,
-                env.databaseUsername,
-                env.databasePassword
+        single {
+            HikariDataSource(
+                createHikariConfig(
+                    env.databaseUrl,
+                    env.databaseUsername,
+                    env.databasePassword,
+                ),
             )
-        )
-    } bind DataSource::class
+        } bind DataSource::class
 
-    single { PostgresGravidSoeknadRepository(ds = get(), om = get()) } bind GravidSoeknadRepository::class
-    single { PostgresKroniskSoeknadRepository(ds = get(), om = get()) } bind KroniskSoeknadRepository::class
-    single { PostgresGravidKravRepository(ds = get(), om = get()) } bind GravidKravRepository::class
-    single { PostgresKroniskKravRepository(ds = get(), om = get()) } bind KroniskKravRepository::class
+        single { PostgresGravidSoeknadRepository(ds = get(), om = get()) } bind GravidSoeknadRepository::class
+        single { PostgresKroniskSoeknadRepository(ds = get(), om = get()) } bind KroniskSoeknadRepository::class
+        single { PostgresGravidKravRepository(ds = get(), om = get()) } bind GravidKravRepository::class
+        single { PostgresKroniskKravRepository(ds = get(), om = get()) } bind KroniskKravRepository::class
 
-    single { PostgresBakgrunnsjobbRepository(get()) } bind BakgrunnsjobbRepository::class
-    single { BakgrunnsjobbService(get(), bakgrunnsvarsler = MetrikkVarsler()) }
+        single { PostgresBakgrunnsjobbRepository(get()) } bind BakgrunnsjobbRepository::class
+        single { BakgrunnsjobbService(get(), bakgrunnsvarsler = MetrikkVarsler()) }
 
-    single { GravidSoeknadProcessor(gravidSoeknadRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), bakgrunnsjobbRepo = get(), pdfGenerator = GravidSoeknadPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
-    single { GravidKravProcessor(gravidKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), bakgrunnsjobbRepo = get(), pdfGenerator = GravidKravPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
-    single { GravidKravSlettProcessor(gravidKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = GravidKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
-    single { GravidKravEndreProcessor(gravidKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = GravidKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
+        single { GravidSoeknadProcessor(gravidSoeknadRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), bakgrunnsjobbRepo = get(), pdfGenerator = GravidSoeknadPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
+        single { GravidKravProcessor(gravidKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), bakgrunnsjobbRepo = get(), pdfGenerator = GravidKravPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
+        single { GravidKravSlettProcessor(gravidKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = GravidKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
+        single { GravidKravEndreProcessor(gravidKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = GravidKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
 
-    single { KroniskSoeknadProcessor(kroniskSoeknadRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), bakgrunnsjobbRepo = get(), pdlService = get(), pdfGenerator = KroniskSoeknadPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
-    single { KroniskKravProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), bakgrunnsjobbRepo = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
-    single { KroniskKravSlettProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
-    single { KroniskKravEndreProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
+        single { KroniskSoeknadProcessor(kroniskSoeknadRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), bakgrunnsjobbRepo = get(), pdlService = get(), pdfGenerator = KroniskSoeknadPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
+        single { KroniskKravProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), bakgrunnsjobbRepo = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), brregService = get()) }
+        single { KroniskKravSlettProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
+        single { KroniskKravEndreProcessor(kroniskKravRepo = get(), dokarkivKlient = get(), oppgaveKlient = get(), pdlService = get(), pdfGenerator = KroniskKravPDFGenerator(), om = get(), bucketStorage = get(), bakgrunnsjobbRepo = get()) }
 
-    single {
-        GravidSoeknadKvitteringProcessor(
-            db = get(),
-            om = get(),
-            dialogSender = get()
+        single {
+            GravidSoeknadKvitteringProcessor(
+                db = get(),
+                om = get(),
+                dialogSender = get(),
+            )
+        }
 
-        )
+        single { GravidKravKvitteringProcessor(get(), get(), get()) }
+
+        single { KroniskSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
+
+        single { KroniskKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
+
+        single {
+            val azureAuthClient: AuthClient = get()
+            val altinnMottaker = AltinnMottaker.Altinn3(Altinn3Ressurs.FRITAKAGP)
+            ArbeidsgiverNotifikasjonKlient(env.arbeidsgiverNotifikasjonUrl, altinnMottaker, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeArbeidsgivernotifikasjon), Sendevindu.NKS_AAPNINGSTID)
+        }
+
+        single { BrukernotifikasjonProcessorNy(brukerNotifikasjonProducerFactory = get(), brukernotifikasjonService = get()) }
+        single { BrukernotifikasjonService(om = get(), sensitivitetNivaa = Sensitivitet.Substantial, frontendAppBaseUrl = env.frontendUrl) }
+        single { BrukernotifikasjonProcessor(gravidKravRepo = get(), gravidSoeknadRepo = get(), kroniskKravRepo = get(), kroniskSoeknadRepo = get(), om = get(), brukernotifikasjonSender = get(), sensitivitetNivaa = Sensitivitet.High, frontendAppBaseUrl = env.frontendUrl) }
+        single { ArbeidsgiverNotifikasjonProcessor(gravidKravRepo = get(), kroniskKravRepo = get(), om = get(), frontendAppBaseUrl = env.frontendUrl, arbeidsgiverNotifikasjonKlient = get()) }
+        single { ArbeidsgiverOppdaterNotifikasjonProcessor(gravidKravRepo = get(), kroniskKravRepo = get(), om = get(), arbeidsgiverNotifikasjonKlient = get()) }
+
+        single { PdlService(pdlClient = get()) }
+        single { MockBrregService() } bind IBrregService::class
+
+        single { BeloepBeregning(grunnbeloepClient = get()) }
     }
-
-    single { GravidKravKvitteringProcessor(get(), get(), get()) }
-
-    single { KroniskSoeknadKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
-
-    single { KroniskKravKvitteringProcessor(db = get(), om = get(), dialogSender = get()) }
-
-    single {
-        val azureAuthClient: AuthClient = get()
-        val altinnMottaker = AltinnMottaker.Altinn3(Altinn3Ressurs.FRITAKAGP)
-        ArbeidsgiverNotifikasjonKlient(env.arbeidsgiverNotifikasjonUrl, altinnMottaker, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeArbeidsgivernotifikasjon), Sendevindu.NKS_AAPNINGSTID)
-    }
-
-    single { BrukernotifikasjonProcessorNy(brukerNotifikasjonProducerFactory = get(), brukernotifikasjonService = get()) }
-    single { BrukernotifikasjonService(om = get(), sensitivitetNivaa = Sensitivitet.Substantial, frontendAppBaseUrl = env.frontendUrl) }
-    single { BrukernotifikasjonProcessor(gravidKravRepo = get(), gravidSoeknadRepo = get(), kroniskKravRepo = get(), kroniskSoeknadRepo = get(), om = get(), brukernotifikasjonSender = get(), sensitivitetNivaa = Sensitivitet.High, frontendAppBaseUrl = env.frontendUrl) }
-    single { ArbeidsgiverNotifikasjonProcessor(gravidKravRepo = get(), kroniskKravRepo = get(), om = get(), frontendAppBaseUrl = env.frontendUrl, arbeidsgiverNotifikasjonKlient = get()) }
-    single { ArbeidsgiverOppdaterNotifikasjonProcessor(gravidKravRepo = get(), kroniskKravRepo = get(), om = get(), arbeidsgiverNotifikasjonKlient = get()) }
-
-    single { PdlService(pdlClient = get()) }
-    single { MockBrregService() } bind IBrregService::class
-
-    single { BeloepBeregning(grunnbeloepClient = get()) }
-}

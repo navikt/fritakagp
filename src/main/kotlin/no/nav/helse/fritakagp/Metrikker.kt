@@ -11,11 +11,13 @@ class MetrikkVarsler : Bakgrunnsvarsler {
     }
 }
 
-val FEILET_JOBB_COUNTER: Counter = Counter.build()
-    .namespace(METRICS_NS)
-    .name("feilet_jobb")
-    .help("Counts the number of permanently failed jobs")
-    .register()
+val FEILET_JOBB_COUNTER: Counter =
+    Counter
+        .build()
+        .namespace(METRICS_NS)
+        .name("feilet_jobb")
+        .help("Counts the number of permanently failed jobs")
+        .register()
 
 object GravidKravMetrics :
     ProseseringsMetrikker("gravid_krav", "Metrikker for krav, gravid")
@@ -29,16 +31,24 @@ object GravidSoeknadMetrics :
 object KroniskSoeknadMetrics :
     ProseseringsMetrikker("kronisk_soeknad", "Metrikker for søknader, kronisk")
 
-abstract class ProseseringsMetrikker(metricName: String, metricHelpText: String) {
-    private val counter: Counter = Counter.build()
-        .namespace(METRICS_NS)
-        .name(metricName)
-        .labelNames("hendelse")
-        .help(metricHelpText)
-        .register()
+abstract class ProseseringsMetrikker(
+    metricName: String,
+    metricHelpText: String,
+) {
+    private val counter: Counter =
+        Counter
+            .build()
+            .namespace(METRICS_NS)
+            .name(metricName)
+            .labelNames("hendelse")
+            .help(metricHelpText)
+            .register()
 
     fun tellMottatt() = counter.labels("mottatt").inc()
+
     fun tellJournalfoert() = counter.labels("journalfoert").inc()
+
     fun tellOppgaveOpprettet() = counter.labels("oppgaveOpprettet").inc()
+
     fun tellKvitteringSendt() = counter.labels("kvitteringSendt").inc()
 }

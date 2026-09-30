@@ -64,39 +64,59 @@ class KroniskKravRequestTest {
     @Test
     internal fun `Antall refusjonsdager kan ikke overstige periodelengden`() {
         validationShouldFailFor("perioder[0].antallDagerMedRefusjon") {
-            KroniskTestData.kroniskKravRequestValid.copy(
-                perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(antallDagerMedRefusjon = 21))
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            KroniskTestData.kroniskKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            KroniskTestData.kroniskKravRequestValid.perioder
+                                .first()
+                                .copy(antallDagerMedRefusjon = 21),
+                        ),
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Til dato kan ikke komme før fra dato`() {
         validationShouldFailFor("perioder[0].fom") {
-            KroniskTestData.kroniskKravRequestValid.copy(
-                perioder = listOf(
-                    KroniskTestData.kroniskKravRequestValid.perioder.first().copy(
-                        fom = LocalDate.of(2020, 1, 10),
-                        tom = LocalDate.of(2020, 1, 5),
-                        antallDagerMedRefusjon = -5
-                    )
-                ) // slik at validationShouldFailFor() kaster ikke to unntak
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            KroniskTestData.kroniskKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            KroniskTestData.kroniskKravRequestValid.perioder.first().copy(
+                                fom = LocalDate.of(2020, 1, 10),
+                                tom = LocalDate.of(2020, 1, 5),
+                                antallDagerMedRefusjon = -5,
+                            ),
+                        ), // slik at validationShouldFailFor() kaster ikke to unntak
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Sykemeldingsgrad må være gyldig`() {
         validationShouldFailFor("perioder[0].gradering") {
-            KroniskTestData.kroniskKravRequestValid.copy(
-                perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(gradering = 1.1))
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            KroniskTestData.kroniskKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            KroniskTestData.kroniskKravRequestValid.perioder
+                                .first()
+                                .copy(gradering = 1.1),
+                        ),
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
 
         validationShouldFailFor("perioder[0].gradering") {
-            KroniskTestData.kroniskKravRequestValid.copy(
-                perioder = listOf(KroniskTestData.kroniskKravRequestValid.perioder.first().copy(gradering = 0.1))
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            KroniskTestData.kroniskKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            KroniskTestData.kroniskKravRequestValid.perioder
+                                .first()
+                                .copy(gradering = 0.1),
+                        ),
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 }

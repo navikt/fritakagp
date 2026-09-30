@@ -40,12 +40,12 @@ class KroniskKravProcessor(
     private val pdfGenerator: KroniskKravPDFGenerator,
     private val om: ObjectMapper,
     private val bucketStorage: BucketStorage,
-    private val brregService: IBrregService
+    private val brregService: IBrregService,
 ) : BakgrunnsjobbProsesserer {
     companion object {
         const val JOB_TYPE = "kronisk-krav-formidling"
-        const val dokumentasjonBrevkode = "krav_om_fritak_fra_agp_dokumentasjon"
-        const val brevkode = "krav_om_fritak_fra_agp_kronisk"
+        const val BREVKODE = "krav_om_fritak_fra_agp_kronisk"
+        const val DOKUMENTASJON_BREVKODE = "krav_om_fritak_fra_agp_dokumentasjon"
     }
 
     override val type: String get() = JOB_TYPE
@@ -87,8 +87,8 @@ class KroniskKravProcessor(
                 Bakgrunnsjobb(
                     maksAntallForsoek = 10,
                     data = om.writeValueAsString(BrukernotifikasjonJobbdata(krav.id, krav.identitetsnummer, krav.virksomhetsnavn, SkjemaType.KroniskKrav, Oppretting)),
-                    type = BrukernotifikasjonProcessorNy.JOB_TYPE
-                )
+                    type = BrukernotifikasjonProcessorNy.JOB_TYPE,
+                ),
             )
         } finally {
             updateAndLogOnFailure(krav)
@@ -120,70 +120,75 @@ class KroniskKravProcessor(
     }
 
     fun journalfør(krav: KroniskKrav): String {
-        val id = runBlocking {
-            val journalpostId = dokarkivKlient.opprettOgFerdigstillJournalpost(
-                tittel = KroniskKrav.tittel,
-                gjelderPerson = GjelderPerson(krav.identitetsnummer),
-                avsender = Avsender.Organisasjon(krav.virksomhetsnummer, krav.virksomhetsnavn ?: "Ukjent arbeidsgiver"),
-                datoMottatt = krav.opprettet.toLocalDate(),
-                dokumenter = createDocuments(krav, KroniskKrav.tittel),
-                eksternReferanseId = krav.id.toString(),
-                callId = UUID.randomUUID().toString(),
-                kanal = Kanal.NAV_NO
-            )
-            logger.info("Journalført ${krav.id} med ref $journalpostId")
-            return@runBlocking journalpostId.journalpostId
-        }
+        val id =
+            runBlocking {
+                val journalpostId =
+                    dokarkivKlient.opprettOgFerdigstillJournalpost(
+                        tittel = KroniskKrav.TITTEL,
+                        gjelderPerson = GjelderPerson(krav.identitetsnummer),
+                        avsender = Avsender.Organisasjon(krav.virksomhetsnummer, krav.virksomhetsnavn ?: "Ukjent arbeidsgiver"),
+                        datoMottatt = krav.opprettet.toLocalDate(),
+                        dokumenter = createDocuments(krav, KroniskKrav.TITTEL),
+                        eksternReferanseId = krav.id.toString(),
+                        callId = UUID.randomUUID().toString(),
+                        kanal = Kanal.NAV_NO,
+                    )
+                logger.info("Journalført ${krav.id} med ref $journalpostId")
+                return@runBlocking journalpostId.journalpostId
+            }
         return id
     }
 
     private fun createDocuments(
         krav: KroniskKrav,
-        journalfoeringsTittel: String
+        journalfoeringsTittel: String,
     ): List<Dokument> {
         val base64EnkodetPdf = Base64.getEncoder().encodeToString(pdfGenerator.lagPDF(krav))
         val jsonOrginalDokument = Base64.getEncoder().encodeToString(om.writeValueAsBytes(krav))
-        val dokumentListe = mutableListOf(
-            Dokument(
-                dokumentVarianter = listOf(
-                    DokumentVariant(
-                        fysiskDokument = base64EnkodetPdf,
-                        filtype = "PDF",
-                        variantFormat = "ARKIV",
-                        filnavn = null
-                    ),
-                    DokumentVariant(
-                        filtype = "JSON",
-                        fysiskDokument = jsonOrginalDokument,
-                        variantFormat = "ORIGINAL",
-                        filnavn = null
-                    )
+        val dokumentListe =
+            mutableListOf(
+                Dokument(
+                    dokumentVarianter =
+                        listOf(
+                            DokumentVariant(
+                                fysiskDokument = base64EnkodetPdf,
+                                filtype = "PDF",
+                                variantFormat = "ARKIV",
+                                filnavn = null,
+                            ),
+                            DokumentVariant(
+                                filtype = "JSON",
+                                fysiskDokument = jsonOrginalDokument,
+                                variantFormat = "ORIGINAL",
+                                filnavn = null,
+                            ),
+                        ),
+                    brevkode = BREVKODE,
+                    tittel = journalfoeringsTittel,
                 ),
-                brevkode = brevkode,
-                tittel = journalfoeringsTittel
             )
-        )
 
         bucketStorage.getDocAsString(krav.id)?.let {
             dokumentListe.add(
                 Dokument(
-                    dokumentVarianter = listOf(
-                        DokumentVariant(
-                            fysiskDokument = it.base64Data,
-                            filtype = it.extension.uppercase(),
-                            variantFormat = "ARKIV",
-                            filnavn = null
+                    dokumentVarianter =
+                        listOf(
+                            DokumentVariant(
+                                fysiskDokument = it.base64Data,
+                                filtype = it.extension.uppercase(),
+                                variantFormat = "ARKIV",
+                                filnavn = null,
+                            ),
+                            DokumentVariant(
+                                filtype = "JSON",
+                                fysiskDokument = jsonOrginalDokument,
+                                variantFormat = "ORIGINAL",
+                                filnavn = null,
+                            ),
                         ),
-                        DokumentVariant(
-                            filtype = "JSON",
-                            fysiskDokument = jsonOrginalDokument,
-                            variantFormat = "ORIGINAL",
-                            filnavn = null
-                        )
-                    ),
-                    brevkode = dokumentasjonBrevkode,
-                    tittel = "Helsedokumentasjon"
-                )
+                    brevkode = DOKUMENTASJON_BREVKODE,
+                    tittel = "Helsedokumentasjon",
+                ),
             )
         }
 
@@ -196,18 +201,19 @@ class KroniskKravProcessor(
         logger.info("Fant aktørid")
         val beskrivelse = om.writeValueAsString(krav.toKravForOppgave())
         val oppgaveType = "ROB_BEH"
-        val request = OpprettOppgaveRequest(
-            aktoerId = aktoerId,
-            journalpostId = krav.journalpostId,
-            beskrivelse = beskrivelse,
-            tema = "SYK",
-            behandlingstype = digitalKravBehandingsType,
-            oppgavetype = oppgaveType,
-            behandlingstema = fritakAGPBehandingsTema,
-            aktivDato = LocalDate.now(),
-            fristFerdigstillelse = LocalDate.now().plusDays(7),
-            prioritet = "NORM"
-        )
+        val request =
+            OpprettOppgaveRequest(
+                aktoerId = aktoerId,
+                journalpostId = krav.journalpostId,
+                beskrivelse = beskrivelse,
+                tema = "SYK",
+                behandlingstype = digitalKravBehandingsType,
+                oppgavetype = oppgaveType,
+                behandlingstema = fritakAGPBehandingsTema,
+                aktivDato = LocalDate.now(),
+                fristFerdigstillelse = LocalDate.now().plusDays(7),
+                prioritet = "NORM",
+            )
 
         return runBlocking { oppgaveKlient.opprettOppgave(request, UUID.randomUUID().toString()).id.toString() }
     }
@@ -216,21 +222,24 @@ class KroniskKravProcessor(
         val aktoerId = pdlService.hentAktoerId(krav.identitetsnummer)
         requireNotNull(aktoerId) { "Fant ikke AktørID for fnr i ${krav.id}" }
 
-        val request = OpprettOppgaveRequest(
-            aktoerId = aktoerId,
-            journalpostId = krav.journalpostId,
-            beskrivelse = generereKroniskKravBeskrivelse(krav, "Fordelingsoppgave for ${KroniskKrav.tittel}"),
-            tema = "SYK",
-            behandlingstype = digitalKravBehandingsType,
-            oppgavetype = OPPGAVETYPE_FORDELINGSOPPGAVE,
-            behandlingstema = fritakAGPBehandingsTema,
-            aktivDato = LocalDate.now(),
-            fristFerdigstillelse = LocalDate.now().plusDays(7),
-            prioritet = "NORM"
-        )
+        val request =
+            OpprettOppgaveRequest(
+                aktoerId = aktoerId,
+                journalpostId = krav.journalpostId,
+                beskrivelse = generereKroniskKravBeskrivelse(krav, "Fordelingsoppgave for ${KroniskKrav.TITTEL}"),
+                tema = "SYK",
+                behandlingstype = digitalKravBehandingsType,
+                oppgavetype = OPPGAVETYPE_FORDELINGSOPPGAVE,
+                behandlingstema = fritakAGPBehandingsTema,
+                aktivDato = LocalDate.now(),
+                fristFerdigstillelse = LocalDate.now().plusDays(7),
+                prioritet = "NORM",
+            )
 
         return runBlocking { oppgaveKlient.opprettOppgave(request, UUID.randomUUID().toString()).id.toString() }
     }
 
-    data class JobbData(val id: UUID)
+    data class JobbData(
+        val id: UUID,
+    )
 }

@@ -26,7 +26,6 @@ import java.util.UUID
 import kotlin.test.assertEquals
 
 class GravidKravEndreProcessorTest {
-
     val joarkMock = mockk<DokArkivClient>(relaxed = true)
     val oppgaveMock = mockk<OppgaveKlient>(relaxed = true)
     val repositoryMock = mockk<GravidKravRepository>(relaxed = true)
@@ -71,7 +70,7 @@ class GravidKravEndreProcessorTest {
                 withArg {
                     assertEquals("BEH_REF", it.oppgavetype)
                 },
-                any()
+                any(),
             )
         }
 

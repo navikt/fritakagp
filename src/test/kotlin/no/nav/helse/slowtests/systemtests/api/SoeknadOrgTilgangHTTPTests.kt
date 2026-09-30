@@ -16,65 +16,72 @@ import org.koin.test.inject
 import java.util.UUID
 
 class SoeknadOrgTilgangHTTPTests : SystemTestBase() {
+    @Test
+    fun `gravid soeknad - kaller validerTilgangTilOrganisasjon og returnerer 403 ved manglende tilgang`() =
+        suspendableTest {
+            val repo by inject<GravidSoeknadRepository>()
+            val soeknad = GravidTestData.soeknadGravid.copy(id = UUID.randomUUID(), virksomhetsnummer = "999999999")
+            repo.insert(soeknad)
+
+            val response =
+                httpClient.get {
+                    appUrl("/fritak-agp-api/api/v1/gravid/soeknad/${soeknad.id}")
+                    contentType(ContentType.Application.Json)
+                    val fnr = Fnr.genererGyldig()
+                    loggedInAs(fnr.verdi)
+                }
+            assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
+        }
 
     @Test
-    fun `gravid soeknad - kaller validerTilgangTilOrganisasjon og returnerer 403 ved manglende tilgang`() = suspendableTest {
-        val repo by inject<GravidSoeknadRepository>()
-        val soeknad = GravidTestData.soeknadGravid.copy(id = UUID.randomUUID(), virksomhetsnummer = "999999999")
-        repo.insert(soeknad)
-
-        val response = httpClient.get {
-            appUrl("/fritak-agp-api/api/v1/gravid/soeknad/${soeknad.id}")
-            contentType(ContentType.Application.Json)
+    fun `gravid soeknad - bruker får tilgang til skjema på vegne av seg selv`() =
+        suspendableTest {
+            val repo by inject<GravidSoeknadRepository>()
             val fnr = Fnr.genererGyldig()
-            loggedInAs(fnr.verdi)
+
+            val soeknad = GravidTestData.soeknadGravid.copy(identitetsnummer = fnr.verdi, id = UUID.randomUUID(), virksomhetsnummer = "999999999")
+            repo.insert(soeknad)
+
+            val response =
+                httpClient.get {
+                    appUrl("/fritak-agp-api/api/v1/gravid/soeknad/${soeknad.id}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(fnr.verdi)
+                }
+            assertThat(response.status).isEqualTo(HttpStatusCode.OK)
         }
-        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
-    }
 
     @Test
-    fun `gravid soeknad - bruker får tilgang til skjema på vegne av seg selv`() = suspendableTest {
-        val repo by inject<GravidSoeknadRepository>()
-        val fnr = Fnr.genererGyldig()
+    fun `kronisk soeknad - kaller validerTilgangTilOrganisasjon og returnerer 403 ved manglende tilgang`() =
+        suspendableTest {
+            val repo by inject<KroniskSoeknadRepository>()
+            val soeknad = KroniskTestData.soeknadKronisk.copy(id = UUID.randomUUID(), virksomhetsnummer = "999999999")
+            repo.insert(soeknad)
+            val response =
+                httpClient.get {
+                    appUrl("/fritak-agp-api/api/v1/kronisk/soeknad/${soeknad.id}")
+                    contentType(ContentType.Application.Json)
+                    val fnr = Fnr.genererGyldig()
+                    loggedInAs(fnr.verdi)
+                }
 
-        val soeknad = GravidTestData.soeknadGravid.copy(identitetsnummer = fnr.verdi, id = UUID.randomUUID(), virksomhetsnummer = "999999999")
-        repo.insert(soeknad)
-
-        val response = httpClient.get {
-            appUrl("/fritak-agp-api/api/v1/gravid/soeknad/${soeknad.id}")
-            contentType(ContentType.Application.Json)
-            loggedInAs(fnr.verdi)
+            assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
         }
-        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-    }
 
     @Test
-    fun `kronisk soeknad - kaller validerTilgangTilOrganisasjon og returnerer 403 ved manglende tilgang`() = suspendableTest {
-        val repo by inject<KroniskSoeknadRepository>()
-        val soeknad = KroniskTestData.soeknadKronisk.copy(id = UUID.randomUUID(), virksomhetsnummer = "999999999")
-        repo.insert(soeknad)
-        val response = httpClient.get {
-            appUrl("/fritak-agp-api/api/v1/kronisk/soeknad/${soeknad.id}")
-            contentType(ContentType.Application.Json)
+    fun `kronisk soeknad - bruker får tilgang til skjema på vegne av seg selv`() =
+        suspendableTest {
+            val repo by inject<KroniskSoeknadRepository>()
             val fnr = Fnr.genererGyldig()
-            loggedInAs(fnr.verdi)
+            val soeknad = KroniskTestData.soeknadKronisk.copy(identitetsnummer = fnr.verdi, id = UUID.randomUUID(), virksomhetsnummer = "999999999")
+            repo.insert(soeknad)
+            val response =
+                httpClient.get {
+                    appUrl("/fritak-agp-api/api/v1/kronisk/soeknad/${soeknad.id}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(fnr.verdi)
+                }
+
+            assertThat(response.status).isEqualTo(HttpStatusCode.OK)
         }
-
-        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
-    }
-
-    @Test
-    fun `kronisk soeknad - bruker får tilgang til skjema på vegne av seg selv`() = suspendableTest {
-        val repo by inject<KroniskSoeknadRepository>()
-        val fnr = Fnr.genererGyldig()
-        val soeknad = KroniskTestData.soeknadKronisk.copy(identitetsnummer = fnr.verdi, id = UUID.randomUUID(), virksomhetsnummer = "999999999")
-        repo.insert(soeknad)
-        val response = httpClient.get {
-            appUrl("/fritak-agp-api/api/v1/kronisk/soeknad/${soeknad.id}")
-            contentType(ContentType.Application.Json)
-            loggedInAs(fnr.verdi)
-        }
-
-        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-    }
 }

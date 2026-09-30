@@ -34,7 +34,6 @@ import java.util.Base64
 import kotlin.test.assertEquals
 
 class GravidSoeknadProcessorTest {
-
     val joarkMock = mockk<DokArkivClient>(relaxed = true)
     val oppgaveMock = mockk<OppgaveKlient>(relaxed = true)
     val repositoryMock = mockk<GravidSoeknadRepository>(relaxed = true)
@@ -44,17 +43,18 @@ class GravidSoeknadProcessorTest {
     val bucketStorageMock = mockk<BucketStorage>(relaxed = true)
     val bakgrunnsjobbRepomock = mockk<BakgrunnsjobbRepository>(relaxed = true)
     val brregServiceMock = mockk<BrregService>()
-    val prosessor = GravidSoeknadProcessor(
-        repositoryMock,
-        joarkMock,
-        oppgaveMock,
-        pdlServiceMock,
-        bakgrunnsjobbRepomock,
-        pdfGeneratorMock,
-        objectMapper,
-        bucketStorageMock,
-        brregServiceMock
-    )
+    val prosessor =
+        GravidSoeknadProcessor(
+            repositoryMock,
+            joarkMock,
+            oppgaveMock,
+            pdlServiceMock,
+            bakgrunnsjobbRepomock,
+            pdfGeneratorMock,
+            objectMapper,
+            bucketStorageMock,
+            brregServiceMock,
+        )
 
     lateinit var soeknad: GravidSoeknad
 
@@ -65,10 +65,11 @@ class GravidSoeknadProcessorTest {
     @BeforeEach
     fun setup() {
         soeknad = GravidTestData.soeknadGravid.copy()
-        jobb = Bakgrunnsjobb(
-            data = objectMapper.writeValueAsString(GravidSoeknadProcessor.JobbData(soeknad.id)),
-            type = "test"
-        )
+        jobb =
+            Bakgrunnsjobb(
+                data = objectMapper.writeValueAsString(GravidSoeknadProcessor.JobbData(soeknad.id)),
+                type = "test",
+            )
         objectMapper.registerModule(JavaTimeModule())
 
         every { repositoryMock.getById(soeknad.id) } returns soeknad
@@ -103,14 +104,14 @@ class GravidSoeknadProcessorTest {
         verify(exactly = 1) { bucketStorageMock.deleteDoc(soeknad.id) }
         coVerify(exactly = 1) {
             joarkMock.opprettOgFerdigstillJournalpost(
-                GravidSoeknad.tittel,
+                GravidSoeknad.TITTEL,
                 any(),
                 any(),
                 any(),
                 withArg {
                     assertEquals(2, it.size)
-                    assertEquals(GravidSoeknadProcessor.brevkode, it.first().brevkode)
-                    assertEquals(GravidSoeknadProcessor.dokumentasjonBrevkode, it[1].brevkode)
+                    assertEquals(GravidSoeknadProcessor.BREVKODE, it.first().brevkode)
+                    assertEquals(GravidSoeknadProcessor.DOKUMENTASJON_BREVKODE, it[1].brevkode)
                     assertEquals("ARKIV", it[0].dokumentVarianter[0].variantFormat)
                     assertEquals("PDF", it[0].dokumentVarianter[0].filtype)
                     assertEquals(dokumentData, it[1].dokumentVarianter[0].fysiskDokument)
@@ -119,7 +120,7 @@ class GravidSoeknadProcessorTest {
                 },
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -168,7 +169,7 @@ class GravidSoeknadProcessorTest {
         val beskjedJobb = opprettetJobber.find { it.type == BrukernotifikasjonProcessorNy.JOB_TYPE }
         assertThat(beskjedJobb?.data).contains(soeknad.id.toString())
         assertThat(beskjedJobb?.data).contains(
-            SkjemaType.GravidSøknad.name
+            SkjemaType.GravidSøknad.name,
         )
     }
 
