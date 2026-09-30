@@ -121,7 +121,7 @@ dependencies {
     val kotlinxSerializationVersion: String by project
     val ktorVersion: String by project
     val logbackEncoderVersion: String by project
-    val logback_version: String by project
+    val logbackVersion: String by project
     val mockOAuth2ServerVersion: String by project
     val mockkVersion: String by project
     val pdfboxVersion: String by project
@@ -134,7 +134,7 @@ dependencies {
     val utilsVersion: String by project
     val valiktorVersion: String by project
 
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
