@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 val mainClassFritakAgp = "no.nav.helse.fritakagp.AppKt"
 
 plugins {
@@ -14,17 +12,8 @@ application {
     mainClass.set(mainClassFritakAgp)
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
 kotlin {
-    jvmToolchain(21)
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
-    }
+    jvmToolchain(25)
 }
 
 repositories {
