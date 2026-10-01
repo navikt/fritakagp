@@ -20,12 +20,6 @@ repositories {
     val githubPassword = project.property("githubPassword") as String
 
     mavenCentral()
-    maven(url = "https://packages.confluent.io/maven/")
-    maven(url = "https://jitpack.io") {
-        content {
-            excludeGroup("no.nav.helsearbeidsgiver")
-        }
-    }
     maven {
         setUrl("https://maven.pkg.github.com/navikt/*")
         credentials {
@@ -146,13 +140,12 @@ dependencies {
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server:$ktorVersion")
     implementation("io.mockk:mockk:$mockkVersion") // Brukes til å mocke eksterne avhengigheter under lokal kjøring
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
