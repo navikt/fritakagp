@@ -9,7 +9,7 @@ import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogMeldingMedEndring
 import no.nav.helse.fritakagp.kafka.DialogSender
-import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.json.toJson
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
@@ -79,8 +79,8 @@ class GravidKravKvitteringProcessor(
 
         val melding =
             when (gravidKrav) {
-                is DialogMelding -> gravidKrav.toJsonStr(DialogMelding.serializer())
-                is DialogMeldingMedEndring -> gravidKrav.toJsonStr(DialogMeldingMedEndring.serializer())
+                is DialogMelding -> gravidKrav.toJson(DialogMelding.serializer()).toString()
+                is DialogMeldingMedEndring -> gravidKrav.toJson(DialogMeldingMedEndring.serializer()).toString()
                 else -> throw IllegalArgumentException("Ugyldig meldingstype for krevId:$gravidKrav")
             }
         logger().info("Sender gravid krav kvittering for krav ${krav.id} til dialogporten")

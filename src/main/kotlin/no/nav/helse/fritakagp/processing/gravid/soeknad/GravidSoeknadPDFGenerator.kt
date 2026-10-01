@@ -4,7 +4,7 @@ import no.nav.helse.fritakagp.domain.DATE_FORMAT
 import no.nav.helse.fritakagp.domain.GravidSoeknad
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT
 import no.nav.helse.fritakagp.processing.PdfConstants
-import org.apache.commons.lang3.text.WordUtils
+import org.apache.commons.text.WordUtils
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream

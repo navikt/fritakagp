@@ -12,7 +12,7 @@ import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogMeldingMedEndring
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
-import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.json.toJson
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,7 +66,8 @@ internal class KroniskKravKvitteringProcessorTest {
                 orgnr = Orgnr(testKrav.virksomhetsnummer),
                 navn = testKrav.navn!!,
                 fnr = testKrav.identitetsnummer,
-            ).toJsonStr(DialogMelding.serializer())
+            ).toJson(DialogMelding.serializer())
+                .toString()
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -104,7 +105,8 @@ internal class KroniskKravKvitteringProcessorTest {
                 navn = testKrav.navn!!,
                 fnr = testKrav.identitetsnummer,
                 forrigeKrav = forrigeKravId,
-            ).toJsonStr(DialogMeldingMedEndring.serializer())
+            ).toJson(DialogMeldingMedEndring.serializer())
+                .toString()
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -144,7 +146,8 @@ internal class KroniskKravKvitteringProcessorTest {
                 orgnr = Orgnr(testKrav.virksomhetsnummer),
                 navn = testKrav.navn!!,
                 fnr = testKrav.identitetsnummer,
-            ).toJsonStr(DialogMelding.serializer())
+            ).toJson(DialogMelding.serializer())
+                .toString()
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
@@ -181,7 +184,8 @@ internal class KroniskKravKvitteringProcessorTest {
                 orgnr = Orgnr(kravUtenNavn.virksomhetsnummer),
                 navn = "Ukjent",
                 fnr = kravUtenNavn.identitetsnummer,
-            ).toJsonStr(DialogMelding.serializer())
+            ).toJson(DialogMelding.serializer())
+                .toString()
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }

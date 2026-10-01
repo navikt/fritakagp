@@ -100,25 +100,22 @@ tasks {
 dependencies {
     val aaregClientVersion = project.property("aaregClientVersion") as String
     val altinnClientVersion = project.property("altinnClientVersion") as String
+    val apacheCommonsTextVersion = project.property("apacheCommonsTextVersion") as String
     val arbeidsgiverNotifikasjonKlientVersion = project.property("arbeidsgiverNotifikasjonKlientVersion") as String
     val assertJVersion = project.property("assertJVersion") as String
     val bakgrunnsjobbVersion = project.property("bakgrunnsjobbVersion") as String
     val brregClientVersion = project.property("brregClientVersion") as String
-    val confluentVersion = project.property("confluentVersion") as String
-    val coroutinesVersion = project.property("coroutinesVersion") as String
     val dokarkivKlientVersion = project.property("dokarkivKlientVersion") as String
     val flywayVersion = project.property("flywayVersion") as String
     val gcpStorageVersion = project.property("gcpStorageVersion") as String
     val hikariVersion = project.property("hikariVersion") as String
     val jacksonModuleKotlinVersion = project.property("jacksonModuleKotlinVersion") as String
     val jacksonVersion = project.property("jacksonVersion") as String
-    val janinoVersion = project.property("janinoVersion") as String
-    val javaxActivationVersion = project.property("javaxActivationVersion") as String
-    val javaxWsRsApiVersion = project.property("javaxWsRsApiVersion") as String
     val junitJupiterVersion = project.property("junitJupiterVersion") as String
     val kafkaClient = project.property("kafkaClient") as String
     val kformatVersion = project.property("kformatVersion") as String
     val koinVersion = project.property("koinVersion") as String
+    val kotlinxCoroutinesVersion = project.property("kotlinxCoroutinesVersion") as String
     val kotlinxSerializationVersion = project.property("kotlinxSerializationVersion") as String
     val ktorVersion = project.property("ktorVersion") as String
     val logbackEncoderVersion = project.property("logbackEncoderVersion") as String
@@ -135,16 +132,13 @@ dependencies {
     val utilsVersion = project.property("utilsVersion") as String
     val valiktorVersion = project.property("valiktorVersion") as String
 
-    implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
+    implementation("org.apache.commons:commons-text:$apacheCommonsTextVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonModuleKotlinVersion")
     implementation("com.google.cloud:google-cloud-storage:$gcpStorageVersion")
-    implementation("com.sun.activation:javax.activation:$javaxActivationVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("de.m3y.kformat:kformat:$kformatVersion")
-    implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
     implementation("io.insert-koin:koin-core-jvm:$koinVersion")
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
@@ -160,10 +154,16 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server:$ktorVersion")
     implementation("io.mockk:mockk:$mockkVersion") // Brukes til å mocke eksterne avhengigheter under lokal kjøring
-
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
-    implementation("javax.ws.rs:javax.ws.rs-api:$javaxWsRsApiVersion")
+    implementation("org.apache.kafka:kafka-clients:$kafkaClient")
+    implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.valiktor:valiktor-core:$valiktorVersion")
+    implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
 
     implementation("no.nav.helsearbeidsgiver:aareg-client:$aaregClientVersion")
     implementation("no.nav.helsearbeidsgiver:altinn-client:$altinnClientVersion")
@@ -180,15 +180,10 @@ dependencies {
     }
     implementation("no.nav.security:token-validation-ktor-v3:$tokenSupportVersion")
     implementation("no.nav.tms.varsel:kotlin-builder:$tmsVarselKotlinBuilderVersion")
-    implementation("org.apache.kafka:kafka-clients:$kafkaClient")
-    implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
-    implementation("org.codehaus.janino:janino:$janinoVersion")
-    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
-    implementation("org.postgresql:postgresql:$postgresqlVersion")
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.valiktor:valiktor-core:$valiktorVersion")
-    implementation("org.valiktor:valiktor-javatime:$valiktorVersion")
+
+    runtimeOnly("ch.qos.logback:logback-classic:$logbackVersion")
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
+    runtimeOnly("org.postgresql:postgresql:$postgresqlVersion")
 
     testImplementation(testFixtures("no.nav.helsearbeidsgiver:utils:$utilsVersion"))
     testImplementation("io.insert-koin:koin-test:$koinVersion")
@@ -196,7 +191,6 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
 
