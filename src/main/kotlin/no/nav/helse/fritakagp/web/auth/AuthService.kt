@@ -7,16 +7,20 @@ import no.nav.helsearbeidsgiver.altinn.AltinnTilgang
 class AuthService(
     private val authClient: AuthClient,
     private val altinnClient: Altinn3OBOClient,
-    private val altinnTilgangerScope: String
+    private val altinnTilgangerScope: String,
 ) {
-    suspend fun validerTilgangTilOrganisasjon(context: RoutingContext, orgnr: String) {
+    suspend fun validerTilgangTilOrganisasjon(
+        context: RoutingContext,
+        orgnr: String,
+    ) {
         val innloggetFnr = context.hentFnrFraLoginToken()
 
-        val harTilgang = altinnClient.harTilgangTilOrganisasjon(
-            fnr = innloggetFnr,
-            orgnr = orgnr,
-            getToken = context.getTokenFn()
-        )
+        val harTilgang =
+            altinnClient.harTilgangTilOrganisasjon(
+                fnr = innloggetFnr,
+                orgnr = orgnr,
+                getToken = context.getTokenFn(),
+            )
 
         if (!harTilgang) {
             throw ManglerAltinnRettigheterException()
@@ -33,7 +37,7 @@ class AuthService(
         val userTokenString = getTokenString()
         return authClient.fetchOboToken(
             target = altinnTilgangerScope,
-            userToken = userTokenString
+            userToken = userTokenString,
         )
     }
 }

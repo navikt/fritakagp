@@ -10,23 +10,24 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class KroniskSoeknadAntallDagerFloatTest {
-
     @Test
     fun `Skal summere antall dager korrekt`() {
-        val testData = setOf(
-            FravaerData(LocalDate.now().minusMonths(4).toYearMonthString(), 5F),
-            FravaerData(LocalDate.now().minusMonths(3).toYearMonthString(), 5.3F)
-        )
+        val testData =
+            setOf(
+                FravaerData(LocalDate.now().minusMonths(4).toYearMonthString(), 5F),
+                FravaerData(LocalDate.now().minusMonths(3).toYearMonthString(), 5.3F),
+            )
 
         assertEquals(10.3F, testData.map { it.antallDagerMedFravaer }.sum())
     }
 
     @Test
     fun `Beskrivelse skal inneholde riktig genererte string `() {
-        val testData = setOf(
-            FravaerData(LocalDate.now().minusMonths(4).toYearMonthString(), 5F),
-            FravaerData(LocalDate.now().minusMonths(3).toYearMonthString(), 5.3F)
-        )
+        val testData =
+            setOf(
+                FravaerData(LocalDate.now().minusMonths(4).toYearMonthString(), 5F),
+                FravaerData(LocalDate.now().minusMonths(3).toYearMonthString(), 5.3F),
+            )
         val result = generereKroniskSoeknadBeskrivelse(KroniskTestData.soeknadKronisk.copy(fravaer = testData), "Test")
 
         assertContains(result, "10.3")

@@ -9,7 +9,6 @@ import java.util.UUID
 data class KroniskSoeknad(
     override val id: UUID = UUID.randomUUID(),
     val opprettet: LocalDateTime = LocalDateTime.now(),
-
     val virksomhetsnummer: String,
     val identitetsnummer: String,
     // Må være null for tidligere verdier er lagret med null
@@ -19,25 +18,22 @@ data class KroniskSoeknad(
     val antallPerioder: Int,
     val bekreftet: Boolean,
     val harVedlegg: Boolean = false,
-
     val sendtAv: String,
     var virksomhetsnavn: String? = null,
-
     /**
      * ID fra joark etter arkivering
      */
     var journalpostId: String? = null,
-
     /**
      * ID fra oppgave etter opprettelse av oppgave
      */
     var oppgaveId: String? = null,
     // Må være null for tidligere verdier er lagret med null
     var sendtAvNavn: String? = null,
-    var referansenummer: Int? = null
+    var referansenummer: Int? = null,
 ) : SimpleJsonbEntity {
     companion object {
-        const val tittel = "Søknad om fritak fra arbeidsgiverperioden - kronisk eller langvarig sykdom"
+        const val TITTEL = "Søknad om fritak fra arbeidsgiverperioden - kronisk eller langvarig sykdom"
     }
 
     @get:JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -47,7 +43,7 @@ data class KroniskSoeknad(
 
 data class FravaerData(
     val yearMonth: String,
-    val antallDagerMedFravaer: Float
+    val antallDagerMedFravaer: Float,
 ) {
     fun toLocalDate(): LocalDate = LocalDate.parse("$yearMonth-01")
 }

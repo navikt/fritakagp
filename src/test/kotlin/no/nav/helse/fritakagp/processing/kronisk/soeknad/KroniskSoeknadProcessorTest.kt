@@ -35,7 +35,6 @@ import java.util.Base64
 import kotlin.test.assertEquals
 
 class KroniskSoeknadProcessorTest {
-
     val joarkMock = mockk<DokArkivClient>(relaxed = true)
     val oppgaveMock = mockk<OppgaveKlient>(relaxed = true)
     val repositoryMock = mockk<KroniskSoeknadRepository>(relaxed = true)
@@ -45,17 +44,18 @@ class KroniskSoeknadProcessorTest {
     val bucketStorageMock = mockk<BucketStorage>(relaxed = true)
     val bakgrunnsjobbRepomock = mockk<BakgrunnsjobbRepository>(relaxed = true)
     val brregServiceMock = mockk<BrregService>()
-    val prosessor = KroniskSoeknadProcessor(
-        repositoryMock,
-        joarkMock,
-        oppgaveMock,
-        bakgrunnsjobbRepomock,
-        pdlServiceMock,
-        pdfGeneratorMock,
-        objectMapper,
-        bucketStorageMock,
-        brregServiceMock
-    )
+    val prosessor =
+        KroniskSoeknadProcessor(
+            repositoryMock,
+            joarkMock,
+            oppgaveMock,
+            bakgrunnsjobbRepomock,
+            pdlServiceMock,
+            pdfGeneratorMock,
+            objectMapper,
+            bucketStorageMock,
+            brregServiceMock,
+        )
     lateinit var soeknad: KroniskSoeknad
 
     private val oppgaveId = 9999
@@ -111,14 +111,14 @@ class KroniskSoeknadProcessorTest {
 
         coVerify(exactly = 1) {
             joarkMock.opprettOgFerdigstillJournalpost(
-                KroniskSoeknad.tittel,
+                KroniskSoeknad.TITTEL,
                 any(),
                 any(),
                 any(),
                 withArg {
                     assertEquals(2, it.size)
-                    assertEquals(KroniskSoeknadProcessor.brevkode, it.first().brevkode)
-                    assertEquals(KroniskSoeknadProcessor.dokumentasjonBrevkode, it[1].brevkode)
+                    assertEquals(KroniskSoeknadProcessor.BREVKODE, it.first().brevkode)
+                    assertEquals(KroniskSoeknadProcessor.DOKUMENTASJON_BREVKODE, it[1].brevkode)
                     assertEquals("ARKIV", it[0].dokumentVarianter[0].variantFormat)
                     assertEquals("PDF", it[0].dokumentVarianter[0].filtype)
                     assertEquals(dokumentData, it[1].dokumentVarianter[0].fysiskDokument)
@@ -127,7 +127,7 @@ class KroniskSoeknadProcessorTest {
                 },
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }

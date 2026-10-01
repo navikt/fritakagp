@@ -9,9 +9,7 @@ import no.nav.helse.fritakagp.web.auth.AuthService
 import no.nav.helse.fritakagp.web.auth.hentFnrFraLoginToken
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 
-fun Route.altinnRoutes(
-    authService: AuthService
-) {
+fun Route.altinnRoutes(authService: AuthService) {
     val sikkerlogger = sikkerLogger()
     get("/arbeidsgiver-tilganger") {
         val innloggetFoedselsdato = hentFnrFraLoginToken().take(6)

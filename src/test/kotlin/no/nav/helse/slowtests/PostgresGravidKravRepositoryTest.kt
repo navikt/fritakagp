@@ -13,7 +13,6 @@ import org.koin.core.component.get
 import kotlin.test.assertNotNull
 
 class PostgresGravidKravRepositoryTest : SystemTestBase() {
-
     lateinit var repo: PostgresGravidKravRepository
     val testKrav = GravidTestData.gravidKrav
 

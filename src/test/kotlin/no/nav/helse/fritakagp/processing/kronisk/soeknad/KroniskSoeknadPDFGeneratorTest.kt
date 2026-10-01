@@ -10,7 +10,6 @@ import java.awt.Desktop
 import java.nio.file.Files
 
 class KroniskSoeknadPDFGeneratorTest {
-
     @Test
     fun testLagPDF() {
         val soeknad = KroniskTestData.soeknadKronisk

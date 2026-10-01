@@ -38,7 +38,10 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.slf4j.LoggerFactory
 
-class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true) : KoinComponent {
+class FritakAgpApplication(
+    val port: Int = 8080,
+    val runAsDeamon: Boolean = true,
+) : KoinComponent {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val appConfig = HoconApplicationConfig(ConfigFactory.load())
     private val env = readEnv(appConfig)
@@ -56,9 +59,10 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
 
         configAndStartBackgroundWorker()
 
-        webserver = createWebserver().also {
-            it.start(wait = runAsDeamon)
-        }
+        webserver =
+            createWebserver().also {
+                it.start(wait = runAsDeamon)
+            }
     }
 
     fun shutdown() {
@@ -70,9 +74,10 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
     private fun createWebserver(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
         embeddedServer(
             factory = Netty,
-            environment = applicationEnvironment {
-                config = appConfig
-            },
+            environment =
+                applicationEnvironment {
+                    config = appConfig
+                },
             configure = {
                 connector {
                     port = this@FritakAgpApplication.port
@@ -84,7 +89,7 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
                 }
                 nais()
                 fritakModule(env)
-            }
+            },
         )
 
     private fun configAndStartBackgroundWorker() {
@@ -118,7 +123,8 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
     private fun migrateDatabase() {
         logger.info("Starter databasemigrering")
 
-        Flyway.configure()
+        Flyway
+            .configure()
             .baselineOnMigrate(true)
             .dataSource(GlobalContext.getKoinApplicationOrNull()?.koin?.get())
             .load()
@@ -144,6 +150,6 @@ fun main() {
             logger.info("Fikk shutdown-signal, avslutter...")
             application.shutdown()
             logger.info("Avsluttet OK")
-        }
+        },
     )
 }

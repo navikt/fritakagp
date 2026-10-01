@@ -13,26 +13,28 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 fun profileModules(env: Env): List<Module> {
-    val envModule = when (env) {
-        is Env.Prod -> prodConfig(env)
-        is Env.Preprod -> preprodConfig(env)
-        is Env.Local -> localConfig(env)
-    }
+    val envModule =
+        when (env) {
+            is Env.Prod -> prodConfig(env)
+            is Env.Preprod -> preprodConfig(env)
+            is Env.Local -> localConfig(env)
+        }
 
     return listOf(common, envModule)
 }
 
-private val common = module {
-    single { customObjectMapper() }
+private val common =
+    module {
+        single { customObjectMapper() }
 
-    single {
-        HttpClient(Apache) {
-            install(ContentNegotiation) {
-                register(ContentType.Application.Json, JacksonConverter(customObjectMapper()))
-                jackson {
-                    registerModule(JavaTimeModule())
+        single {
+            HttpClient(Apache) {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(customObjectMapper()))
+                    jackson {
+                        registerModule(JavaTimeModule())
+                    }
                 }
             }
         }
     }
-}

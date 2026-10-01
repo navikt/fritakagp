@@ -23,16 +23,19 @@ internal class ArbeidsgiverNotifikasjonProcessorTest {
     val arbeidsgiverNotifikasjonKlient = mockClientArbeidsgiverNotifikasjonKlient()
     val gravidKravRepositoryMock = mockk<GravidKravRepository>(relaxed = true)
     val kroniskKravRepositoryMock = mockk<KroniskKravRepository>(relaxed = true)
-    val objectMapper: ObjectMapper = ObjectMapper().registerModule(
-        KotlinModule.Builder()
-            .withReflectionCacheSize(512)
-            .configure(KotlinFeature.NullToEmptyCollection, false)
-            .configure(KotlinFeature.NullToEmptyMap, false)
-            .configure(KotlinFeature.NullIsSameAsDefault, false)
-            .configure(KotlinFeature.SingletonSupport, false)
-            .configure(KotlinFeature.StrictNullChecks, false)
-            .build()
-    ).registerModule(JavaTimeModule())
+    val objectMapper: ObjectMapper =
+        ObjectMapper()
+            .registerModule(
+                KotlinModule
+                    .Builder()
+                    .withReflectionCacheSize(512)
+                    .configure(KotlinFeature.NullToEmptyCollection, false)
+                    .configure(KotlinFeature.NullToEmptyMap, false)
+                    .configure(KotlinFeature.NullIsSameAsDefault, false)
+                    .configure(KotlinFeature.SingletonSupport, false)
+                    .configure(KotlinFeature.StrictNullChecks, false)
+                    .build(),
+            ).registerModule(JavaTimeModule())
 
     lateinit var gravidKrav: GravidKrav
     lateinit var kroniskKrav: KroniskKrav
@@ -40,13 +43,14 @@ internal class ArbeidsgiverNotifikasjonProcessorTest {
     private var gravidJobb = Bakgrunnsjobb(data = "", type = "test")
     private var kroniskJobb = Bakgrunnsjobb(data = "", type = "test")
 
-    val prosessor = ArbeidsgiverNotifikasjonProcessor(
-        gravidKravRepositoryMock,
-        kroniskKravRepositoryMock,
-        objectMapper,
-        "http://localhost:8080/",
-        arbeidsgiverNotifikasjonKlient
-    )
+    val prosessor =
+        ArbeidsgiverNotifikasjonProcessor(
+            gravidKravRepositoryMock,
+            kroniskKravRepositoryMock,
+            objectMapper,
+            "http://localhost:8080/",
+            arbeidsgiverNotifikasjonKlient,
+        )
 
     @BeforeEach
     fun setup() {

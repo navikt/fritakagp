@@ -13,7 +13,6 @@ import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
 class GravidKravPDFGeneratorTest {
-
     @Test
     fun testLagPDF() {
         val krav = GravidTestData.gravidKrav
@@ -25,7 +24,13 @@ class GravidKravPDFGeneratorTest {
 
         assertThat(pdfText).contains(krav.navn)
         assertThat(pdfText).contains(krav.virksomhetsnummer)
-        assertThat(pdfText).contains(krav.perioder.first().månedsinntekt.roundToInt().toString())
+        assertThat(pdfText).contains(
+            krav.perioder
+                .first()
+                .månedsinntekt
+                .roundToInt()
+                .toString(),
+        )
         assertThat(antallSider).isEqualTo(1)
     }
 

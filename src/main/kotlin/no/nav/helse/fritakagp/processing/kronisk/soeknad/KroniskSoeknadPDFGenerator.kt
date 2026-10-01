@@ -2,6 +2,7 @@ package no.nav.helse.fritakagp.processing.kronisk.soeknad
 
 import no.nav.helse.fritakagp.domain.KroniskSoeknad
 import no.nav.helse.fritakagp.domain.TIMESTAMP_FORMAT
+import no.nav.helse.fritakagp.processing.PdfConstants
 import org.apache.commons.lang3.text.WordUtils
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -12,15 +13,15 @@ import java.time.LocalDate
 import java.time.Month
 
 class KroniskSoeknadPDFGenerator {
-    private val FONT_SIZE = 11f
-    private val LINE_HEIGHT = 15f
-    private val MARGIN_X = 40f
-    private val MARGIN_Y = 40f
-    private val FONT_NAME = "fonts/ARIALUNI.TTF"
-
     fun lagPDF(soeknad: KroniskSoeknad): ByteArray {
         val doc = PDDocument()
-        val font = PDType0Font.load(doc, this::class.java.classLoader.getResource(FONT_NAME).openStream())
+        val font =
+            PDType0Font.load(
+                doc,
+                this::class.java.classLoader
+                    .getResource(PdfConstants.FONT_NAME)
+                    .openStream(),
+            )
 
         val curPage = PDPage()
         doc.addPage(curPage)
@@ -28,12 +29,12 @@ class KroniskSoeknadPDFGenerator {
         val content = PDPageContentStream(doc, curPage)
         content.beginText()
         val mediaBox = curPage.mediaBox
-        val startX = mediaBox.lowerLeftX + MARGIN_X
-        val startY = mediaBox.upperRightY - MARGIN_Y
+        val startX = mediaBox.lowerLeftX + PdfConstants.MARGIN_X
+        val startY = mediaBox.upperRightY - PdfConstants.MARGIN_Y
         content.newLineAtOffset(startX, startY)
-        content.setFont(font, FONT_SIZE + 4)
-        content.showText(KroniskSoeknad.tittel)
-        content.setFont(font, FONT_SIZE)
+        content.setFont(font, PdfConstants.FONT_SIZE + 4)
+        content.showText(KroniskSoeknad.TITTEL)
+        content.setFont(font, PdfConstants.FONT_SIZE)
 
         content.writeTextWrapped("Mottatt: ${soeknad.opprettet.format(TIMESTAMP_FORMAT)}", 4)
         content.writeTextWrapped("Referansenummer: ${soeknad.referansenummer}")
@@ -53,11 +54,11 @@ class KroniskSoeknadPDFGenerator {
 
             yearlyFravaer.forEach { yearGroup ->
                 content.writeTextWrapped(yearGroup.key)
-                content.newLineAtOffset(0F, -LINE_HEIGHT)
+                content.newLineAtOffset(0F, -PdfConstants.LINE_HEIGHT)
                 yearGroup.value.sortedBy { it.yearMonth }.forEach {
                     content.showText("${it.toLocalDate().toName()}: ${it.antallDagerMedFravaer}   ")
                 }
-                content.newLineAtOffset(0F, -LINE_HEIGHT)
+                content.newLineAtOffset(0F, -PdfConstants.LINE_HEIGHT)
             }
         }
 
@@ -70,8 +71,8 @@ class KroniskSoeknadPDFGenerator {
         return ba
     }
 
-    private fun LocalDate.toName(): String {
-        return when (this.month) {
+    private fun LocalDate.toName(): String =
+        when (this.month) {
             Month.JANUARY -> "Jan"
             Month.FEBRUARY -> "Feb"
             Month.MARCH -> "Mar"
@@ -85,11 +86,13 @@ class KroniskSoeknadPDFGenerator {
             Month.NOVEMBER -> "Nov"
             Month.DECEMBER -> "Des"
         }
-    }
 
-    private fun PDPageContentStream.writeTextWrapped(text: String, spacing: Int = 1) {
+    private fun PDPageContentStream.writeTextWrapped(
+        text: String,
+        spacing: Int = 1,
+    ) {
         WordUtils.wrap(text, 100).split('\n').forEach {
-            this.newLineAtOffset(0F, -LINE_HEIGHT * spacing)
+            this.newLineAtOffset(0F, -PdfConstants.LINE_HEIGHT * spacing)
             this.showText(it)
         }
     }

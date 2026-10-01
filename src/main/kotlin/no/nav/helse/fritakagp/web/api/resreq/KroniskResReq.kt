@@ -36,10 +36,8 @@ data class KroniskSoknadRequest(
     val fravaer: Set<FravaerData>,
     val bekreftet: Boolean,
     val antallPerioder: Int,
-
-    val dokumentasjon: String?
+    val dokumentasjon: String?,
 ) {
-
     fun validate(isVirksomhet: Boolean) {
         validate(this) {
             validate(KroniskSoknadRequest::identitetsnummer).isValidIdentitetsnummer()
@@ -65,7 +63,11 @@ data class KroniskSoknadRequest(
         }
     }
 
-    fun toDomain(sendtAv: String, sendtAvNavn: String, navn: String) = KroniskSoeknad(
+    fun toDomain(
+        sendtAv: String,
+        sendtAvNavn: String,
+        navn: String,
+    ) = KroniskSoeknad(
         virksomhetsnummer = virksomhetsnummer,
         identitetsnummer = identitetsnummer,
         navn = navn,
@@ -75,7 +77,7 @@ data class KroniskSoknadRequest(
         fravaer = fravaer,
         ikkeHistoriskFravaer = ikkeHistoriskFravaer,
         bekreftet = bekreftet,
-        harVedlegg = !dokumentasjon.isNullOrEmpty()
+        harVedlegg = !dokumentasjon.isNullOrEmpty(),
     )
 }
 
@@ -86,7 +88,7 @@ data class KroniskKravRequest(
     val bekreftet: Boolean,
     val kontrollDager: Int?,
     val antallDager: Int,
-    var aarsakEndring: AarsakEndring? = null
+    var aarsakEndring: AarsakEndring? = null,
 ) {
     fun validate(ansettelsesperioder: Set<Periode>) {
         validate(this) {
@@ -106,7 +108,11 @@ data class KroniskKravRequest(
         }
     }
 
-    fun toDomain(sendtAv: String, sendtAvNavn: String, navn: String) = KroniskKrav(
+    fun toDomain(
+        sendtAv: String,
+        sendtAvNavn: String,
+        navn: String,
+    ) = KroniskKrav(
         identitetsnummer = identitetsnummer,
         navn = navn,
         virksomhetsnummer = virksomhetsnummer,
@@ -115,6 +121,6 @@ data class KroniskKravRequest(
         sendtAvNavn = sendtAvNavn,
         kontrollDager = kontrollDager,
         antallDager = antallDager,
-        aarsakEndring = aarsakEndring?.name
+        aarsakEndring = aarsakEndring?.name,
     )
 }

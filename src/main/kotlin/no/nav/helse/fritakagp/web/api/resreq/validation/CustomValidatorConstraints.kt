@@ -18,13 +18,11 @@ interface CustomConstraint : Constraint {
 
 class IdentitetsnummerConstraint : CustomConstraint
 
-fun <E> Validator<E>.Property<String?>.isValidIdentitetsnummer() =
-    this.validate(IdentitetsnummerConstraint()) { it?.let(Fnr::erGyldig).orDefault(false) }
+fun <E> Validator<E>.Property<String?>.isValidIdentitetsnummer() = this.validate(IdentitetsnummerConstraint()) { it?.let(Fnr::erGyldig).orDefault(false) }
 
 class OrganisasjonsnummerConstraint : CustomConstraint
 
-fun <E> Validator<E>.Property<String?>.isValidOrganisasjonsnummer() =
-    this.validate(OrganisasjonsnummerConstraint()) { it?.let(Orgnr::erGyldig).orDefault(false) }
+fun <E> Validator<E>.Property<String?>.isValidOrganisasjonsnummer() = this.validate(OrganisasjonsnummerConstraint()) { it?.let(Orgnr::erGyldig).orDefault(false) }
 
 class RefusjonsdagerKanIkkeOverstigePeriodelengdenConstraint : CustomConstraint
 
@@ -35,19 +33,17 @@ fun <E> Validator<E>.Property<Int?>.refusjonsDagerIkkeOverstigerPeriodelengde(ap
 
 class MåVæreVirksomhetContraint : CustomConstraint
 
-fun <E> Validator<E>.Property<String?>.isVirksomhet(erVirksomhet: Boolean) =
-    this.validate(MåVæreVirksomhetContraint()) { erVirksomhet }
+fun <E> Validator<E>.Property<String?>.isVirksomhet(erVirksomhet: Boolean) = this.validate(MåVæreVirksomhetContraint()) { erVirksomhet }
 
 class FraDatoKanIkkeKommeEtterTomDato : CustomConstraint
 
-fun <E> Validator<E>.Property<LocalDate?>.datoerHarRiktigRekkefolge(tom: LocalDate) =
-    this.validate(FraDatoKanIkkeKommeEtterTomDato()) { fom -> fom!!.isEqual(tom) || fom!!.isBefore(tom) }
+fun <E> Validator<E>.Property<LocalDate?>.datoerHarRiktigRekkefolge(tom: LocalDate) = this.validate(FraDatoKanIkkeKommeEtterTomDato()) { fom -> fom!!.isEqual(tom) || fom!!.isBefore(tom) }
 
 class MaanedsInntektErStorreEnTiMil : CustomConstraint
 
 fun <E> Validator<E>.Property<Double?>.maanedsInntektErMellomNullOgTiMil() =
     this.validate(MaanedsInntektErStorreEnTiMil()) {
-        it!! > 0.0 && it!! <= TiMil
+        it!! > 0.0 && it <= TI_MILL
     }
 
 class DataUrlExtensionConstraints : CustomConstraint
@@ -59,10 +55,12 @@ fun <E> Validator<E>.Property<String?>.isGodkjentFiltype() =
 
 class DataUrlBase64Constraints : CustomConstraint
 
-fun <E> Validator<E>.Property<String?>.isAvStorrelse(minSize: Long, maxSize: Long) =
-    this.validate(DataUrlBase64Constraints()) {
-        return@validate extractBase64Del(it!!).toByteArray().size in (minSize + 1)..maxSize
-    }
+fun <E> Validator<E>.Property<String?>.isAvStorrelse(
+    minSize: Long,
+    maxSize: Long,
+) = this.validate(DataUrlBase64Constraints()) {
+    return@validate extractBase64Del(it!!).toByteArray().size in (minSize + 1)..maxSize
+}
 
 class MaxAgeFravaersDataConstraint : CustomConstraint
 
@@ -93,9 +91,7 @@ fun <E> Validator<E>.Property<Iterable<FravaerData>?>.ikkeFlereFravaersdagerEnnD
         }
     }
 
-inline fun <reified T : Enum<T>> enumContains(name: String): Boolean {
-    return enumValues<T>().any { it.name == name }
-}
+inline fun <reified T : Enum<T>> enumContains(name: String): Boolean = enumValues<T>().any { it.name == name }
 
 fun extractBase64Del(dataUrl: String): String = dataUrl.substringAfter("base64,")
 
@@ -108,4 +104,4 @@ fun extractFilExtDel(dataUrl: String): String =
 
 class VirusCheckConstraint : CustomConstraint
 
-const val TiMil = 10000000.0
+const val TI_MILL = 10_000_000.0

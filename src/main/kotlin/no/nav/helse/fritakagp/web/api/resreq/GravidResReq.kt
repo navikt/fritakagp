@@ -32,17 +32,13 @@ data class GravidSoknadRequest(
     val identitetsnummer: String,
     val tilrettelegge: Boolean,
     val termindato: LocalDate?,
-
     val tiltak: List<Tiltak>? = null,
     val tiltakBeskrivelse: String? = null,
-
     val omplassering: Omplassering? = null,
     val omplasseringAarsak: OmplasseringAarsak? = null,
     val bekreftet: Boolean,
-
-    val dokumentasjon: String?
+    val dokumentasjon: String?,
 ) {
-
     fun validate(isVirksomhet: Boolean) {
         validate(this) {
             validate(GravidSoknadRequest::identitetsnummer).isValidIdentitetsnummer()
@@ -70,7 +66,11 @@ data class GravidSoknadRequest(
         }
     }
 
-    fun toDomain(sendtAv: String, sendtAvNavn: String, navn: String) = GravidSoeknad(
+    fun toDomain(
+        sendtAv: String,
+        sendtAvNavn: String,
+        navn: String,
+    ) = GravidSoeknad(
         virksomhetsnummer = virksomhetsnummer,
         identitetsnummer = identitetsnummer,
         navn = navn,
@@ -82,7 +82,7 @@ data class GravidSoknadRequest(
         tilrettelegge = tilrettelegge,
         tiltak = tiltak,
         tiltakBeskrivelse = tiltakBeskrivelse,
-        harVedlegg = !dokumentasjon.isNullOrEmpty()
+        harVedlegg = !dokumentasjon.isNullOrEmpty(),
     )
 }
 
@@ -93,7 +93,7 @@ data class GravidKravRequest(
     val bekreftet: Boolean,
     val kontrollDager: Int?,
     val antallDager: Int,
-    var aarsakEndring: AarsakEndring? = null
+    var aarsakEndring: AarsakEndring? = null,
 ) {
     fun validate(ansettelsesperioder: Set<Periode>) {
         validate(this) {
@@ -114,7 +114,11 @@ data class GravidKravRequest(
         }
     }
 
-    fun toDomain(sendtAv: String, sendtAvNavn: String, navn: String) = GravidKrav(
+    fun toDomain(
+        sendtAv: String,
+        sendtAvNavn: String,
+        navn: String,
+    ) = GravidKrav(
         identitetsnummer = identitetsnummer,
         navn = navn,
         virksomhetsnummer = virksomhetsnummer,
@@ -123,7 +127,7 @@ data class GravidKravRequest(
         sendtAvNavn = sendtAvNavn,
         kontrollDager = kontrollDager,
         antallDager = antallDager,
-        aarsakEndring = aarsakEndring?.name
+        aarsakEndring = aarsakEndring?.name,
     )
 }
 

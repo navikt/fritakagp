@@ -30,9 +30,8 @@ abstract class SimpleJsonbRepositoryBase<T : SimpleJsonbEntity>(
     tableName: String,
     val ds: DataSource,
     val mapper: ObjectMapper,
-    val clazz: Class<T>
+    val clazz: Class<T>,
 ) : SimpleJsonbRepository<T> {
-
     private val getByIdStatement = """SELECT * FROM $tableName WHERE data ->> 'id' = ?"""
     private val saveStatement = "INSERT INTO $tableName (data) VALUES (?::json);"
     private val updateStatement = "UPDATE $tableName SET data = ?::json WHERE data ->> 'id' = ?"
@@ -42,16 +41,18 @@ abstract class SimpleJsonbRepositoryBase<T : SimpleJsonbEntity>(
     override fun getById(id: UUID): T? {
         val existingList = ArrayList<T>()
         ds.connection.use { con ->
-            con.prepareStatement(getByIdStatement).apply {
-                setString(1, id.toString())
-            }.use {
-                val res = it.executeQuery()
-                while (res.next()) {
-                    val sg = mapper.readValue(res.getString("data"), clazz)
-                    existingList.add(sg)
+            con
+                .prepareStatement(getByIdStatement)
+                .apply {
+                    setString(1, id.toString())
+                }.use {
+                    val res = it.executeQuery()
+                    while (res.next()) {
+                        val sg = mapper.readValue(res.getString("data"), clazz)
+                        existingList.add(sg)
+                    }
+                    res.close()
                 }
-                res.close()
-            }
         }
         return existingList.firstOrNull()
     }
@@ -70,13 +71,17 @@ abstract class SimpleJsonbRepositoryBase<T : SimpleJsonbEntity>(
         ds.connection.use { connection ->
 
             val referansenummer = getNesteReferanse(connection)
-            val json = mapper.convertValue(entity, ObjectNode::class.java).apply {
-                put("referansenummer", referansenummer)
-            }.let { mapper.writeValueAsString(it) }
+            val json =
+                mapper
+                    .convertValue(entity, ObjectNode::class.java)
+                    .apply {
+                        put("referansenummer", referansenummer)
+                    }.let { mapper.writeValueAsString(it) }
             connection.prepareStatement(saveStatement).use {
-                it.apply {
-                    setString(1, json)
-                }.executeUpdate()
+                it
+                    .apply {
+                        setString(1, json)
+                    }.executeUpdate()
             }
         }
         return entity
@@ -85,9 +90,10 @@ abstract class SimpleJsonbRepositoryBase<T : SimpleJsonbEntity>(
     override fun delete(id: UUID): Int {
         ds.connection.use { connection ->
             connection.prepareStatement(deleteStatement).use {
-                return it.apply {
-                    setString(1, id.toString())
-                }.executeUpdate()
+                return it
+                    .apply {
+                        setString(1, id.toString())
+                    }.executeUpdate()
             }
         }
     }
@@ -96,10 +102,11 @@ abstract class SimpleJsonbRepositoryBase<T : SimpleJsonbEntity>(
         val json = mapper.writeValueAsString(entity)
         ds.connection.use { connection ->
             connection.prepareStatement(updateStatement).use {
-                it.apply {
-                    setString(1, json)
-                    setString(2, entity.id.toString())
-                }.executeUpdate()
+                it
+                    .apply {
+                        setString(1, json)
+                        setString(2, entity.id.toString())
+                    }.executeUpdate()
             }
         }
     }

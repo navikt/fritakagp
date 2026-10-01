@@ -13,15 +13,22 @@ fun readEnv(config: ApplicationConfig): Env =
         "PROD" -> Env::Prod
         "PREPROD" -> Env::Preprod
         else -> Env::Local
-    }
-        .invoke(config)
+    }.invoke(config)
 
 sealed class Env(
-    private val config: ApplicationConfig
+    private val config: ApplicationConfig,
 ) {
-    class Prod(config: ApplicationConfig) : Env(config)
-    class Preprod(config: ApplicationConfig) : Env(config)
-    class Local(config: ApplicationConfig) : Env(config)
+    class Prod(
+        config: ApplicationConfig,
+    ) : Env(config)
+
+    class Preprod(
+        config: ApplicationConfig,
+    ) : Env(config)
+
+    class Local(
+        config: ApplicationConfig,
+    ) : Env(config)
 
     val ktorBasepath = "ktor.application.basepath".prop()
 
@@ -55,8 +62,8 @@ sealed class Env(
             IssuerConfig(
                 name = Issuers.TOKENX,
                 discoveryUrl = tokenxDiscoveryUrl,
-                acceptedAudience = tokenxAcceptedAudience.let(::listOf)
-            )
+                acceptedAudience = tokenxAcceptedAudience.let(::listOf),
+            ),
         )
 
     val aaregUrl = "aareg_url".prop()
@@ -81,9 +88,7 @@ sealed class Env(
     val scopePdl = "pdlscope".prop()
     val scopeAareg = "aaregscope".prop()
 
-    private fun String.prop(): String =
-        config.prop(this)
+    private fun String.prop(): String = config.prop(this)
 }
 
-private fun ApplicationConfig.prop(key: String): String =
-    property(key).getString()
+private fun ApplicationConfig.prop(key: String): String = property(key).getString()

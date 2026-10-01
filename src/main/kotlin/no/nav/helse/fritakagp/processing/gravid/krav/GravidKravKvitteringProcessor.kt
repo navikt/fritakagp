@@ -17,7 +17,7 @@ import java.util.UUID
 class GravidKravKvitteringProcessor(
     private val db: GravidKravRepository,
     private val om: ObjectMapper,
-    private val dialogSender: DialogSender
+    private val dialogSender: DialogSender,
 ) : BakgrunnsjobbProsesserer {
     companion object {
         const val JOB_TYPE = "gravid-krav-altinn-kvittering"
@@ -44,7 +44,7 @@ class GravidKravKvitteringProcessor(
                         id = id,
                         orgnr = orgnr,
                         navn = navn,
-                        fnr = fnr
+                        fnr = fnr,
                     )
                 }
 
@@ -55,9 +55,10 @@ class GravidKravKvitteringProcessor(
                         orgnr = orgnr,
                         navn = navn,
                         fnr = fnr,
-                        forrigeKrav = requireNotNull(kvitteringJobbData.forrigeKrav) {
-                            "forrigeKrav må være satt for status OPPDATERT"
-                        }
+                        forrigeKrav =
+                            requireNotNull(kvitteringJobbData.forrigeKrav) {
+                                "forrigeKrav må være satt for status OPPDATERT"
+                            },
                     )
                 }
 
@@ -67,7 +68,7 @@ class GravidKravKvitteringProcessor(
                         id = id,
                         orgnr = orgnr,
                         navn = navn,
-                        fnr = fnr
+                        fnr = fnr,
                     )
                 }
 
@@ -76,11 +77,12 @@ class GravidKravKvitteringProcessor(
                 }
             }
 
-        val melding = when (gravidKrav) {
-            is DialogMelding -> gravidKrav.toJsonStr(DialogMelding.serializer())
-            is DialogMeldingMedEndring -> gravidKrav.toJsonStr(DialogMeldingMedEndring.serializer())
-            else -> throw IllegalArgumentException("Ugyldig meldingstype for krevId:$gravidKrav")
-        }
+        val melding =
+            when (gravidKrav) {
+                is DialogMelding -> gravidKrav.toJsonStr(DialogMelding.serializer())
+                is DialogMeldingMedEndring -> gravidKrav.toJsonStr(DialogMeldingMedEndring.serializer())
+                else -> throw IllegalArgumentException("Ugyldig meldingstype for krevId:$gravidKrav")
+            }
         logger().info("Sender gravid krav kvittering for krav ${krav.id} til dialogporten")
         dialogSender.sendMessage(melding)
 
@@ -89,6 +91,6 @@ class GravidKravKvitteringProcessor(
 
     data class Jobbdata(
         val kravId: UUID,
-        val forrigeKrav: UUID? = null
+        val forrigeKrav: UUID? = null,
     )
 }

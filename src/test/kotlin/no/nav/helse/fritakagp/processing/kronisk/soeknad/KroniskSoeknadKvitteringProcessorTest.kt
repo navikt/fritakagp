@@ -17,16 +17,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class KroniskSoeknadKvitteringProcessorTest {
-
     private val repositoryMock = mockk<KroniskSoeknadRepository>(relaxed = true)
     private val objectMapper: ObjectMapper = customObjectMapper()
     private val dialogSenderMock = mockk<DialogSender>(relaxed = true)
 
-    private val processor = KroniskSoeknadKvitteringProcessor(
-        db = repositoryMock,
-        om = objectMapper,
-        dialogSender = dialogSenderMock
-    )
+    private val processor =
+        KroniskSoeknadKvitteringProcessor(
+            db = repositoryMock,
+            om = objectMapper,
+            dialogSender = dialogSenderMock,
+        )
 
     private val testSoeknad = KroniskTestData.soeknadKronisk.copy()
 
@@ -35,21 +35,23 @@ internal class KroniskSoeknadKvitteringProcessorTest {
     @BeforeEach
     fun setup() {
         every { repositoryMock.getById(testSoeknad.id) } returns testSoeknad
-        jobb = BakgrunnsJobbUtils.testJob(
-            objectMapper.writeValueAsString(KroniskSoeknadKvitteringProcessor.Jobbdata(testSoeknad.id))
-        )
+        jobb =
+            BakgrunnsJobbUtils.testJob(
+                objectMapper.writeValueAsString(KroniskSoeknadKvitteringProcessor.Jobbdata(testSoeknad.id)),
+            )
     }
 
     @Test
     fun `skal sende dialog melding og kvittering`() {
         processor.prosesser(jobb)
-        val expectedMessage = DialogMelding(
-            type = DialogMelding.Type.KroniskSoeknadOpprettet,
-            id = testSoeknad.id,
-            orgnr = Orgnr(testSoeknad.virksomhetsnummer),
-            navn = testSoeknad.navn!!,
-            fnr = testSoeknad.identitetsnummer
-        ).toJsonStr(DialogMelding.serializer())
+        val expectedMessage =
+            DialogMelding(
+                type = DialogMelding.Type.KroniskSoeknadOpprettet,
+                id = testSoeknad.id,
+                orgnr = Orgnr(testSoeknad.virksomhetsnummer),
+                navn = testSoeknad.navn!!,
+                fnr = testSoeknad.identitetsnummer,
+            ).toJsonStr(DialogMelding.serializer())
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }
 

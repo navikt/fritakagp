@@ -56,15 +56,27 @@ class GravidKravRequestTest {
     @Test
     internal fun `Sykemeldingsgrad må være gyldig`() {
         validationShouldFailFor("perioder[0].gradering") {
-            GravidTestData.gravidKravRequestValid.copy(
-                perioder = listOf(GravidTestData.gravidKravRequestValid.perioder.first().copy(gradering = 1.1))
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            GravidTestData.gravidKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            GravidTestData.gravidKravRequestValid.perioder
+                                .first()
+                                .copy(gradering = 1.1),
+                        ),
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
 
         validationShouldFailFor("perioder[0].gradering") {
-            GravidTestData.gravidKravRequestValid.copy(
-                perioder = listOf(GravidTestData.gravidKravRequestValid.perioder.first().copy(gradering = 0.1))
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            GravidTestData.gravidKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            GravidTestData.gravidKravRequestValid.perioder
+                                .first()
+                                .copy(gradering = 0.1),
+                        ),
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
@@ -83,24 +95,32 @@ class GravidKravRequestTest {
     @Test
     internal fun `Antall refusjonsdager kan ikke overstige periodelengden`() {
         validationShouldFailFor("perioder[0].antallDagerMedRefusjon") {
-            GravidTestData.gravidKravRequestValid.copy(
-                perioder = listOf(GravidTestData.gravidKravRequestValid.perioder.first().copy(antallDagerMedRefusjon = 21))
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            GravidTestData.gravidKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            GravidTestData.gravidKravRequestValid.perioder
+                                .first()
+                                .copy(antallDagerMedRefusjon = 21),
+                        ),
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 
     @Test
     internal fun `Til dato kan ikke komme før fra dato`() {
         validationShouldFailFor("perioder[0].fom") {
-            GravidTestData.gravidKravRequestValid.copy(
-                perioder = listOf(
-                    GravidTestData.gravidKravRequestValid.perioder.first().copy(
-                        fom = LocalDate.of(2020, 1, 10),
-                        tom = LocalDate.of(2020, 1, 5),
-                        antallDagerMedRefusjon = -5
-                    )
-                ) // slik at validationShouldFailFor() kaster ikke to unntak
-            ).validate(AaregTestData.evigAnsettelsesperiode)
+            GravidTestData.gravidKravRequestValid
+                .copy(
+                    perioder =
+                        listOf(
+                            GravidTestData.gravidKravRequestValid.perioder.first().copy(
+                                fom = LocalDate.of(2020, 1, 10),
+                                tom = LocalDate.of(2020, 1, 5),
+                                antallDagerMedRefusjon = -5,
+                            ),
+                        ), // slik at validationShouldFailFor() kaster ikke to unntak
+                ).validate(AaregTestData.evigAnsettelsesperiode)
         }
     }
 

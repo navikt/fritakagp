@@ -14,26 +14,27 @@ import java.util.Properties
 import java.util.concurrent.CompletableFuture
 
 class DialogProducerTest {
-
     @Test
     fun `sender melding til dialog-topic`() {
         val recordSlot = slot<ProducerRecord<String, String>>()
         val producer = mockk<Producer<String, String>>()
-        val metadata = RecordMetadata(
-            TopicPartition(DEFAULT_DIALOG_TOPIC_NAME, 0),
-            0,
-            1,
-            System.currentTimeMillis(),
-            "dialog-1".length,
-            "melding".length
-        )
+        val metadata =
+            RecordMetadata(
+                TopicPartition(DEFAULT_DIALOG_TOPIC_NAME, 0),
+                0,
+                1,
+                System.currentTimeMillis(),
+                "dialog-1".length,
+                "melding".length,
+            )
 
         every { producer.send(capture(recordSlot)) } returns CompletableFuture.completedFuture(metadata)
 
-        val dialogProducer = KafkaDialogProducer(
-            topicName = DEFAULT_DIALOG_TOPIC_NAME,
-            props = Properties()
-        ) { producer }
+        val dialogProducer =
+            KafkaDialogProducer(
+                topicName = DEFAULT_DIALOG_TOPIC_NAME,
+                props = Properties(),
+            ) { producer }
 
         val actualMetadata = requireNotNull(dialogProducer.sendMessage("dialog-1"))
         val record = requireNotNull(recordSlot.captured)

@@ -1,10 +1,10 @@
 pluginManagement {
     plugins {
         val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
-        val ktlintVersion = providers.gradleProperty("ktlintVersion").get()
+        val kotlinterVersion = providers.gradleProperty("kotlinterVersion").get()
 
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.serialization") version kotlinVersion
-        id("org.jlleitschuh.gradle.ktlint") version ktlintVersion
+        id("org.jmailen.kotlinter") version kotlinterVersion
     }
 }

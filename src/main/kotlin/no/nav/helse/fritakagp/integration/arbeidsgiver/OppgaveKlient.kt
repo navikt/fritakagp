@@ -15,37 +15,57 @@ import no.nav.helsearbeidsgiver.utils.log.logger
 import java.time.LocalDate
 
 interface OppgaveKlient {
-    suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest, callId: String): OpprettOppgaveResponse
-    suspend fun hentOppgave(oppgaveId: Int, callId: String): OppgaveResponse
+    suspend fun opprettOppgave(
+        opprettOppgaveRequest: OpprettOppgaveRequest,
+        callId: String,
+    ): OpprettOppgaveResponse
+
+    suspend fun hentOppgave(
+        oppgaveId: Int,
+        callId: String,
+    ): OppgaveResponse
 }
 
 interface SyncOppgaveKlient {
-    fun opprettOppgaveSync(opprettOppgaveRequest: OpprettOppgaveRequest, callId: String): OpprettOppgaveResponse
-    fun hentOppgaveSync(oppgaveId: Int, callId: String): OppgaveResponse
+    fun opprettOppgaveSync(
+        opprettOppgaveRequest: OpprettOppgaveRequest,
+        callId: String,
+    ): OpprettOppgaveResponse
+
+    fun hentOppgaveSync(
+        oppgaveId: Int,
+        callId: String,
+    ): OppgaveResponse
 }
 
 class OppgaveKlientImpl(
     private val url: String,
     val getAccessToken: () -> String,
-    private val httpClient: HttpClient
-) : OppgaveKlient, SyncOppgaveKlient {
-
-    override suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest, callId: String): OpprettOppgaveResponse {
+    private val httpClient: HttpClient,
+) : OppgaveKlient,
+    SyncOppgaveKlient {
+    override suspend fun opprettOppgave(
+        opprettOppgaveRequest: OpprettOppgaveRequest,
+        callId: String,
+    ): OpprettOppgaveResponse {
         logger().info("Oppretter oppgave for journalpost ${opprettOppgaveRequest.journalpostId} med saksreferanse ${opprettOppgaveRequest.saksreferanse} og X-Correlation-ID $callId")
         val token = getAccessToken()
-        val httpResponse = httpClient.post(url) {
-            contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
-            header("Authorization", "Bearer $token")
-            header("X-Correlation-ID", callId)
-            setBody(opprettOppgaveRequest)
-        }
+        val httpResponse =
+            httpClient.post(url) {
+                contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
+                header("Authorization", "Bearer $token")
+                header("X-Correlation-ID", callId)
+                setBody(opprettOppgaveRequest)
+            }
         return when (httpResponse.status) {
             HttpStatusCode.OK -> {
                 httpResponse.call.response.body()
             }
+
             HttpStatusCode.Created -> {
                 httpResponse.call.response.body()
             }
+
             else -> {
                 logger().error("Feilet å opprette oppgave : $httpResponse")
                 throw OpprettOppgaveUnauthorizedException(opprettOppgaveRequest, httpResponse.status)
@@ -55,22 +75,25 @@ class OppgaveKlientImpl(
 
     override fun opprettOppgaveSync(
         opprettOppgaveRequest: OpprettOppgaveRequest,
-        callId: String
-    ): OpprettOppgaveResponse {
-        return runBlocking { opprettOppgave(opprettOppgaveRequest, callId) }
-    }
+        callId: String,
+    ): OpprettOppgaveResponse = runBlocking { opprettOppgave(opprettOppgaveRequest, callId) }
 
-    override suspend fun hentOppgave(oppgaveId: Int, callId: String): OppgaveResponse {
+    override suspend fun hentOppgave(
+        oppgaveId: Int,
+        callId: String,
+    ): OppgaveResponse {
         val token = getAccessToken()
-        val httpResponse = httpClient.get("$url/$oppgaveId") {
-            contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer $token")
-            header("X-Correlation-ID", callId)
-        }
+        val httpResponse =
+            httpClient.get("$url/$oppgaveId") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                header("X-Correlation-ID", callId)
+            }
         return when (httpResponse.status) {
             HttpStatusCode.OK -> {
                 httpResponse.call.response.body()
             }
+
             else -> {
                 throw HentOppgaveUnauthorizedException(oppgaveId, httpResponse.status)
             }
@@ -79,10 +102,8 @@ class OppgaveKlientImpl(
 
     override fun hentOppgaveSync(
         oppgaveId: Int,
-        callId: String
-    ): OppgaveResponse {
-        return runBlocking { hentOppgave(oppgaveId, callId) }
-    }
+        callId: String,
+    ): OppgaveResponse = runBlocking { hentOppgave(oppgaveId, callId) }
 }
 
 data class OppgaveResponse(
@@ -103,7 +124,7 @@ data class OppgaveResponse(
     val fristFerdigstillelse: LocalDate? = null,
     val prioritet: String,
     val status: String? = null,
-    val mappeId: Int? = null
+    val mappeId: Int? = null,
 )
 
 data class OpprettOppgaveRequest(
@@ -115,25 +136,22 @@ data class OpprettOppgaveRequest(
     val journalpostkilde: String? = null,
     val behandlesAvApplikasjon: String? = null,
     val tilordnetRessurs: String? = null,
-
     val saksreferanse: String? = null,
     val beskrivelse: String? = null,
     val temagruppe: String? = null,
     val tema: String,
     val oppgavetype: String,
-
     /**
      * https://kodeverk-web.nais.adeo.no/kodeverksoversikt/kodeverk/Behandlingstyper
      */
     val behandlingstype: String? = null,
-
     /**
      * https://kodeverk-web.nais.adeo.no/kodeverksoversikt/kodeverk/Behandlingstema
      */
     val behandlingstema: String? = null,
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
-    val prioritet: String
+    val prioritet: String,
 )
 
 // https://oppgave.dev.adeo.no/#/Oppgave/opprettOppgave
@@ -145,10 +163,11 @@ data class OpprettOppgaveResponse(
     val versjon: Int,
     val aktivDato: LocalDate,
     val prioritet: Prioritet,
-    val status: Status
+    val status: Status,
 )
 
 enum class Status { OPPRETTET, AAPNET, UNDER_BEHANDLING, FERDIGSTILT, FEILREGISTRERT }
+
 enum class Prioritet { HOY, NORM, LAV }
 
 const val OPPGAVETYPE_FORDELINGSOPPGAVE = "FDR"

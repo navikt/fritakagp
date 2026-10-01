@@ -4,7 +4,7 @@ plugins {
     application
     kotlin("jvm")
     kotlin("plugin.serialization")
-    id("org.jlleitschuh.gradle.ktlint")
+    id("org.jmailen.kotlinter")
     jacoco
 }
 
@@ -48,7 +48,11 @@ tasks {
 
         doLast {
             dependencies.forEach {
-                val file = layout.buildDirectory.file("libs/${it.name}").get().asFile
+                val file =
+                    layout.buildDirectory
+                        .file("libs/${it.name}")
+                        .get()
+                        .asFile
                 if (!file.exists()) {
                     it.copyTo(file)
                 }
@@ -118,7 +122,7 @@ dependencies {
     val kotlinxSerializationVersion = project.property("kotlinxSerializationVersion") as String
     val ktorVersion = project.property("ktorVersion") as String
     val logbackEncoderVersion = project.property("logbackEncoderVersion") as String
-    val logback_version = project.property("logback_version") as String
+    val logbackVersion = project.property("logbackVersion") as String
     val mockOAuth2ServerVersion = project.property("mockOAuth2ServerVersion") as String
     val mockkVersion = project.property("mockkVersion") as String
     val pdfboxVersion = project.property("pdfboxVersion") as String
@@ -131,7 +135,7 @@ dependencies {
     val utilsVersion = project.property("utilsVersion") as String
     val valiktorVersion = project.property("valiktorVersion") as String
 
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")

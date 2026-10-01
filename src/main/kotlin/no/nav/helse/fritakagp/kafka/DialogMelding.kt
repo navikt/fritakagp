@@ -14,7 +14,7 @@ data class DialogMelding(
     val id: UUID,
     val orgnr: Orgnr,
     val navn: String,
-    val fnr: String
+    val fnr: String,
 ) {
     @Serializable
     enum class Type {
@@ -23,7 +23,7 @@ data class DialogMelding(
         KroniskKravSlettet,
         GravidSoeknadOpprettet,
         GravidKravOpprettet,
-        GravidKravSlettet
+        GravidKravSlettet,
     }
 }
 
@@ -34,11 +34,11 @@ data class DialogMeldingMedEndring(
     val orgnr: Orgnr,
     val navn: String,
     val fnr: String,
-    val forrigeKrav: UUID
+    val forrigeKrav: UUID,
 ) {
     @Serializable
     enum class Type {
         GravidKravEndret,
-        KroniskKravEndret
+        KroniskKravEndret,
     }
 }

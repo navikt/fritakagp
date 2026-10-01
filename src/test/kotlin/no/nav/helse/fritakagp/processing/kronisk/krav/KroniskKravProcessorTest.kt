@@ -38,7 +38,6 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 class KroniskKravProcessorTest {
-
     val joarkMock = mockk<DokArkivClient>(relaxed = true)
     val oppgaveMock = mockk<OppgaveKlient>(relaxed = true)
     val repositoryMock = mockk<KroniskKravRepository>(relaxed = true)
@@ -103,14 +102,14 @@ class KroniskKravProcessorTest {
 
         coVerify(exactly = 1) {
             joarkMock.opprettOgFerdigstillJournalpost(
-                KroniskKrav.tittel,
+                KroniskKrav.TITTEL,
                 any(),
                 any(),
                 any(),
                 withArg {
                     assertEquals(2, it.size)
-                    assertEquals(KroniskKravProcessor.brevkode, it.first().brevkode)
-                    assertEquals(KroniskKravProcessor.dokumentasjonBrevkode, it[1].brevkode)
+                    assertEquals(KroniskKravProcessor.BREVKODE, it.first().brevkode)
+                    assertEquals(KroniskKravProcessor.DOKUMENTASJON_BREVKODE, it[1].brevkode)
                     assertEquals("ARKIV", it[0].dokumentVarianter[0].variantFormat)
                     assertEquals("PDF", it[0].dokumentVarianter[0].filtype)
                     assertEquals("JSON", it[0].dokumentVarianter[1].filtype)
@@ -121,7 +120,7 @@ class KroniskKravProcessorTest {
                 },
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
 //        val joarkRequest = slot<JournalpostRequest>()
@@ -173,7 +172,7 @@ class KroniskKravProcessorTest {
                         fail()
                     }
                 },
-                any()
+                any(),
             )
         }
         verify(exactly = 1) { repositoryMock.update(krav) }
