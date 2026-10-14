@@ -1,0 +1,63 @@
+spec:
+  kafka:
+    pool: nav-dev
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_16
+        tier: db-f1-micro
+        diskAutoresize: true
+        databases:
+          - name: fritakagp-db
+    buckets:
+      - name: helse-arbeidsgiver-fritakagb-bucket
+  ingresses:
+    - https://fritakagp-api.intern.dev.nav.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: tokenx-token-generator
+          namespace: nais
+    outbound:
+      external:
+        - host: aareg-services.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
+        - host: oppgave-q1.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: kafka-schema-registry.nais-q.adeo.no
+        - host: api-gw-q1.oera.no
+        - host: tt02.altinn.no
+  envFrom:
+    # servicebrukerens passord som er hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
+    - secret: service-user-password
+    - secret: altinn-api-gw-keys
+  env:
+    - name: KOIN_PROFILE
+      value: PREPROD
+    - name: GCP_PRJ_ID
+      value: helsearbeidsgiver-dev-6d06
+    - name: GCP_BUCKET_NAME
+      value: helse-arbeidsgiver-fritakagb-bucket
+    - name: AAREG_SCOPE
+      value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
+    - name: ALTINN_TILGANGER_SCOPE
+      value: dev-gcp:fager:arbeidsgiver-altinn-tilganger
+    - name: ARBEIDSGIVER_NOTIFIKASJON_SCOPE
+      value: api://dev-gcp.fager.notifikasjon-produsent-api/.default
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
+    - name: OPPGAVE_SCOPE
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
+    - name: FRONTEND_URL
+      value: https://arbeidsgiver.intern.dev.nav.no/fritak-agp
+    - name: AAREG_URL
+      value: https://aareg-services.dev-fss-pub.nais.io
+    - name: ARBEIDSGIVER_NOTIFIKASJON_API_URL
+      value: http://notifikasjon-produsent-api.fager/api/graphql
+    - name: DOKARKIV_URL
+      value: https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1
+    - name: OPPGAVEBEHANDLING_URL
+      value: https://oppgave-q1.dev-fss-pub.nais.io/api/v1/oppgaver
+    - name: PDL_URL
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
