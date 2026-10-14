@@ -11,20 +11,23 @@ import org.testcontainers.postgresql.PostgreSQLContainer
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class WithPostgresContainer {
     private val postgresContainer =
-        PostgreSQLContainer("postgres:latest").apply {
-            setCommand("postgres", "-c", "fsync=off", "-c", "log_statement=all", "-c", "wal_level=logical")
+        PostgreSQLContainer("postgres:16")
+            .withReuse(true)
+            .withLabel("app", "fritakagp")
+            .also {
+                it.setCommand("postgres", "-c", "fsync=off", "-c", "log_statement=all", "-c", "wal_level=logical")
 
-            withReuse(true)
-            withLabel("app-navn", "test-database")
-            withUsername("fritakagp")
-            withPassword("fritakagp")
+                it.start()
 
-            println("Starter Postgres-container...")
-            start()
-            println(
-                "Postgres-container er klar, med portnummer: $firstMappedPort, jdbcUrl: jdbc:postgresql://localhost:$firstMappedPort/test, credentials: $username og $password",
-            )
-        }
+                println(
+                    """
+                    Databasecontainer er startet opp 🐘
+                    port='${it.firstMappedPort}'
+                    jdbcUrl='jdbc:postgresql://localhost:${it.firstMappedPort}/test'
+                    credentials: 'test' og 'test'
+                    """.trimIndent(),
+                )
+            }
 
     val hikariConfig = createHikariConfig(postgresContainer)
     val dataSource = HikariDataSource(hikariConfig)
