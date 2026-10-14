@@ -26,7 +26,6 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
-import no.nav.helse.fritakagp.web.auth.localAuthTokenDispenser
 import no.nav.helse.fritakagp.web.fritakModule
 import no.nav.helse.fritakagp.web.nais.nais
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory
 
 class FritakAgpApplication(
     val port: Int = 8080,
-    val runAsDeamon: Boolean = true,
+    val runAsDaemon: Boolean = true,
 ) : KoinComponent {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val appConfig = HoconApplicationConfig(ConfigFactory.load())
@@ -61,7 +60,7 @@ class FritakAgpApplication(
 
         webserver =
             createWebserver().also {
-                it.start(wait = runAsDeamon)
+                it.start(wait = runAsDaemon)
             }
     }
 
@@ -84,9 +83,6 @@ class FritakAgpApplication(
                 }
             },
             module = {
-                if (env is Env.Local) {
-                    localAuthTokenDispenser(env)
-                }
                 nais()
                 fritakModule(env)
             },

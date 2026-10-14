@@ -19,7 +19,7 @@ class OppdaterGravidKravHTTPTests : SystemTestBase() {
     private val kravGravidUrl = "/fritak-agp-api/api/v1/gravid/krav"
 
     @Test
-    internal fun `Returnerer endret krav når korrekt bruker er innlogget`() =
+    fun `Returnerer endret krav når korrekt bruker er innlogget`() =
         suspendableTest {
             val repo by inject<GravidKravRepository>()
 
@@ -43,7 +43,7 @@ class OppdaterGravidKravHTTPTests : SystemTestBase() {
         }
 
     @Test
-    internal fun `Oppdaterer ikke når ny request er duplikat`() =
+    fun `Oppdaterer ikke når ny request er duplikat`() =
         suspendableTest {
             val repo by inject<GravidKravRepository>()
 
@@ -60,7 +60,7 @@ class OppdaterGravidKravHTTPTests : SystemTestBase() {
         }
 
     @Test
-    internal fun `Skal returnere 404 når kravet ikke finnes`() =
+    fun `Skal returnere 404 når kravet ikke finnes`() =
         suspendableTest {
             val response =
                 httpClient.patch {

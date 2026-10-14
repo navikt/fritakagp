@@ -59,9 +59,9 @@ fun preprodConfig(env: Env.Preprod): Module =
         single {
             HikariDataSource(
                 createHikariConfig(
-                    env.databaseUrl,
-                    env.databaseUsername,
-                    env.databasePassword,
+                    jdbcUrl = env.databaseUrl,
+                    username = env.databaseUsername,
+                    password = env.databasePassword,
                 ),
             )
         } bind DataSource::class

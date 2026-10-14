@@ -13,6 +13,7 @@ import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.KroniskKrav
+import no.nav.helse.fritakagp.web.api.resreq.validation.Problem
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
 import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
 import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
@@ -33,7 +34,7 @@ class KroniskKravHTTPTests : SystemTestBase() {
     }
 
     @Test
-    internal fun `Returnerer 403 når feil bruker er innlogget`() =
+    fun `Returnerer 403 når feil bruker er innlogget`() =
         suspendableTest {
             val repo by inject<KroniskKravRepository>()
 
@@ -50,7 +51,7 @@ class KroniskKravHTTPTests : SystemTestBase() {
         }
 
     @Test
-    internal fun `Returnerer kravet når korrekt bruker er innlogget`() =
+    fun `Returnerer kravet når korrekt bruker er innlogget`() =
         suspendableTest {
             val repo by inject<KroniskKravRepository>()
 
@@ -128,7 +129,7 @@ class KroniskKravHTTPTests : SystemTestBase() {
                 }
 
             assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
-            val res = extractResponseBody(response)
+            val res = response.call.response.body<Problem>()
             assertThat(res.title).contains("Valideringen av input feilet")
         }
 
@@ -215,7 +216,7 @@ class KroniskKravHTTPTests : SystemTestBase() {
         }
 
     @Test
-    internal fun `Oppdaterer ikke når ny request er duplikat`() =
+    fun `Oppdaterer ikke når ny request er duplikat`() =
         suspendableTest {
             val repo by inject<KroniskKravRepository>()
 

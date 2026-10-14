@@ -1,31 +1,32 @@
 package no.nav.helse.slowtests
 
-import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.KroniskTestData
+import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helse.fritakagp.db.PostgresKroniskSoeknadRepository
-import no.nav.helse.fritakagp.db.createTestHikariConfig
-import no.nav.helse.slowtests.systemtests.api.SystemTestBase
+import no.nav.helse.slowtests.utils.WithPostgresContainer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.koin.core.component.get
+import org.junit.jupiter.api.TestInstance
 import kotlin.test.assertNotNull
 
-class PostgresKroniskSoeknadRepositoryTest : SystemTestBase() {
-    lateinit var repo: PostgresKroniskSoeknadRepository
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class PostgresKroniskSoeknadRepositoryTest : WithPostgresContainer() {
+    val repo =
+        PostgresKroniskSoeknadRepository(
+            ds = dataSource,
+            om = customObjectMapper(),
+        )
     val testSoeknad = KroniskTestData.soeknadKronisk
 
     @BeforeEach
-    internal fun setUp() {
-        val ds = HikariDataSource(createTestHikariConfig())
-
-        repo = PostgresKroniskSoeknadRepository(ds, get())
+    fun setUp() {
         repo.insert(testSoeknad)
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun tearDown() {
         repo.delete(testSoeknad.id)
     }
 

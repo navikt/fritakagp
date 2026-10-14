@@ -121,6 +121,7 @@ dependencies {
     val postgresqlVersion = project.property("postgresqlVersion") as String
     val prometheusVersion = project.property("prometheusVersion") as String
     val slf4jVersion = project.property("slf4jVersion") as String
+    val testcontainersVersion = project.property("testcontainersVersion") as String
     val tmsVarselKotlinBuilderVersion = project.property("tmsVarselKotlinBuilderVersion") as String
     val tokenSupportVersion = project.property("tokenSupportVersion") as String
     val utilsVersion = project.property("utilsVersion") as String
@@ -184,9 +185,8 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainersVersion")
 
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:$junitJupiterVersion")
 }

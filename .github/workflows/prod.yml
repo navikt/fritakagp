@@ -17,9 +17,6 @@ jobs:
           java-version: 25
           distribution: temurin
 
-      - name: compose up
-        run: cd docker/local && docker compose up -d && sleep 15
-
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build and test
