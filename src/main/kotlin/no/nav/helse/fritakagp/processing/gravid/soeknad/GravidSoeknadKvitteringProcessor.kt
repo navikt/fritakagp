@@ -7,7 +7,7 @@ import no.nav.helse.fritakagp.GravidSoeknadMetrics
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogSender
-import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.json.toJson
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import java.util.UUID
@@ -38,7 +38,7 @@ class GravidSoeknadKvitteringProcessor(
                 fnr = soeknad.identitetsnummer,
             )
         logger().info("Sender gravid søknad kvittering for søknad ${soeknad.id} til dialogporten")
-        dialogSender.sendMessage(gravidSoeknadMelding.toJsonStr(DialogMelding.serializer()))
+        dialogSender.sendMessage(gravidSoeknadMelding.toJson(DialogMelding.serializer()).toString())
 
         GravidSoeknadMetrics.tellKvitteringSendt()
     }

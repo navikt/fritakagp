@@ -10,7 +10,7 @@ import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.kafka.DialogMelding
 import no.nav.helse.fritakagp.kafka.DialogSender
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils
-import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.json.toJson
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,7 +52,8 @@ internal class GravidSoeknadKvitteringProcessorTest {
                 orgnr = Orgnr(testSoeknad.virksomhetsnummer),
                 navn = testSoeknad.navn!!,
                 fnr = testSoeknad.identitetsnummer,
-            ).toJsonStr(DialogMelding.serializer())
+            ).toJson(DialogMelding.serializer())
+                .toString()
 
         verify(exactly = 1) { dialogSenderMock.sendMessage(expectedMessage) }
     }

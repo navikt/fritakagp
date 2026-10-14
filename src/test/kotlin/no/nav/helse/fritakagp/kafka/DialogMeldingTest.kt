@@ -1,7 +1,7 @@
 package no.nav.helse.fritakagp.kafka
 
 import kotlinx.serialization.json.Json
-import no.nav.helsearbeidsgiver.utils.json.toJsonStr
+import no.nav.helsearbeidsgiver.utils.json.toJson
 import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
 import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -22,7 +22,7 @@ internal class DialogMeldingTest {
                 fnr = fnr,
             )
 
-        val json = melding.toJsonStr(DialogMelding.serializer())
+        val json = melding.toJson(DialogMelding.serializer()).toString()
 
         assertEquals(
             """{"type":"GravidSoeknadOpprettet","id":"31c825b2-8664-4abb-a173-694a485a81aa","orgnr":"214398982","navn":"RETTFERDIG LEVEREGEL","fnr":"$fnr"}""",
@@ -43,7 +43,7 @@ internal class DialogMeldingTest {
                 forrigeKrav = UUID.fromString("8f063f0d-12aa-4fa8-9e34-a76752513eb8"),
             )
 
-        val json = melding.toJsonStr(DialogMeldingMedEndring.serializer())
+        val json = melding.toJson(DialogMeldingMedEndring.serializer()).toString()
 
         assertEquals(
             """{"type":"GravidKravEndret","id":"31c825b2-8664-4abb-a173-694a485a81aa","orgnr":"214398982","navn":"RETTFERDIG LEVEREGEL","fnr":"$fnr","forrigeKrav":"8f063f0d-12aa-4fa8-9e34-a76752513eb8"}""",
