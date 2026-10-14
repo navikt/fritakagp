@@ -37,11 +37,13 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.koin.core.module.Module
 import org.koin.dsl.bind
+import org.koin.dsl.onClose
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun Module.mockExternalDependencies() {
-    single { MockOAuth2Server().apply { start(port = 6668) } }
+    single { MockOAuth2Server().apply { start(port = 6668) } }.onClose { it?.shutdown() }
+
     single {
         spyk(
             AuthClient("token-endpoint", "token-exchange-endpoint"),

@@ -55,7 +55,17 @@ fun localConfig(env: Env.Local): Module =
 
         single { GrunnbeloepClient(url = env.grunnbeloepUrl, httpClient = get()) }
         single { BeloepBeregning(grunnbeloepClient = get()) }
-        single { HikariDataSource(createHikariConfig(jdbcUrl = env.databaseUrl, username = env.databaseUsername, password = env.databasePassword)) } bind DataSource::class
+
+        single {
+            HikariDataSource(
+                createHikariConfig(
+                    jdbcUrl = env.databaseUrl,
+                    username = env.databaseUsername,
+                    password = env.databasePassword,
+                ),
+            )
+        } bind DataSource::class
+
         single { PostgresGravidSoeknadRepository(ds = get(), om = get()) } bind GravidSoeknadRepository::class
         single { PostgresGravidKravRepository(ds = get(), om = get()) } bind GravidKravRepository::class
         single { PostgresKroniskSoeknadRepository(ds = get(), om = get()) } bind KroniskSoeknadRepository::class
