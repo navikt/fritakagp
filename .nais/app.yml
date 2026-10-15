@@ -1,0 +1,85 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: fritakagp
+  namespace: helsearbeidsgiver
+  labels:
+    team: helsearbeidsgiver
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 50M
+    nais.io/read-only-file-system: "false"
+
+spec:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 1024Mi
+    limits:
+      memory: 2048Mi
+  replicas:
+    max: 1
+    min: 1
+  liveness:
+    path: /health/alive
+    initialDelay: 10
+    timeout: 2
+    periodSeconds: 30
+    failureThreshold: 10
+  readiness:
+    path: /health/ready
+    initialDelay: 10
+    timeout: 2
+    periodSeconds: 5
+    failureThreshold: 10
+
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: altinn:serviceowner/reportees
+  prometheus:
+    enabled: true
+  observability:
+    logging:
+      destinations:
+        - id: loki
+
+  accessPolicy:
+    inbound:
+      rules:
+        - application: fritak-agp-frontend
+        - application: hag-dokument-proxy
+    outbound:
+      rules:
+        - application: clamav
+          namespace: nais-system
+        - application: logging
+          namespace: nais-system
+        - application: arbeidsgiver-altinn-tilganger
+          namespace: fager
+        - application: notifikasjon-produsent-api
+          namespace: fager
+      external:
+        - host: g.nav.no
+        - host: data.brreg.no
+
+  envFrom:
+    - secret: altinn-correspondence-credentials
+  env:
+    - name: KAFKA_BESKJED_TOPIC_NAME
+      value: min-side.aapen-brukervarsel-v1
+    - name: KTOR_APPLICATION_BASEPATH
+      value: /fritak-agp-api
+    - name: CLAM_AV_URL
+      value: http://clamav.nais-system/scan
+    - name: GRUNNBELOEP_URL
+      value: https://g.nav.no/api/v1/grunnbeloep
+    - name: ENHETSREGISTERET
+      value: https://data.brreg.no/enhetsregisteret/api/underenheter
+    - name: ALTINN_TILGANGER_BASE_URL
+      value: http://arbeidsgiver-altinn-tilganger.fager
