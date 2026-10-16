@@ -1,0 +1,21 @@
+name: Dependency submission
+
+on:
+  schedule:
+    # Hver dag kl. 04:00
+    - cron: '0 4 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - gradle.properties
+      - build.gradle.kts
+      - settings.gradle.kts
+
+jobs:
+  dependency-submission:
+    uses: navikt/hag-workflows/.github/workflows/dependency-submission.yml@main
+    permissions:
+      contents: write
+    with:
+      java-version: 25
