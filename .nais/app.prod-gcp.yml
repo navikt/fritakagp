@@ -25,8 +25,6 @@ spec:
     outbound:
       external:
         - host: aareg-services.prod-fss-pub.nais.io
-        # TODO fjern etter bytte til service discovery
-        - host: ag-notifikasjon-produsent-api.intern.nav.no
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
@@ -60,9 +58,8 @@ spec:
       value: https://arbeidsgiver.nav.no/fritak-agp
     - name: AAREG_URL
       value: https://aareg-services.prod-fss-pub.nais.io
-    # TODO bytt til service discovery (som i dev)
     - name: ARBEIDSGIVER_NOTIFIKASJON_API_URL
-      value: https://ag-notifikasjon-produsent-api.intern.nav.no/api/graphql
+      value: http://notifikasjon-produsent-api.fager/api/graphql
     - name: DOKARKIV_URL
       value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1
     - name: OPPGAVEBEHANDLING_URL
