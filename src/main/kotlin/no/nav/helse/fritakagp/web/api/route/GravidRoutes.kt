@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hag.utils.bakgrunnsjobb.BakgrunnsjobbService
 import no.nav.helse.fritakagp.GravidKravMetrics
 import no.nav.helse.fritakagp.GravidSoeknadMetrics
+import no.nav.helse.fritakagp.Log
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
 import no.nav.helse.fritakagp.domain.BeloepService
@@ -40,6 +41,7 @@ import no.nav.helse.fritakagp.web.auth.hentFnrFraLoginToken
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
 import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.SakEllerOppgaveFinnesIkkeException
+import no.nav.helsearbeidsgiver.utils.log.MdcUtils
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -60,15 +62,16 @@ fun Route.gravidRoutes(
     bakgunnsjobbService: BakgrunnsjobbService,
     virusScanner: VirusScanner,
     bucket: BucketStorage,
-    om: ObjectMapper
+    om: ObjectMapper,
 ) {
     val logger = "gravidRoutes".logger()
     val sikkerLogger = sikkerLogger()
 
-    val requestHandler = RequestHandler(
-        aapenLogger = logger,
-        sikkerLogger = sikkerLogger
-    )
+    val requestHandler =
+        RequestHandler(
+            aapenLogger = logger,
+            sikkerLogger = sikkerLogger,
+        )
 
     route("/gravid") {
         route("/soeknad") {
@@ -77,9 +80,13 @@ fun Route.gravidRoutes(
 
                 val innloggetFnr = hentFnrFraLoginToken()
                 val soeknad = gravidSoeknadRepo.getById(soeknadId)
-                if (soeknad == null || soeknad.identitetsnummer != innloggetFnr) {
+                if (soeknad == null) {
                     call.respond(HttpStatusCode.NotFound)
                 } else {
+                    if (soeknad.identitetsnummer != innloggetFnr) {
+                        authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
+                    }
+
                     soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                     soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)
 
@@ -105,11 +112,11 @@ fun Route.gravidRoutes(
                 gravidSoeknadRepo.insert(soeknad)
                 bakgunnsjobbService.opprettJobb<GravidSoeknadProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidSoeknadProcessor.JobbData(soeknad.id))
+                    data = om.writeValueAsString(GravidSoeknadProcessor.JobbData(soeknad.id)),
                 )
                 bakgunnsjobbService.opprettJobb<GravidSoeknadKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidSoeknadKvitteringProcessor.Jobbdata(soeknad.id))
+                    data = om.writeValueAsString(GravidSoeknadKvitteringProcessor.Jobbdata(soeknad.id)),
                 )
 
                 call.respond(HttpStatusCode.Created, soeknad)
@@ -120,32 +127,67 @@ fun Route.gravidRoutes(
         route("/krav") {
             get("/{id}") {
                 val kravId = requestHandler.lesParameterId(this)
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /gravid/krav/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID()),
+                ) {
+                    logger.info("Hent gravid krav med id $kravId")
+                    val innloggetFnr = hentFnrFraLoginToken()
+                    val krav = gravidKravRepo.getById(kravId)
+                    val slettet = call.request.queryParameters.contains("slettet")
+                    if (krav == null) {
+                        logger.warn("Gravid krav med id $kravId ikke funnet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else if (!slettet && krav.status == KravStatus.SLETTET) {
+                        logger.warn("Gravid krav med id $kravId er slettet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        if (krav.identitetsnummer != innloggetFnr) {
+                            authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+                        }
 
-                val innloggetFnr = hentFnrFraLoginToken()
-                val krav = gravidKravRepo.getById(kravId)
-                val slettet = call.request.queryParameters.contains("slettet")
-                if (krav == null) {
-                    call.respond(HttpStatusCode.NotFound)
-                } else if (!slettet && krav.status == KravStatus.SLETTET) {
-                    call.respond(HttpStatusCode.NotFound)
-                } else {
-                    if (krav.identitetsnummer != innloggetFnr) {
-                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+                        krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+                        logger.info("Gravid krav med $kravId hentet OK.")
+                        call.respond(HttpStatusCode.OK, krav)
                     }
-                    krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
-                    krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+                }
+            }
+            // Dette endepunktet brukes til PDF-generering og henter i tillegg soft-deleted krav. Denne skal erstatte den gamle routen på sikt, men da må frontend-koden i så fall håndtere at soft-deleted krav også hentes.
+            get("/dokument/{id}") {
+                val kravId = requestHandler.lesParameterId(this)
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /gravid/krav/dokument/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID()),
+                ) {
+                    logger.info("Hent gravid krav med id $kravId")
+                    val innloggetFnr = hentFnrFraLoginToken()
+                    val krav = gravidKravRepo.getById(kravId)
 
-                    call.respond(HttpStatusCode.OK, krav)
+                    if (krav == null) {
+                        logger.warn("Gravid krav med id $kravId ikke funnet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
+
+                        krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+                        logger.info("Gravid krav med $kravId hentet OK.")
+                        call.respond(HttpStatusCode.OK, krav)
+                    }
                 }
             }
 
             post {
                 val request = requestHandler.lesRequestBody<GravidKravRequest>(this)
                 authService.validerTilgangTilOrganisasjon(this, request.virksomhetsnummer)
-                val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
-                    .get(Orgnr(request.virksomhetsnummer))
-                    .orEmpty()
+                val ansettelsesperioder =
+                    aaregClient
+                        .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
+                        .get(Orgnr(request.virksomhetsnummer))
+                        .orEmpty()
 
                 request.validate(ansettelsesperioder)
 
@@ -155,25 +197,26 @@ fun Route.gravidRoutes(
 
                 val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
 
-                val krav = request.tilKrav(
-                    sendtAv = innloggetFnr,
-                    sendtAvNavn = sendtAvNavn,
-                    navn = navn,
-                    perioder = perioder
-                )
+                val krav =
+                    request.tilKrav(
+                        sendtAv = innloggetFnr,
+                        sendtAvNavn = sendtAvNavn,
+                        navn = navn,
+                        perioder = perioder,
+                    )
 
                 gravidKravRepo.insert(krav)
                 bakgunnsjobbService.opprettJobb<GravidKravProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id))
+                    data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id)),
                 )
                 bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
+                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id)),
                 )
                 bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(krav.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.GravidKrav))
+                    data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(krav.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.GravidKrav)),
                 )
 
                 call.respond(HttpStatusCode.Created, krav)
@@ -190,15 +233,17 @@ fun Route.gravidRoutes(
                 val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
                 val navn = pdlService.hentNavn(request.identitetsnummer)
 
-                val ansettelsesperioder = aaregClient
-                    .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
-                    .get(Orgnr(request.virksomhetsnummer))
-                    .orEmpty()
+                val ansettelsesperioder =
+                    aaregClient
+                        .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
+                        .get(Orgnr(request.virksomhetsnummer))
+                        .orEmpty()
 
                 request.validate(ansettelsesperioder)
 
-                val forrigeKrav = gravidKravRepo.getById(kravId)
-                    ?: return@patch call.respond(HttpStatusCode.NotFound)
+                val forrigeKrav =
+                    gravidKravRepo.getById(kravId)
+                        ?: return@patch call.respond(HttpStatusCode.NotFound)
 
                 if (forrigeKrav.virksomhetsnummer != request.virksomhetsnummer) {
                     return@patch call.respond(HttpStatusCode.Forbidden)
@@ -206,12 +251,13 @@ fun Route.gravidRoutes(
 
                 val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
 
-                val kravTilOppdatering = request.tilKrav(
-                    sendtAv = innloggetFnr,
-                    sendtAvNavn = sendtAvNavn,
-                    navn = navn,
-                    perioder = perioder
-                )
+                val kravTilOppdatering =
+                    request.tilKrav(
+                        sendtAv = innloggetFnr,
+                        sendtAvNavn = sendtAvNavn,
+                        navn = navn,
+                        perioder = perioder,
+                    )
 
                 if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                     return@patch call.respond(HttpStatusCode.Conflict)
@@ -239,15 +285,15 @@ fun Route.gravidRoutes(
                 gravidKravRepo.insert(kravTilOppdatering)
                 bakgunnsjobbService.opprettJobb<GravidKravEndreProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravProcessor.JobbData(forrigeKrav.id))
+                    data = om.writeValueAsString(GravidKravProcessor.JobbData(forrigeKrav.id)),
                 )
                 bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id))
+                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id, forrigeKrav.id)),
                 )
                 bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(kravTilOppdatering.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.GravidKrav))
+                    data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(kravTilOppdatering.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.GravidKrav)),
                 )
 
                 call.respond(HttpStatusCode.OK, kravTilOppdatering)
@@ -259,8 +305,9 @@ fun Route.gravidRoutes(
                 val innloggetFnr = hentFnrFraLoginToken()
                 val slettetAv = pdlService.hentNavn(innloggetFnr)
 
-                val krav = gravidKravRepo.getById(kravId)
-                    ?: return@delete call.respond(HttpStatusCode.NotFound)
+                val krav =
+                    gravidKravRepo.getById(kravId)
+                        ?: return@delete call.respond(HttpStatusCode.NotFound)
 
                 authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
 
@@ -278,11 +325,11 @@ fun Route.gravidRoutes(
                 gravidKravRepo.update(krav)
                 bakgunnsjobbService.opprettJobb<GravidKravSlettProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id))
+                    data = om.writeValueAsString(GravidKravProcessor.JobbData(krav.id)),
                 )
                 bakgunnsjobbService.opprettJobb<GravidKravKvitteringProcessor>(
                     maksAntallForsoek = 10,
-                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id))
+                    data = om.writeValueAsString(GravidKravKvitteringProcessor.Jobbdata(krav.id)),
                 )
                 call.respond(HttpStatusCode.OK)
             }
@@ -290,7 +337,12 @@ fun Route.gravidRoutes(
     }
 }
 
-suspend fun processDocumentForGCPStorage(doc: String?, virusScanner: VirusScanner, bucket: BucketStorage, id: UUID) {
+suspend fun processDocumentForGCPStorage(
+    doc: String?,
+    virusScanner: VirusScanner,
+    bucket: BucketStorage,
+    id: UUID,
+) {
     if (!doc.isNullOrEmpty()) {
         val fileContent = extractBase64Del(doc)
         val fileExt = extractFilExtDel(doc)
@@ -299,9 +351,9 @@ suspend fun processDocumentForGCPStorage(doc: String?, virusScanner: VirusScanne
                 setOf(
                     DefaultConstraintViolation(
                         "dokumentasjon",
-                        constraint = VirusCheckConstraint()
-                    )
-                )
+                        constraint = VirusCheckConstraint(),
+                    ),
+                ),
             )
         }
         bucket.uploadDoc(id, fileContent, fileExt)

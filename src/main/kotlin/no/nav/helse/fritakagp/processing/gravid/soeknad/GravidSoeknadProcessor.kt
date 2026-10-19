@@ -40,12 +40,12 @@ class GravidSoeknadProcessor(
     private val pdfGenerator: GravidSoeknadPDFGenerator,
     private val om: ObjectMapper,
     private val bucketStorage: BucketStorage,
-    private val brregService: IBrregService
+    private val brregService: IBrregService,
 ) : BakgrunnsjobbProsesserer {
     companion object {
         const val JOB_TYPE = "gravid-søknad-formidling"
-        const val dokumentasjonBrevkode = "soeknad_om_fritak_fra_agp_dokumentasjon"
-        const val brevkode = "soeknad_om_fritak_fra_agp_gravid"
+        const val BREVKODE = "soeknad_om_fritak_fra_agp_gravid"
+        const val DOKUMENTASJON_BREVKODE = "soeknad_om_fritak_fra_agp_dokumentasjon"
     }
 
     override val type: String get() = JOB_TYPE
@@ -86,8 +86,8 @@ class GravidSoeknadProcessor(
                 Bakgrunnsjobb(
                     maksAntallForsoek = 10,
                     data = om.writeValueAsString(BrukernotifikasjonJobbdata(soeknad.id, soeknad.identitetsnummer, soeknad.virksomhetsnavn, GravidSøknad, Oppretting)),
-                    type = BrukernotifikasjonProcessorNy.JOB_TYPE
-                )
+                    type = BrukernotifikasjonProcessorNy.JOB_TYPE,
+                ),
             )
         } finally {
             updateAndLogOnFailure(soeknad)
@@ -103,20 +103,22 @@ class GravidSoeknadProcessor(
     }
 
     fun journalfør(soeknad: GravidSoeknad): String {
-        val id = runBlocking {
-            val journalpostId = dokarkivKlient.opprettOgFerdigstillJournalpost(
-                tittel = GravidSoeknad.tittel,
-                gjelderPerson = GjelderPerson(soeknad.identitetsnummer),
-                avsender = Avsender.Organisasjon(soeknad.virksomhetsnummer, soeknad.virksomhetsnavn ?: "Ukjent arbeidsgiver"),
-                datoMottatt = soeknad.opprettet.toLocalDate(),
-                dokumenter = createDocuments(soeknad, GravidSoeknad.tittel),
-                eksternReferanseId = soeknad.id.toString(),
-                callId = UUID.randomUUID().toString(),
-                kanal = Kanal.NAV_NO
-            )
-            logger.info("Journalført ${soeknad.id} med ref $journalpostId")
-            return@runBlocking journalpostId.journalpostId
-        }
+        val id =
+            runBlocking {
+                val journalpostId =
+                    dokarkivKlient.opprettOgFerdigstillJournalpost(
+                        tittel = GravidSoeknad.TITTEL,
+                        gjelderPerson = GjelderPerson(soeknad.identitetsnummer),
+                        avsender = Avsender.Organisasjon(soeknad.virksomhetsnummer, soeknad.virksomhetsnavn ?: "Ukjent arbeidsgiver"),
+                        datoMottatt = soeknad.opprettet.toLocalDate(),
+                        dokumenter = createDocuments(soeknad, GravidSoeknad.TITTEL),
+                        eksternReferanseId = soeknad.id.toString(),
+                        callId = UUID.randomUUID().toString(),
+                        kanal = Kanal.NAV_NO,
+                    )
+                logger.info("Journalført ${soeknad.id} med ref $journalpostId")
+                return@runBlocking journalpostId.journalpostId
+            }
         return id
     }
 
@@ -138,45 +140,48 @@ class GravidSoeknadProcessor(
 
     private fun createDocuments(
         soeknad: GravidSoeknad,
-        journalfoeringsTittel: String
+        journalfoeringsTittel: String,
     ): List<Dokument> {
         val base64EnkodetPdf = Base64.getEncoder().encodeToString(pdfGenerator.lagPDF(soeknad))
         val jsonOrginalDokument = Base64.getEncoder().encodeToString(om.writeValueAsBytes(soeknad))
-        val dokumentListe = mutableListOf(
-            Dokument(
-                dokumentVarianter = listOf(
-                    DokumentVariant(
-                        fysiskDokument = base64EnkodetPdf,
-                        filtype = "PDF",
-                        variantFormat = "ARKIV",
-                        filnavn = null
-                    )
+        val dokumentListe =
+            mutableListOf(
+                Dokument(
+                    dokumentVarianter =
+                        listOf(
+                            DokumentVariant(
+                                fysiskDokument = base64EnkodetPdf,
+                                filtype = "PDF",
+                                variantFormat = "ARKIV",
+                                filnavn = null,
+                            ),
+                        ),
+                    brevkode = BREVKODE,
+                    tittel = journalfoeringsTittel,
                 ),
-                brevkode = brevkode,
-                tittel = journalfoeringsTittel
             )
-        )
 
         bucketStorage.getDocAsString(soeknad.id)?.let {
             dokumentListe.add(
                 Dokument(
-                    dokumentVarianter = listOf(
-                        DokumentVariant(
-                            fysiskDokument = it.base64Data,
-                            filtype = it.extension.uppercase(),
-                            variantFormat = "ARKIV",
-                            filnavn = null
+                    dokumentVarianter =
+                        listOf(
+                            DokumentVariant(
+                                fysiskDokument = it.base64Data,
+                                filtype = it.extension.uppercase(),
+                                variantFormat = "ARKIV",
+                                filnavn = null,
+                            ),
+                            DokumentVariant(
+                                variantFormat = "ORIGINAL",
+                                fysiskDokument = jsonOrginalDokument,
+                                filtype = "JSON",
+                                filnavn = null,
+                            ),
                         ),
-                        DokumentVariant(
-                            variantFormat = "ORIGINAL",
-                            fysiskDokument = jsonOrginalDokument,
-                            filtype = "JSON",
-                            filnavn = null
-                        )
-                    ),
-                    brevkode = dokumentasjonBrevkode,
-                    tittel = "Helsedokumentasjon"
-                )
+                    brevkode = DOKUMENTASJON_BREVKODE,
+                    tittel = "Helsedokumentasjon",
+                ),
             )
         }
 
@@ -187,18 +192,19 @@ class GravidSoeknadProcessor(
         val aktoerId = pdlService.hentAktoerId(soeknad.identitetsnummer)
         requireNotNull(aktoerId) { "Fant ikke AktørID for fnr i ${soeknad.id}" }
 
-        val request = OpprettOppgaveRequest(
-            aktoerId = aktoerId,
-            journalpostId = soeknad.journalpostId,
-            beskrivelse = generereGravidSoeknadBeskrivelse(soeknad, GravidSoeknad.tittel),
-            tema = "SYK",
-            behandlingstype = digitalSoeknadBehandingsType,
-            oppgavetype = "BEH_SAK",
-            behandlingstema = fritakAGPBehandingsTema,
-            aktivDato = LocalDate.now(),
-            fristFerdigstillelse = LocalDate.now().plusDays(7),
-            prioritet = "NORM"
-        )
+        val request =
+            OpprettOppgaveRequest(
+                aktoerId = aktoerId,
+                journalpostId = soeknad.journalpostId,
+                beskrivelse = generereGravidSoeknadBeskrivelse(soeknad, GravidSoeknad.TITTEL),
+                tema = "SYK",
+                behandlingstype = digitalSoeknadBehandingsType,
+                oppgavetype = "BEH_SAK",
+                behandlingstema = fritakAGPBehandingsTema,
+                aktivDato = LocalDate.now(),
+                fristFerdigstillelse = LocalDate.now().plusDays(7),
+                prioritet = "NORM",
+            )
 
         return runBlocking {
             oppgaveKlient.opprettOppgave(request, UUID.randomUUID().toString()).id.toString()
@@ -209,21 +215,24 @@ class GravidSoeknadProcessor(
         val aktoerId = pdlService.hentAktoerId(soeknad.identitetsnummer)
         requireNotNull(aktoerId) { "Fant ikke AktørID for fnr i ${soeknad.id}" }
 
-        val request = OpprettOppgaveRequest(
-            aktoerId = aktoerId,
-            journalpostId = soeknad.journalpostId,
-            beskrivelse = generereGravidSoeknadBeskrivelse(soeknad, "Fordelingsoppgave for ${GravidSoeknad.tittel}"),
-            tema = "SYK",
-            behandlingstype = digitalSoeknadBehandingsType,
-            oppgavetype = OPPGAVETYPE_FORDELINGSOPPGAVE,
-            behandlingstema = fritakAGPBehandingsTema,
-            aktivDato = LocalDate.now(),
-            fristFerdigstillelse = LocalDate.now().plusDays(7),
-            prioritet = "NORM"
-        )
+        val request =
+            OpprettOppgaveRequest(
+                aktoerId = aktoerId,
+                journalpostId = soeknad.journalpostId,
+                beskrivelse = generereGravidSoeknadBeskrivelse(soeknad, "Fordelingsoppgave for ${GravidSoeknad.TITTEL}"),
+                tema = "SYK",
+                behandlingstype = digitalSoeknadBehandingsType,
+                oppgavetype = OPPGAVETYPE_FORDELINGSOPPGAVE,
+                behandlingstema = fritakAGPBehandingsTema,
+                aktivDato = LocalDate.now(),
+                fristFerdigstillelse = LocalDate.now().plusDays(7),
+                prioritet = "NORM",
+            )
 
         return runBlocking { oppgaveKlient.opprettOppgave(request, UUID.randomUUID().toString()).id.toString() }
     }
 
-    data class JobbData(val id: UUID)
+    data class JobbData(
+        val id: UUID,
+    )
 }

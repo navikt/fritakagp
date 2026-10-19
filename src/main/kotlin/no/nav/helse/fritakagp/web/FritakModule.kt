@@ -36,7 +36,7 @@ fun Application.fritakModule(env: Env) {
             config = env.tokenxConfig,
             additionalValidation = {
                 it.containsPid()
-            }
+            },
         )
     }
 
@@ -52,16 +52,20 @@ fun Application.fritakModule(env: Env) {
 
     setupRoutes(
         ktorBasepath = env.ktorBasepath,
-        altinnTilgangerScope = env.altinnTilgangerScope
+        altinnTilgangerScope = env.altinnTilgangerScope,
     )
 }
 
-private fun Application.setupRoutes(ktorBasepath: String, altinnTilgangerScope: String) {
-    val authService = AuthService(
-        altinnClient = get(),
-        authClient = get(),
-        altinnTilgangerScope = altinnTilgangerScope
-    )
+private fun Application.setupRoutes(
+    ktorBasepath: String,
+    altinnTilgangerScope: String,
+) {
+    val authService =
+        AuthService(
+            altinnClient = get(),
+            authClient = get(),
+            altinnTilgangerScope = altinnTilgangerScope,
+        )
 
     routing {
         route("$ktorBasepath/api/v1") {

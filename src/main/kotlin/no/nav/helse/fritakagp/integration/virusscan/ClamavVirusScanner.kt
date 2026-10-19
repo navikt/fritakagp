@@ -16,39 +16,44 @@ interface VirusScanner {
 }
 
 class MockVirusScanner : VirusScanner {
-    override suspend fun scanDoc(vedlagt: ByteArray): Boolean {
-        return true
-    }
+    override suspend fun scanDoc(vedlagt: ByteArray): Boolean = true
 }
 
-class ClamavVirusScannerImp(private val httpClient: HttpClient, private val scanUrl: String) : VirusScanner {
+class ClamavVirusScannerImp(
+    private val httpClient: HttpClient,
+    private val scanUrl: String,
+) : VirusScanner {
     data class ScanResult(
         val Filename: String,
-        val Result: Result
+        val Result: Result,
     )
 
     enum class Result {
-        FOUND, OK, ERROR
+        FOUND,
+        OK,
+        ERROR,
     }
 
     override suspend fun scanDoc(vedlagt: ByteArray): Boolean {
-        val scanResult: List<ScanResult> = httpClient.post {
-            url(scanUrl)
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append(
-                            "file1",
-                            "vedlagt",
-                            ContentType.parse("application/octet-stream"),
-                            vedlagt.size.toLong()
-                        ) {
-                            writeFully(vedlagt)
-                        }
-                    }
-                )
-            )
-        }.body()
+        val scanResult: List<ScanResult> =
+            httpClient
+                .post {
+                    url(scanUrl)
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append(
+                                    "file1",
+                                    "vedlagt",
+                                    ContentType.parse("application/octet-stream"),
+                                    vedlagt.size.toLong(),
+                                ) {
+                                    writeFully(vedlagt)
+                                }
+                            },
+                        ),
+                    )
+                }.body()
         return when (scanResult[0].Result) {
             Result.OK -> true
             Result.FOUND, Result.ERROR -> false

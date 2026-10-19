@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class KroniskKravTest {
-
     @Test
     fun `Duplikatsjekk - orginal skal være lik seg selv`() {
         val krav = KroniskTestData.kroniskKrav
@@ -30,15 +29,16 @@ class KroniskKravTest {
 
     @Test
     fun `Duplikatsjekk - forskjellige arbeidsgiverperioder gir ingen duplikat-treff`() {
-        val agp1 = Arbeidsgiverperiode(
-            fom = 1.januar(2020),
-            tom = 16.januar(2020),
-            antallDagerMedRefusjon = 10,
-            månedsinntekt = 1000.0,
-            gradering = 1.0,
-            dagsats = 111.0,
-            belop = 1110.0
-        )
+        val agp1 =
+            Arbeidsgiverperiode(
+                fom = 1.januar(2020),
+                tom = 16.januar(2020),
+                antallDagerMedRefusjon = 10,
+                månedsinntekt = 1000.0,
+                gradering = 1.0,
+                dagsats = 111.0,
+                belop = 1110.0,
+            )
         val endretFraDato = agp1.copy(fom = agp1.fom.plusDays(1))
         val endretTilDato = agp1.copy(tom = agp1.tom.plusDays(1))
         val endretRefusjon = agp1.copy(antallDagerMedRefusjon = 11)

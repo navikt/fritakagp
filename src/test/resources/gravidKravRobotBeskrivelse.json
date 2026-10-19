@@ -14,7 +14,8 @@
       "månedsinntekt": 2590.8,
       "gradering": 1.0,
       "dagsats" : 7772.4,
-      "belop" : 38862.0
+      "belop" : 38862.0,
+      "graderingProsent": 100.0
     }
   ],
   "harVedlegg": false,

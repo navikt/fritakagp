@@ -1,5 +1,6 @@
 package no.nav.helse.fritakagp.domain
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 
 data class Arbeidsgiverperiode(
@@ -9,5 +10,9 @@ data class Arbeidsgiverperiode(
     val månedsinntekt: Double,
     val gradering: Double = 1.0,
     val dagsats: Double,
-    val belop: Double
-)
+    val belop: Double,
+) {
+    @get:JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    val graderingProsent: Double
+        get() = gradering * 100
+}

@@ -13,162 +13,225 @@ import no.nav.helse.fritakagp.db.KroniskKravRepository
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.KroniskKrav
 import no.nav.helse.fritakagp.web.api.resreq.ArbeidsgiverperiodeRequest
+import no.nav.helse.fritakagp.web.api.resreq.validation.Problem
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
 import no.nav.helse.mockArbeidsgiverperiode
 import no.nav.helsearbeidsgiver.utils.test.date.februar
 import no.nav.helsearbeidsgiver.utils.test.date.januar
+import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
+import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.koin.test.inject
 
 class KroniskKravHTTPTests : SystemTestBase() {
     private val kravKroniskUrl = "/fritak-agp-api/api/v1/kronisk/krav"
 
-    @Test
-    fun `Gir not found når kravet er slettet`() = suspendableTest {
+    @AfterEach
+    fun cleanUp() {
         val repo by inject<KroniskKravRepository>()
+        repo.delete(KroniskTestData.kroniskKrav.id)
+    }
 
-        repo.insert(KroniskTestData.kroniskKrav.copy(status = KravStatus.SLETTET))
+    @Test
+    fun `Returnerer 403 når feil bruker er innlogget`() =
+        suspendableTest {
+            val repo by inject<KroniskKravRepository>()
 
-        val response = httpClient.get {
-            appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}")
-            contentType(ContentType.Application.Json)
-            loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
+            repo.insert(KroniskTestData.kroniskKrav.copy(virksomhetsnummer = Orgnr.genererGyldig().verdi))
+            val fnr = Fnr.genererGyldig()
+            val response =
+                httpClient.get {
+                    appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(fnr.verdi)
+                }
+
+            assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
         }
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.NotFound)
-    }
-
     @Test
-    fun `Gir ikke not found når kravet er slettet men flagget slettet er satt`() = suspendableTest {
-        val repo by inject<KroniskKravRepository>()
+    fun `Returnerer kravet når korrekt bruker er innlogget`() =
+        suspendableTest {
+            val repo by inject<KroniskKravRepository>()
 
-        repo.insert(KroniskTestData.kroniskKrav.copy(status = KravStatus.SLETTET))
+            val orgnr = Orgnr.genererGyldig().verdi
+            repo.insert(KroniskTestData.kroniskKrav.copy(virksomhetsnummer = orgnr))
 
-        val response = httpClient.get {
-            appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}?slettet")
-            contentType(ContentType.Application.Json)
-            loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
+            val response =
+                httpClient.get {
+                    appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
+                }
+
+            assertThat(response.body<KroniskKrav>())
+                .usingRecursiveComparison()
+                .ignoringFields("referansenummer")
+                .isEqualTo(KroniskTestData.kroniskKrav.copy(virksomhetsnummer = orgnr))
         }
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-    }
-
     @Test
-    fun `invalid json gives 400 Bad request`() = suspendableTest {
-        val response =
-            httpClient.post {
-                appUrl(kravKroniskUrl)
-                contentType(ContentType.Application.Json)
-                loggedInAs(KroniskTestData.validIdentitetsnummer)
+    fun `Gir not found når kravet er slettet`() =
+        suspendableTest {
+            val repo by inject<KroniskKravRepository>()
 
-                setBody(
-                    """
-                    {
-                        "identitetsnummer": "${KroniskTestData.validIdentitetsnummer}",
-                        "virksomhetsnummer": "${KroniskTestData.fullValidRequest.virksomhetsnummer}",
-                        "perioder": fele,
-                        "bekreftet": ["IKKE GYLDIG"]
-                        "dokumentasjon": ["IKKE GYLDIG"]
-                        "kontrollDager": ["IKKE GYLDIG"]
-                    }
-                    """.trimIndent()
-                )
-            }
+            repo.insert(KroniskTestData.kroniskKrav.copy(status = KravStatus.SLETTET))
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
-        val res = extractResponseBody(response)
-        assertThat(res.title).contains("Valideringen av input feilet")
-    }
+            val response =
+                httpClient.get {
+                    appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
+                }
 
-    @Test
-    fun `Skal returnere Created ved feilfritt skjema uten fil`() = suspendableTest {
-        val response = httpClient.post {
-            appUrl(kravKroniskUrl)
-            contentType(ContentType.Application.Json)
-            loggedInAs(KroniskTestData.validIdentitetsnummer)
-            setBody(KroniskTestData.kroniskKravRequestValid)
+            assertThat(response.status).isEqualTo(HttpStatusCode.NotFound)
         }
 
-        val krav = response.body<KroniskKrav>()
-        assertThat(response.status).isEqualTo(HttpStatusCode.Created)
-        assertThat(krav.identitetsnummer).isEqualTo(KroniskTestData.kroniskKravRequestValid.identitetsnummer)
-    }
+    @Test
+    fun `Gir ikke not found når kravet er slettet men flagget slettet er satt`() =
+        suspendableTest {
+            val repo by inject<KroniskKravRepository>()
+
+            repo.insert(KroniskTestData.kroniskKrav.copy(status = KravStatus.SLETTET))
+
+            val response =
+                httpClient.get {
+                    appUrl("$kravKroniskUrl/${KroniskTestData.kroniskKrav.id}?slettet")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
+                }
+
+            assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        }
 
     @Test
-    fun `Skal returnere forbidden hvis virksomheten ikke er i auth listen fra altinn`() = suspendableTest {
-        val response =
-            httpClient.post {
-                appUrl(kravKroniskUrl)
-                contentType(ContentType.Application.Json)
-                loggedInAs(KroniskTestData.validIdentitetsnummer)
-                setBody(KroniskTestData.kroniskKravRequestValid.copy(virksomhetsnummer = "123456785"))
-            }
+    fun `invalid json gives 400 Bad request`() =
+        suspendableTest {
+            val response =
+                httpClient.post {
+                    appUrl(kravKroniskUrl)
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.VALID_IDENTITETSNUMMER)
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
-    }
-
-    @Test
-    fun `Skal returnere full propertypath for periode`() = suspendableTest {
-        val response =
-            httpClient.post {
-                appUrl(kravKroniskUrl)
-                contentType(ContentType.Application.Json)
-                loggedInAs(KroniskTestData.validIdentitetsnummer)
-                setBody(
-                    KroniskTestData.kroniskKravRequestInValid.copy(
-                        perioder = listOf(
-                            ArbeidsgiverperiodeRequest(
-                                fom = 1.februar(2020),
-                                tom = 31.januar(2020),
-                                antallDagerMedRefusjon = 29,
-                                månedsinntekt = 34000000.0
-                            ),
-                            ArbeidsgiverperiodeRequest(
-                                fom = 3.februar(2020),
-                                tom = 31.januar(2020),
-                                antallDagerMedRefusjon = 23,
-                                månedsinntekt = -30.0
-                            ),
-                            ArbeidsgiverperiodeRequest(
-                                fom = 5.januar(2020),
-                                tom = 14.januar(2020),
-                                antallDagerMedRefusjon = 12,
-                                månedsinntekt = 2590.8
-                            )
-                        )
+                    setBody(
+                        """
+                        {
+                            "identitetsnummer": "${KroniskTestData.VALID_IDENTITETSNUMMER}",
+                            "virksomhetsnummer": "${KroniskTestData.fullValidRequest.virksomhetsnummer}",
+                            "perioder": fele,
+                            "bekreftet": ["IKKE GYLDIG"]
+                            "dokumentasjon": ["IKKE GYLDIG"]
+                            "kontrollDager": ["IKKE GYLDIG"]
+                        }
+                        """.trimIndent(),
                     )
-                )
-            }
+                }
 
-        val possiblePropertyPaths = listOf(
-            "perioder[0].fom",
-            "perioder[0].månedsinntekt",
-            "perioder[0].antallDagerMedRefusjon",
-            "perioder[1].fom",
-            "perioder[1].antallDagerMedRefusjon",
-            "perioder[1].månedsinntekt",
-            "perioder[2].antallDagerMedRefusjon"
-        )
-        val res = response.call.body<ValidationProblem>()
-        assertThat(res.violations.size).isEqualTo(7)
-        res.violations.forEach {
-            assertThat(it.propertyPath).isIn(possiblePropertyPaths)
+            assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
+            val res = response.call.response.body<Problem>()
+            assertThat(res.title).contains("Valideringen av input feilet")
         }
-    }
 
     @Test
-    fun `Oppdaterer ikke når ny request er duplikat`() = suspendableTest {
-        val repo by inject<KroniskKravRepository>()
+    fun `Skal returnere Created ved feilfritt skjema uten fil`() =
+        suspendableTest {
+            val response =
+                httpClient.post {
+                    appUrl(kravKroniskUrl)
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.VALID_IDENTITETSNUMMER)
+                    setBody(KroniskTestData.kroniskKravRequestValid)
+                }
 
-        val krav = repo.insert(KroniskTestData.kroniskKravRequestValid.tilKrav("hohoho", "god", "jul", listOf(mockArbeidsgiverperiode())))
-
-        val response = httpClient.patch {
-            appUrl("$kravKroniskUrl/${krav.id}")
-            contentType(ContentType.Application.Json)
-            loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
-            setBody(KroniskTestData.kroniskKravRequestValid)
+            val krav = response.body<KroniskKrav>()
+            assertThat(response.status).isEqualTo(HttpStatusCode.Created)
+            assertThat(krav.identitetsnummer).isEqualTo(KroniskTestData.kroniskKravRequestValid.identitetsnummer)
         }
-        assertThat(response.status).isEqualTo(HttpStatusCode.Conflict)
-    }
+
+    @Test
+    fun `Skal returnere forbidden hvis virksomheten ikke er i auth listen fra altinn`() =
+        suspendableTest {
+            val response =
+                httpClient.post {
+                    appUrl(kravKroniskUrl)
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.VALID_IDENTITETSNUMMER)
+                    setBody(KroniskTestData.kroniskKravRequestValid.copy(virksomhetsnummer = "123456785"))
+                }
+
+            assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
+        }
+
+    @Test
+    fun `Skal returnere full propertypath for periode`() =
+        suspendableTest {
+            val response =
+                httpClient.post {
+                    appUrl(kravKroniskUrl)
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.VALID_IDENTITETSNUMMER)
+                    setBody(
+                        KroniskTestData.kroniskKravRequestInValid.copy(
+                            perioder =
+                                listOf(
+                                    ArbeidsgiverperiodeRequest(
+                                        fom = 1.februar(2020),
+                                        tom = 31.januar(2020),
+                                        antallDagerMedRefusjon = 29,
+                                        månedsinntekt = 34000000.0,
+                                    ),
+                                    ArbeidsgiverperiodeRequest(
+                                        fom = 3.februar(2020),
+                                        tom = 31.januar(2020),
+                                        antallDagerMedRefusjon = 23,
+                                        månedsinntekt = -30.0,
+                                    ),
+                                    ArbeidsgiverperiodeRequest(
+                                        fom = 5.januar(2020),
+                                        tom = 14.januar(2020),
+                                        antallDagerMedRefusjon = 12,
+                                        månedsinntekt = 2590.8,
+                                    ),
+                                ),
+                        ),
+                    )
+                }
+
+            val possiblePropertyPaths =
+                listOf(
+                    "perioder[0].fom",
+                    "perioder[0].månedsinntekt",
+                    "perioder[0].antallDagerMedRefusjon",
+                    "perioder[1].fom",
+                    "perioder[1].antallDagerMedRefusjon",
+                    "perioder[1].månedsinntekt",
+                    "perioder[2].antallDagerMedRefusjon",
+                )
+            val res = response.call.body<ValidationProblem>()
+            assertThat(res.violations.size).isEqualTo(7)
+            res.violations.forEach {
+                assertThat(it.propertyPath).isIn(possiblePropertyPaths)
+            }
+        }
+
+    @Test
+    fun `Oppdaterer ikke når ny request er duplikat`() =
+        suspendableTest {
+            val repo by inject<KroniskKravRepository>()
+
+            val krav = repo.insert(KroniskTestData.kroniskKravRequestValid.tilKrav("hohoho", "god", "jul", listOf(mockArbeidsgiverperiode())))
+
+            val response =
+                httpClient.patch {
+                    appUrl("$kravKroniskUrl/${krav.id}")
+                    contentType(ContentType.Application.Json)
+                    loggedInAs(KroniskTestData.kroniskKrav.identitetsnummer)
+                    setBody(KroniskTestData.kroniskKravRequestValid)
+                }
+            assertThat(response.status).isEqualTo(HttpStatusCode.Conflict)
+            repo.delete(krav.id)
+        }
 }

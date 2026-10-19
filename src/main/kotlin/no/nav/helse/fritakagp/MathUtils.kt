@@ -7,22 +7,29 @@ fun Number.multiplySafe(other: Number): BigDecimal =
     safeOperation(
         operation = BigDecimal::multiply,
         operandA = this,
-        operandB = other
+        operandB = other,
     )
 
-fun Number.divideSafe(other: Number, roundingMode: RoundingMode = RoundingMode.HALF_UP): BigDecimal =
+fun Number.divideSafe(
+    other: Number,
+    roundingMode: RoundingMode = RoundingMode.HALF_UP,
+): BigDecimal =
     safeOperation(
         operation = { a, b ->
             a.divide(b, 2, roundingMode)
         },
         operandA = this,
-        operandB = other
+        operandB = other,
     )
 
-private fun safeOperation(operation: (BigDecimal, BigDecimal) -> BigDecimal, operandA: Number, operandB: Number): BigDecimal =
+private fun safeOperation(
+    operation: (BigDecimal, BigDecimal) -> BigDecimal,
+    operandA: Number,
+    operandB: Number,
+): BigDecimal =
     operation(
         operandA.toBigDecimal(),
-        operandB.toBigDecimal()
+        operandB.toBigDecimal(),
     )
 
 private fun Number.toBigDecimal(): BigDecimal =

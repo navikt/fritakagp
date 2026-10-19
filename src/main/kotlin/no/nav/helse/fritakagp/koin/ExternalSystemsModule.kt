@@ -11,11 +11,14 @@ import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
 import no.nav.helse.fritakagp.integration.kafka.brukernotifikasjonKafkaProps
 import no.nav.helse.fritakagp.integration.virusscan.ClamavVirusScannerImp
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
+import no.nav.helse.fritakagp.kafka.DialogSender
+import no.nav.helse.fritakagp.kafka.KafkaConfig
+import no.nav.helse.fritakagp.kafka.KafkaDialogProducer
 import no.nav.helse.fritakagp.web.auth.AuthClient
 import no.nav.helse.fritakagp.web.auth.IdentityProvider
 import no.nav.helsearbeidsgiver.aareg.AaregClient
 import no.nav.helsearbeidsgiver.altinn.Altinn3OBOClient
-import no.nav.helsearbeidsgiver.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonKlient
+import no.nav.helsearbeidsgiver.altinn.Altinn3Ressurs
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.pdl.Behandlingsgrunnlag
 import no.nav.helsearbeidsgiver.pdl.PdlClient
@@ -30,7 +33,8 @@ fun Module.externalSystemClients(env: Env) {
         Altinn3OBOClient(
             baseUrl = env.altinnTilgangerBaseUrl,
             serviceCode = env.altinnServiceOwnerServiceId,
-            cacheConfig = LocalCache.Config(60.minutes, 250)
+            ressurs = Altinn3Ressurs.FRITAKAGP,
+            cacheConfig = LocalCache.Config(60.minutes, 250),
         )
     } bind Altinn3OBOClient::class
 
@@ -42,7 +46,7 @@ fun Module.externalSystemClients(env: Env) {
             url = env.pdlUrl,
             behandlingsgrunnlag = Behandlingsgrunnlag.FRITAKAGP,
             cacheConfig = LocalCache.Config(1.days, 10_000),
-            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopePdl)
+            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopePdl),
         )
     } bind PdlClient::class
 
@@ -51,7 +55,7 @@ fun Module.externalSystemClients(env: Env) {
         AaregClient(
             baseUrl = env.aaregUrl,
             cacheConfig = LocalCache.Config(5.minutes, 500),
-            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeAareg)
+            getAccessToken = azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeAareg),
         )
     } bind AaregClient::class
 
@@ -66,30 +70,35 @@ fun Module.externalSystemClients(env: Env) {
     } bind OppgaveKlient::class
 
     single {
-        val azureAuthClient: AuthClient = get()
-        ArbeidsgiverNotifikasjonKlient(env.arbeidsgiverNotifikasjonUrl, azureAuthClient.fetchToken(IdentityProvider.AZURE_AD, env.scopeArbeidsgivernotifikasjon))
-    }
-
-    single {
         ClamavVirusScannerImp(
             get(),
-            env.clamAvUrl
+            env.clamAvUrl,
         )
     } bind VirusScanner::class
 
     single {
         BucketStorageImpl(
             env.gcpBucketName,
-            env.gcpProjectId
+            env.gcpProjectId,
         )
     } bind BucketStorage::class
 
     single {
         BrukernotifikasjonKafkaProducer(
             brukernotifikasjonKafkaProps(),
-            env.kafkaTopicNameBrukernotifikasjon
+            env.kafkaTopicNameBrukernotifikasjon,
         )
     } bind BrukernotifikasjonSender::class
+
+    single { KafkaConfig() }
+
+    single {
+        val kafkaConfig: KafkaConfig = get()
+        KafkaDialogProducer(
+            topicName = env.kafkaTopicNameDialog,
+            props = kafkaConfig.dialogProducerConfig,
+        )
+    } bind DialogSender::class
 
     single { AuthClient(tokenEndpoint = env.tokenEndpoint, tokenExchangeEndpoint = env.tokenExchangeEndpoint) }
 }

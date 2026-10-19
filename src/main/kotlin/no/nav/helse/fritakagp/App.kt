@@ -26,9 +26,9 @@ import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravProcessor
 import no.nav.helse.fritakagp.processing.kronisk.krav.KroniskKravSlettProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadKvitteringProcessor
 import no.nav.helse.fritakagp.processing.kronisk.soeknad.KroniskSoeknadProcessor
-import no.nav.helse.fritakagp.web.auth.localAuthTokenDispenser
 import no.nav.helse.fritakagp.web.fritakModule
 import no.nav.helse.fritakagp.web.nais.nais
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 import org.flywaydb.core.Flyway
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -37,7 +37,10 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.slf4j.LoggerFactory
 
-class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true) : KoinComponent {
+class FritakAgpApplication(
+    val port: Int = 8080,
+    val runAsDaemon: Boolean = true,
+) : KoinComponent {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val appConfig = HoconApplicationConfig(ConfigFactory.load())
     private val env = readEnv(appConfig)
@@ -55,9 +58,10 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
 
         configAndStartBackgroundWorker()
 
-        webserver = createWebserver().also {
-            it.start(wait = runAsDeamon)
-        }
+        webserver =
+            createWebserver().also {
+                it.start(wait = runAsDaemon)
+            }
     }
 
     fun shutdown() {
@@ -69,21 +73,19 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
     private fun createWebserver(): EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration> =
         embeddedServer(
             factory = Netty,
-            environment = applicationEnvironment {
-                config = appConfig
-            },
+            environment =
+                applicationEnvironment {
+                    config = appConfig
+                },
             configure = {
                 connector {
                     port = this@FritakAgpApplication.port
                 }
             },
             module = {
-                if (env is Env.Local) {
-                    localAuthTokenDispenser(env)
-                }
                 nais()
                 fritakModule(env)
-            }
+            },
         )
 
     private fun configAndStartBackgroundWorker() {
@@ -117,7 +119,8 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
     private fun migrateDatabase() {
         logger.info("Starter databasemigrering")
 
-        Flyway.configure()
+        Flyway
+            .configure()
             .baselineOnMigrate(true)
             .dataSource(GlobalContext.getKoinApplicationOrNull()?.koin?.get())
             .load()
@@ -130,7 +133,10 @@ class FritakAgpApplication(val port: Int = 8080, val runAsDeamon: Boolean = true
 fun main() {
     val logger = LoggerFactory.getLogger("fritakagp")
     Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
-        logger.error("uncaught exception in thread ${thread.name}: ${err.message}", err)
+        "Uncaught exception in thread ${thread.name}: ${err.message}".also {
+            logger.error(it)
+            sikkerLogger().error(it, err)
+        }
     }
 
     val application = FritakAgpApplication()
@@ -140,6 +146,6 @@ fun main() {
             logger.info("Fikk shutdown-signal, avslutter...")
             application.shutdown()
             logger.info("Avsluttet OK")
-        }
+        },
     )
 }

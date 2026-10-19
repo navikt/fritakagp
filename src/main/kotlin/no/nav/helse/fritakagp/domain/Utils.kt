@@ -8,23 +8,34 @@ import java.time.format.DateTimeFormatter
 import java.util.Base64
 import kotlin.math.roundToInt
 
-fun decodeBase64File(datafile: String): ByteArray {
-    return Base64.getDecoder().decode(datafile)
+fun decodeBase64File(datafile: String): ByteArray = Base64.getDecoder().decode(datafile)
+
+enum class GodkjenteFiletyper(
+    val beskrivelse: String,
+) {
+    PDF("pdf"),
 }
 
-enum class GodkjenteFiletyper(val beskrivelse: String) {
-    PDF("pdf")
-}
+fun sladdFnr(fnr: String): String = fnr.take(6) + "*****"
 
-fun sladdFnr(fnr: String): String {
-    return fnr.take(6) + "*****"
-}
+data class FravaerPerAar(
+    val aar: String,
+    val antallDager: Float,
+)
+
+fun Set<FravaerData>.tilFravaerPerAar(): Set<FravaerPerAar> =
+    groupBy { it.yearMonth.substring(0, 4) }
+        .map { (aar, fravaerData) -> FravaerPerAar(aar, fravaerData.map { it.antallDagerMedFravaer }.sum()) }
+        .toSet()
 
 val TIMESTAMP_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 val TIMESTAMP_FORMAT_MED_KL: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy 'kl.' HH:mm")
 
-fun generereGravidSoeknadBeskrivelse(soeknad: GravidSoeknad, desc: String): String {
+fun generereGravidSoeknadBeskrivelse(
+    soeknad: GravidSoeknad,
+    desc: String,
+): String {
     val terminaDatoIkkeOppgitt = "Ikke oppgitt"
     return buildString {
         appendLine(desc)
@@ -50,8 +61,11 @@ fun generereGravidSoeknadBeskrivelse(soeknad: GravidSoeknad, desc: String): Stri
     }
 }
 
-fun generereKroniskSoeknadBeskrivelse(soeknad: KroniskSoeknad, desc: String): String {
-    return buildString {
+fun generereKroniskSoeknadBeskrivelse(
+    soeknad: KroniskSoeknad,
+    desc: String,
+): String =
+    buildString {
         appendLine(desc)
         appendLine("Mottatt: ${soeknad.opprettet.format(TIMESTAMP_FORMAT)}")
         appendLine("Referansenummer: ${soeknad.referansenummer}")
@@ -74,10 +88,12 @@ fun generereKroniskSoeknadBeskrivelse(soeknad: KroniskSoeknad, desc: String): St
             }
         }
     }
-}
 
-fun generereKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String {
-    return buildString {
+fun generereKroniskKravBeskrivelse(
+    krav: KroniskKrav,
+    desc: String,
+): String =
+    buildString {
         appendLine(desc)
         krav.aarsakEndring?.let { appendLine("Årsak til endring: $it") }
         appendLine("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}")
@@ -88,10 +104,12 @@ fun generereKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String {
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
     }
-}
 
-fun generereSlettKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String {
-    return buildString {
+fun generereSlettKroniskKravBeskrivelse(
+    krav: KroniskKrav,
+    desc: String,
+): String =
+    buildString {
         appendLine(desc)
         appendLine("Annullering mottatt: ${TIMESTAMP_FORMAT.format(krav.endretDato ?: LocalDateTime.now())}")
         appendLine("Tidligere krav med JournalpostId: ${krav.journalpostId}")
@@ -100,10 +118,12 @@ fun generereSlettKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
     }
-}
 
-fun generereEndretKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): String {
-    return buildString {
+fun generereEndretKroniskKravBeskrivelse(
+    krav: KroniskKrav,
+    desc: String,
+): String =
+    buildString {
         appendLine(desc)
         appendLine("Endret krav mottatt: ${TIMESTAMP_FORMAT.format(krav.opprettet)}")
         appendLine("Endret krav med JournalpostId: ${krav.journalpostId}")
@@ -113,10 +133,12 @@ fun generereEndretKroniskKravBeskrivelse(krav: KroniskKrav, desc: String): Strin
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
     }
-}
 
-fun generereEndretGravidKravBeskrivelse(krav: GravidKrav, desc: String): String {
-    return buildString {
+fun generereEndretGravidKravBeskrivelse(
+    krav: GravidKrav,
+    desc: String,
+): String =
+    buildString {
         appendLine(desc)
         appendLine("Endret krav mottatt: ${TIMESTAMP_FORMAT.format(krav.opprettet)}")
         appendLine("Referansenummer: ${krav.referansenummer}")
@@ -126,9 +148,12 @@ fun generereEndretGravidKravBeskrivelse(krav: GravidKrav, desc: String): String 
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
     }
-}
-fun generereGravidKravBeskrivelse(krav: GravidKrav, desc: String): String {
-    return buildString {
+
+fun generereGravidKravBeskrivelse(
+    krav: GravidKrav,
+    desc: String,
+): String =
+    buildString {
         appendLine(desc)
         krav.aarsakEndring?.let { appendLine("Årsak til endring: $it") }
         appendLine("Mottatt: ${krav.opprettet.format(TIMESTAMP_FORMAT)}")
@@ -139,10 +164,12 @@ fun generereGravidKravBeskrivelse(krav: GravidKrav, desc: String): String {
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
     }
-}
 
-fun generereSlettGravidKravBeskrivelse(krav: GravidKrav, desc: String): String {
-    return buildString {
+fun generereSlettGravidKravBeskrivelse(
+    krav: GravidKrav,
+    desc: String,
+): String =
+    buildString {
         appendLine(desc)
         appendLine("Annullering mottatt: ${TIMESTAMP_FORMAT.format(krav.endretDato ?: LocalDateTime.now())}")
         appendLine("Tidligere krav med JournalpostId: ${krav.journalpostId}")
@@ -151,10 +178,9 @@ fun generereSlettGravidKravBeskrivelse(krav: GravidKrav, desc: String): String {
         appendLine("Periode:")
         appendLine(genererePeriodeTable(krav.perioder))
     }
-}
 
-fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String {
-    return table {
+fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String =
+    table {
         header("FOM", "TOM", "Sykmeldingsgrad", "kreves refusjon for", "Beregnet månedsinntekt (NOK)", "Dagsats (NOK)", "Beløp (NOK)")
         for (p in perioder.sortedBy { it.fom }) {
             row(
@@ -164,7 +190,7 @@ fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String {
                 p.antallDagerMedRefusjon,
                 p.månedsinntekt.roundToInt().toString(),
                 p.dagsats.toString(),
-                p.belop.toString()
+                p.belop.toString(),
             )
         }
         hints {
@@ -178,7 +204,5 @@ fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String {
             borderStyle = Table.BorderStyle.SINGLE_LINE
         }
     }.render(StringBuilder()).toString()
-}
 
-fun Double.tilProsent(): String =
-    multiplySafe(100).toDouble().toString() + "%"
+fun Double.tilProsent(): String = multiplySafe(100).toDouble().toString() + "%"

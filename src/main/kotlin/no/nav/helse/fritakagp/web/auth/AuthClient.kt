@@ -19,10 +19,12 @@ import no.nav.helse.fritakagp.customObjectMapper
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 
-enum class IdentityProvider(@JsonValue val alias: String) {
+enum class IdentityProvider(
+    @JsonValue val alias: String,
+) {
     MASKINPORTEN("maskinporten"),
     AZURE_AD("azuread"),
-    TOKEN_X("tokenx")
+    TOKEN_X("tokenx"),
 }
 
 sealed class TokenResponse {
@@ -30,76 +32,98 @@ sealed class TokenResponse {
         @JsonProperty("access_token")
         val accessToken: String,
         @JsonProperty("expires_in")
-        val expiresInSeconds: Int
+        val expiresInSeconds: Int,
     ) : TokenResponse()
 
     data class Error(
         val error: TokenErrorResponse,
-        val status: HttpStatusCode
+        val status: HttpStatusCode,
     ) : TokenResponse()
 }
 
 data class TokenErrorResponse(
     val error: String,
     @JsonProperty("error_description")
-    val errorDescription: String
+    val errorDescription: String,
 )
 
 class AuthClient(
     private val tokenEndpoint: String,
-    private val tokenExchangeEndpoint: String
+    private val tokenExchangeEndpoint: String,
 ) {
     private val httpClient = createHttpClient()
-    suspend fun token(provider: IdentityProvider, target: String): TokenResponse = try {
-        logger().debug("Henter token fra ${provider.alias}")
-        httpClient.submitForm(
-            tokenEndpoint,
-            parameters {
-                set("target", target)
-                set("identity_provider", provider.alias)
-            }
-        ).body<TokenResponse.Success>()
-    } catch (e: ResponseException) {
-        TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
-    }
 
-    suspend fun exchange(provider: IdentityProvider, target: String, userToken: String): TokenResponse = try {
-        httpClient.submitForm(
-            tokenExchangeEndpoint,
-            parameters {
-                set("target", target)
-                set("user_token", userToken)
-                set("identity_provider", provider.alias)
-            }
-        ).body<TokenResponse.Success>()
-    } catch (e: ResponseException) {
-        TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
-    }
+    suspend fun token(
+        provider: IdentityProvider,
+        target: String,
+    ): TokenResponse =
+        try {
+            logger().debug("Henter token fra ${provider.alias}")
+            httpClient
+                .submitForm(
+                    tokenEndpoint,
+                    parameters {
+                        set("target", target)
+                        set("identity_provider", provider.alias)
+                    },
+                ).body<TokenResponse.Success>()
+        } catch (e: ResponseException) {
+            TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
+        }
 
-    fun fetchToken(identityProvider: IdentityProvider, target: String): () -> String = {
-        runBlocking {
-            token(identityProvider, target).let {
-                when (it) {
-                    is TokenResponse.Success -> it.accessToken
-                    is TokenResponse.Error -> {
-                        logger().error("Feilet å hente token")
-                        sikkerLogger().error("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
-                        throw RuntimeException("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
+    suspend fun exchange(
+        provider: IdentityProvider,
+        target: String,
+        userToken: String,
+    ): TokenResponse =
+        try {
+            httpClient
+                .submitForm(
+                    tokenExchangeEndpoint,
+                    parameters {
+                        set("target", target)
+                        set("user_token", userToken)
+                        set("identity_provider", provider.alias)
+                    },
+                ).body<TokenResponse.Success>()
+        } catch (e: ResponseException) {
+            TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
+        }
+
+    fun fetchToken(
+        identityProvider: IdentityProvider,
+        target: String,
+    ): () -> String =
+        {
+            runBlocking {
+                token(identityProvider, target).let {
+                    when (it) {
+                        is TokenResponse.Success -> {
+                            it.accessToken
+                        }
+
+                        is TokenResponse.Error -> {
+                            logger().error("Feilet å hente token")
+                            sikkerLogger().error("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
+                            throw RuntimeException("Feilet å hente token status: ${it.status} - ${it.error.errorDescription}")
+                        }
                     }
                 }
             }
         }
-    }
 
     fun fetchOboToken(
         target: String,
-        userToken: String
+        userToken: String,
     ): () -> String =
         {
             runBlocking {
                 exchange(IdentityProvider.TOKEN_X, target, userToken).let {
                     when (it) {
-                        is TokenResponse.Success -> it.accessToken
+                        is TokenResponse.Success -> {
+                            it.accessToken
+                        }
+
                         is TokenResponse.Error -> {
                             sikkerLogger().error("Feilet å hente obo token status: ${it.status} - ${it.error.errorDescription}")
                             throw RuntimeException("Feilet å hente obo token status: ${it.status} - ${it.error.errorDescription}")
@@ -110,12 +134,13 @@ class AuthClient(
         }
 }
 
-fun createHttpClient(): HttpClient = HttpClient(Apache5) {
-    expectSuccess = true
-    install(ContentNegotiation) {
-        register(ContentType.Application.Json, JacksonConverter(customObjectMapper()))
-        jackson {
-            registerModule(JavaTimeModule())
+fun createHttpClient(): HttpClient =
+    HttpClient(Apache5) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(customObjectMapper()))
+            jackson {
+                registerModule(JavaTimeModule())
+            }
         }
     }
-}

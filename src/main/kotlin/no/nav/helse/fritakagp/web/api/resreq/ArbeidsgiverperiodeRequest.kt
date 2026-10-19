@@ -15,9 +15,12 @@ data class ArbeidsgiverperiodeRequest(
     val tom: LocalDate,
     val antallDagerMedRefusjon: Int,
     val månedsinntekt: Double,
-    val gradering: Double = 1.0
+    val gradering: Double = 1.0,
 ) {
-    fun validate(v: Validator<ArbeidsgiverperiodeRequest>, ansettelsesperioder: Set<Periode>) {
+    fun validate(
+        v: Validator<ArbeidsgiverperiodeRequest>,
+        ansettelsesperioder: Set<Periode>,
+    ) {
         v.validate(ArbeidsgiverperiodeRequest::fom).datoerHarRiktigRekkefolge(tom)
         v.validate(ArbeidsgiverperiodeRequest::antallDagerMedRefusjon).refusjonsDagerIkkeOverstigerPeriodelengde(this)
         v.validate(ArbeidsgiverperiodeRequest::månedsinntekt).maanedsInntektErMellomNullOgTiMil()

@@ -56,15 +56,16 @@ fun Route.kroniskRoutes(
     bakgunnsjobbService: BakgrunnsjobbService,
     virusScanner: VirusScanner,
     bucket: BucketStorage,
-    om: ObjectMapper
+    om: ObjectMapper,
 ) {
     val logger = "kroniskRoutes".logger()
     val sikkerLogger = sikkerLogger()
 
-    val requestHandler = RequestHandler(
-        aapenLogger = logger,
-        sikkerLogger = sikkerLogger
-    )
+    val requestHandler =
+        RequestHandler(
+            aapenLogger = logger,
+            sikkerLogger = sikkerLogger,
+        )
 
     fun slettSak(sakId: String) {
         try {
@@ -82,7 +83,7 @@ fun Route.kroniskRoutes(
                 MdcUtils.withLogFields(
                     Log.apiRoute("GET /kronisk/soeknad/{id}"),
                     Log.soeknadId(soeknadId),
-                    Log.kontekstId(UUID.randomUUID())
+                    Log.kontekstId(UUID.randomUUID()),
                 ) {
                     logger.info("Hent kronisk søknad.")
 
@@ -91,10 +92,14 @@ fun Route.kroniskRoutes(
                     logger.info("Hent kronisk søknad fra database.")
                     val soeknad = kroniskSoeknadRepo.getById(soeknadId)
 
-                    if (soeknad == null || soeknad.identitetsnummer != innloggetFnr) {
-                        logger.warn("Kronisk søknad ikke funnet eller matcher ikke innlogget fnr.")
+                    if (soeknad == null) {
+                        logger.warn("Kronisk søknad ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
+                        if (soeknad.identitetsnummer != innloggetFnr) {
+                            logger.info("Sjekker om org har tilgang til kronisk søknad.")
+                            authService.validerTilgangTilOrganisasjon(this, soeknad.virksomhetsnummer)
+                        }
                         logger.info("Hent personinfo fra PDL.")
                         soeknad.sendtAvNavn = soeknad.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         soeknad.navn = soeknad.navn ?: pdlService.hentNavn(soeknad.identitetsnummer)
@@ -108,7 +113,7 @@ fun Route.kroniskRoutes(
             post {
                 MdcUtils.withLogFields(
                     Log.apiRoute("POST /kronisk/soeknad"),
-                    Log.kontekstId(UUID.randomUUID())
+                    Log.kontekstId(UUID.randomUUID()),
                 ) {
                     logger.info("Motta kronisk søknad.")
 
@@ -135,11 +140,11 @@ fun Route.kroniskRoutes(
                     kroniskSoeknadRepo.insert(soeknad)
                     bakgunnsjobbService.opprettJobb<KroniskSoeknadProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskSoeknadProcessor.JobbData(soeknad.id))
+                        data = om.writeValueAsString(KroniskSoeknadProcessor.JobbData(soeknad.id)),
                     )
                     bakgunnsjobbService.opprettJobb<KroniskSoeknadKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskSoeknadKvitteringProcessor.Jobbdata(soeknad.id))
+                        data = om.writeValueAsString(KroniskSoeknadKvitteringProcessor.Jobbdata(soeknad.id)),
                     )
 
                     logger.info("Kronisk søknad mottatt OK.")
@@ -157,7 +162,7 @@ fun Route.kroniskRoutes(
                 MdcUtils.withLogFields(
                     Log.apiRoute("GET /kronisk/krav/{id}"),
                     Log.kravId(kravId),
-                    Log.kontekstId(UUID.randomUUID())
+                    Log.kontekstId(UUID.randomUUID()),
                 ) {
                     logger.info("Hent kronisk krav.")
 
@@ -167,22 +172,50 @@ fun Route.kroniskRoutes(
                     val krav = kroniskKravRepo.getById(kravId)
 
                     if (krav == null) {
-                        logger.warn("Kronisk krav ikke funnet.")
+                        logger.warn("Kronisk krav med id $kravId ikke funnet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else if (!erSlettet && krav.status == KravStatus.SLETTET) {
-                        logger.warn("Kronisk krav er slettet.")
+                        logger.warn("Kronisk krav med id $kravId er slettet.")
                         call.respond(HttpStatusCode.NotFound)
                     } else {
                         if (krav.identitetsnummer != innloggetFnr) {
-                            logger.info("Fnr på kronisk krav matcher ikke innlogget fnr.")
                             authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
                         }
+                        logger.info("Hent personinfo fra PDL.")
+                        krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
+                        krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
+
+                        logger.info("Kronisk krav med $kravId hentet OK.")
+                        call.respond(HttpStatusCode.OK, krav)
+                    }
+                }
+            }
+            // Dette endepunktet brukes til PDF-generering og henter i tillegg soft-deleted krav. Denne skal erstatte den gamle routen på sikt, men da må frontend-koden i så fall håndtere at soft-deleted krav også hentes.
+            get("/dokument/{id}") {
+                val kravId = requestHandler.lesParameterId(this)
+
+                MdcUtils.withLogFields(
+                    Log.apiRoute("GET /kronisk/krav/dokument/{id}"),
+                    Log.kravId(kravId),
+                    Log.kontekstId(UUID.randomUUID()),
+                ) {
+                    logger.info("Hent kronisk krav med id $kravId")
+
+                    val innloggetFnr = hentFnrFraLoginToken()
+
+                    val krav = kroniskKravRepo.getById(kravId)
+
+                    if (krav == null) {
+                        logger.warn("Kronisk krav med id $kravId ikke funnet.")
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        authService.validerTilgangTilOrganisasjon(this, krav.virksomhetsnummer)
 
                         logger.info("Hent personinfo fra PDL.")
                         krav.sendtAvNavn = krav.sendtAvNavn ?: pdlService.hentNavn(innloggetFnr)
                         krav.navn = krav.navn ?: pdlService.hentNavn(krav.identitetsnummer)
 
-                        logger.info("Kronisk krav hentet OK.")
+                        logger.info("Kronisk krav med $kravId hentet OK.")
                         call.respond(HttpStatusCode.OK, krav)
                     }
                 }
@@ -191,7 +224,7 @@ fun Route.kroniskRoutes(
             post {
                 MdcUtils.withLogFields(
                     Log.apiRoute("POST /kronisk/krav"),
-                    Log.kontekstId(UUID.randomUUID())
+                    Log.kontekstId(UUID.randomUUID()),
                 ) {
                     logger.info("Motta kronisk krav.")
 
@@ -201,10 +234,11 @@ fun Route.kroniskRoutes(
 
                     val callId = UUID.randomUUID().toString()
                     logger.info("Hent ansettelsesperioder fra aareg, callId: $callId")
-                    val ansettelsesperioder = aaregClient
-                        .hentAnsettelsesperioder(request.identitetsnummer, callId)
-                        .get(Orgnr(request.virksomhetsnummer))
-                        .orEmpty()
+                    val ansettelsesperioder =
+                        aaregClient
+                            .hentAnsettelsesperioder(request.identitetsnummer, callId)
+                            .get(Orgnr(request.virksomhetsnummer))
+                            .orEmpty()
 
                     logger.info("Valider request.")
                     request.validate(ansettelsesperioder)
@@ -218,26 +252,27 @@ fun Route.kroniskRoutes(
                     logger.info("Hent grunnbeløp.")
                     val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
 
-                    val krav = request.tilKrav(
-                        sendtAv = innloggetFnr,
-                        sendtAvNavn = sendtAvNavn,
-                        navn = navn,
-                        perioder = perioder
-                    )
+                    val krav =
+                        request.tilKrav(
+                            sendtAv = innloggetFnr,
+                            sendtAvNavn = sendtAvNavn,
+                            navn = navn,
+                            perioder = perioder,
+                        )
 
                     logger.info("Legg til kronisk krav i database.")
                     kroniskKravRepo.insert(krav)
                     bakgunnsjobbService.opprettJobb<KroniskKravProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id))
+                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id)),
                     )
                     bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id)),
                     )
                     bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(krav.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav))
+                        data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(krav.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav)),
                     )
 
                     logger.info("Kronisk krav mottatt OK.")
@@ -252,7 +287,7 @@ fun Route.kroniskRoutes(
                 MdcUtils.withLogFields(
                     Log.apiRoute("PATCH /kronisk/krav/{id}"),
                     Log.kravId(kravId),
-                    Log.kontekstId(UUID.randomUUID())
+                    Log.kontekstId(UUID.randomUUID()),
                 ) {
                     logger.info("Oppdater kronisk krav.")
 
@@ -267,10 +302,11 @@ fun Route.kroniskRoutes(
                     val navn = pdlService.hentNavn(request.identitetsnummer)
 
                     logger.info("Hent ansettelsesperioder fra aareg.")
-                    val ansettelsesperioder = aaregClient
-                        .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
-                        .get(Orgnr(request.virksomhetsnummer))
-                        .orEmpty()
+                    val ansettelsesperioder =
+                        aaregClient
+                            .hentAnsettelsesperioder(request.identitetsnummer, UUID.randomUUID().toString())
+                            .get(Orgnr(request.virksomhetsnummer))
+                            .orEmpty()
 
                     logger.info("Valider request.")
                     request.validate(ansettelsesperioder)
@@ -289,12 +325,13 @@ fun Route.kroniskRoutes(
                     logger.info("Hent grunnbeløp.")
                     val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
 
-                    val kravTilOppdatering = request.tilKrav(
-                        sendtAv = innloggetFnr,
-                        sendtAvNavn = sendtAvNavn,
-                        navn = navn,
-                        perioder = perioder
-                    )
+                    val kravTilOppdatering =
+                        request.tilKrav(
+                            sendtAv = innloggetFnr,
+                            sendtAvNavn = sendtAvNavn,
+                            navn = navn,
+                            perioder = perioder,
+                        )
 
                     if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                         logger.warn("Nytt kronisk krav er duplikat.")
@@ -324,15 +361,15 @@ fun Route.kroniskRoutes(
                     kroniskKravRepo.insert(kravTilOppdatering)
                     bakgunnsjobbService.opprettJobb<KroniskKravEndreProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(forrigeKrav.id))
+                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(forrigeKrav.id)),
                     )
                     bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id))
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(kravTilOppdatering.id, forrigeKrav.id)),
                     )
                     bakgunnsjobbService.opprettJobb<ArbeidsgiverNotifikasjonProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(kravTilOppdatering.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav))
+                        data = om.writeValueAsString(ArbeidsgiverNotifikasjonProcessor.JobbData(kravTilOppdatering.id, ArbeidsgiverNotifikasjonProcessor.JobbData.SkjemaType.KroniskKrav)),
                     )
 
                     logger.info("Kronisk krav oppdatert OK.")
@@ -346,7 +383,7 @@ fun Route.kroniskRoutes(
                 MdcUtils.withLogFields(
                     Log.apiRoute("DELETE /kronisk/krav/{id}"),
                     Log.kravId(kravId),
-                    Log.kontekstId(UUID.randomUUID())
+                    Log.kontekstId(UUID.randomUUID()),
                 ) {
                     logger.info("Slett kronisk krav.")
 
@@ -378,11 +415,11 @@ fun Route.kroniskRoutes(
                     kroniskKravRepo.update(krav)
                     bakgunnsjobbService.opprettJobb<KroniskKravSlettProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id))
+                        data = om.writeValueAsString(KroniskKravProcessor.JobbData(krav.id)),
                     )
                     bakgunnsjobbService.opprettJobb<KroniskKravKvitteringProcessor>(
                         maksAntallForsoek = 10,
-                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id))
+                        data = om.writeValueAsString(KroniskKravKvitteringProcessor.Jobbdata(krav.id)),
                     )
 
                     logger.info("Kronisk krav slettet OK.")

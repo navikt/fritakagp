@@ -9,7 +9,7 @@ import java.util.UUID
 
 class RequestHandler(
     val aapenLogger: Logger,
-    val sikkerLogger: Logger
+    val sikkerLogger: Logger,
 ) {
     val objectMapper = customObjectMapper()
 

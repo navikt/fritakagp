@@ -9,7 +9,7 @@ import no.nav.helse.fritakagp.web.api.resreq.KroniskKravRequest
 import java.math.RoundingMode
 
 class BeloepService(
-    private val grunnbeloepClient: GrunnbeloepClient
+    private val grunnbeloepClient: GrunnbeloepClient,
 ) {
     fun perioderMedDagsatsOgBeloep(request: KroniskKravRequest): List<Arbeidsgiverperiode> = request.perioder.medDagsatsOgBeloep(request.antallDager)
 
@@ -21,9 +21,11 @@ class BeloepService(
             val seksG = grunnbeloep.multiplySafe(6)
             val aarsloenn = periode.månedsinntekt.multiplySafe(12)
 
-            val dagsats = aarsloenn.min(seksG)
-                .divideSafe(antallDager)
-                .toDouble()
+            val dagsats =
+                aarsloenn
+                    .min(seksG)
+                    .divideSafe(antallDager)
+                    .toDouble()
 
             val beloep =
                 dagsats
@@ -39,7 +41,7 @@ class BeloepService(
                 månedsinntekt = periode.månedsinntekt,
                 gradering = periode.gradering,
                 dagsats = dagsats,
-                belop = beloep
+                belop = beloep,
             )
         }
 }

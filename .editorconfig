@@ -13,4 +13,6 @@ indent_size = 4
 trim_trailing_whitespace=true
 insert_final_newline = true
 max_line_length = 4000
-ktlint_disabled_rules=filename
+
+# Ktlint
+ktlint_standard_no-unused-imports = enabled

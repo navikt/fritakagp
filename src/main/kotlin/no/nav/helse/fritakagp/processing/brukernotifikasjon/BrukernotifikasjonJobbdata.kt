@@ -14,7 +14,7 @@ data class BrukernotifikasjonJobbdata(
     val identitetsnummer: String,
     val virksomhetsnavn: String?,
     val skjemaType: SkjemaType,
-    val notifikasjonsType: NotifikasjonsType = Oppretting
+    val notifikasjonsType: NotifikasjonsType = Oppretting,
 ) {
     fun hentTekst(): String {
         val ukjentArbeidsgiver = "Arbeidsgiveren din"
@@ -24,8 +24,8 @@ data class BrukernotifikasjonJobbdata(
         }
     }
 
-    fun hentLenke(): String {
-        return when (skjemaType) {
+    fun hentLenke(): String =
+        when (skjemaType) {
             SkjemaType.KroniskKrav -> {
                 when (notifikasjonsType) {
                     Oppretting, Endring -> "${ENDEPUNKT_KRONISK}krav/$skjemaId"
@@ -40,21 +40,25 @@ data class BrukernotifikasjonJobbdata(
                 }
             }
 
-            SkjemaType.KroniskSøknad -> "${ENDEPUNKT_KRONISK}soknad/$skjemaId"
-            SkjemaType.GravidSøknad -> "${ENDEPUNKT_GRAVID}soknad/$skjemaId"
+            SkjemaType.KroniskSøknad -> {
+                "${ENDEPUNKT_KRONISK}soknad/$skjemaId"
+            }
+
+            SkjemaType.GravidSøknad -> {
+                "${ENDEPUNKT_GRAVID}soknad/$skjemaId"
+            }
         }
-    }
 
     enum class SkjemaType {
         KroniskKrav,
         KroniskSøknad,
         GravidKrav,
-        GravidSøknad
+        GravidSøknad,
     }
 
     enum class NotifikasjonsType {
         Oppretting,
         Endring,
-        Annullering
+        Annullering,
     }
 }

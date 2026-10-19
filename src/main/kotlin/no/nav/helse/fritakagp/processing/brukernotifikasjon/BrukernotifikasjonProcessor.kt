@@ -25,7 +25,7 @@ class BrukernotifikasjonProcessor(
     private val om: ObjectMapper,
     private val brukernotifikasjonSender: BrukernotifikasjonSender,
     private val sensitivitetNivaa: Sensitivitet = Sensitivitet.High,
-    private val frontendAppBaseUrl: String = "https://arbeidsgiver.nav.no/fritak-agp"
+    private val frontendAppBaseUrl: String = "https://arbeidsgiver.nav.no/fritak-agp",
 ) : BakgrunnsjobbProsesserer {
     override val type: String get() = JOB_TYPE
     private val logger = this.logger()
@@ -43,7 +43,10 @@ class BrukernotifikasjonProcessor(
         brukernotifikasjonSender.sendMessage(varselId = varselId, varsel = varsel)
     }
 
-    private fun opprettVarsel(varselId: String, jobb: Bakgrunnsjobb): String {
+    private fun opprettVarsel(
+        varselId: String,
+        jobb: Bakgrunnsjobb,
+    ): String {
         val jobbData = om.readValue<Jobbdata>(jobb.data)
 
         return when (jobbData.skjemaType) {
@@ -53,7 +56,7 @@ class BrukernotifikasjonProcessor(
                     varselId = varselId,
                     identitetsnummer = skjema.identitetsnummer,
                     virksomhetsnavn = skjema.virksomhetsnavn,
-                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/kronisk/krav/${skjema.id}"
+                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/kronisk/krav/${skjema.id}",
                 )
             }
 
@@ -63,7 +66,7 @@ class BrukernotifikasjonProcessor(
                     varselId = varselId,
                     identitetsnummer = skjema.identitetsnummer,
                     virksomhetsnavn = skjema.virksomhetsnavn,
-                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/kronisk/soknad/${skjema.id}"
+                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/kronisk/soknad/${skjema.id}",
                 )
             }
 
@@ -73,7 +76,7 @@ class BrukernotifikasjonProcessor(
                     varselId = varselId,
                     identitetsnummer = skjema.identitetsnummer,
                     virksomhetsnavn = skjema.virksomhetsnavn,
-                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/gravid/krav/${skjema.id}"
+                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/gravid/krav/${skjema.id}",
                 )
             }
 
@@ -83,36 +86,41 @@ class BrukernotifikasjonProcessor(
                     varselId = varselId,
                     identitetsnummer = skjema.identitetsnummer,
                     virksomhetsnavn = skjema.virksomhetsnavn,
-                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/gravid/soknad/${skjema.id}"
+                    lenke = "$frontendAppBaseUrl/nb/notifikasjon/gravid/soknad/${skjema.id}",
                 )
             }
         }
     }
 
-    private fun getVarsel(varselId: String, identitetsnummer: String, virksomhetsnavn: String?, lenke: String) =
-        VarselActionBuilder.opprett {
-            type = Varseltype.Beskjed
-            this.varselId = varselId
-            sensitivitet = sensitivitetNivaa
-            ident = identitetsnummer
-            tekst = Tekst(
+    private fun getVarsel(
+        varselId: String,
+        identitetsnummer: String,
+        virksomhetsnavn: String?,
+        lenke: String,
+    ) = VarselActionBuilder.opprett {
+        type = Varseltype.Beskjed
+        this.varselId = varselId
+        sensitivitet = sensitivitetNivaa
+        ident = identitetsnummer
+        tekst =
+            Tekst(
                 spraakkode = "nb",
                 tekst = "${virksomhetsnavn ?: ukjentArbeidsgiver} har søkt om utvidet støtte fra NAV angående sykepenger til deg.",
-                default = true
+                default = true,
             )
-            link = lenke
-            aktivFremTil = ZonedDateTime.now().plusDays(31)
-        }
+        link = lenke
+        aktivFremTil = ZonedDateTime.now().plusDays(31)
+    }
 
     data class Jobbdata(
         val skjemaId: UUID,
-        val skjemaType: SkjemaType
+        val skjemaType: SkjemaType,
     ) {
         enum class SkjemaType {
             KroniskKrav,
             KroniskSøknad,
             GravidKrav,
-            GravidSøknad
+            GravidSøknad,
         }
     }
 }

@@ -21,16 +21,19 @@ class ArbeidsgiverOppdaterNotifikasjonProcessorTest {
     val arbeidsgiverNotifikasjonKlient = mockk<ArbeidsgiverNotifikasjonKlient>(relaxed = true)
     val gravidKravRepositoryMock = mockk<GravidKravRepository>(relaxed = true)
     val kroniskKravRepositoryMock = mockk<KroniskKravRepository>(relaxed = true)
-    val objectMapper: ObjectMapper = ObjectMapper().registerModule(
-        KotlinModule.Builder()
-            .withReflectionCacheSize(512)
-            .configure(KotlinFeature.NullToEmptyCollection, false)
-            .configure(KotlinFeature.NullToEmptyMap, false)
-            .configure(KotlinFeature.NullIsSameAsDefault, false)
-            .configure(KotlinFeature.SingletonSupport, false)
-            .configure(KotlinFeature.StrictNullChecks, false)
-            .build()
-    ).registerModule(JavaTimeModule())
+    val objectMapper: ObjectMapper =
+        ObjectMapper()
+            .registerModule(
+                KotlinModule
+                    .Builder()
+                    .withReflectionCacheSize(512)
+                    .configure(KotlinFeature.NullToEmptyCollection, false)
+                    .configure(KotlinFeature.NullToEmptyMap, false)
+                    .configure(KotlinFeature.NullIsSameAsDefault, false)
+                    .configure(KotlinFeature.SingletonSupport, false)
+                    .configure(KotlinFeature.StrictNullChecks, false)
+                    .build(),
+            ).registerModule(JavaTimeModule())
 
     val gravidKrav = GravidTestData.gravidKrav
     val kroniskKrav = KroniskTestData.kroniskKrav
@@ -38,12 +41,13 @@ class ArbeidsgiverOppdaterNotifikasjonProcessorTest {
     private var gravidJobb = Bakgrunnsjobb(data = "", type = "arbeidsgiveroppdaternotifikasjon")
     private var kroniskJobb = Bakgrunnsjobb(data = "", type = "arbeidsgiveroppdaternotifikasjon")
 
-    val prosessor = ArbeidsgiverOppdaterNotifikasjonProcessor(
-        gravidKravRepositoryMock,
-        kroniskKravRepositoryMock,
-        objectMapper,
-        arbeidsgiverNotifikasjonKlient
-    )
+    val prosessor =
+        ArbeidsgiverOppdaterNotifikasjonProcessor(
+            gravidKravRepositoryMock,
+            kroniskKravRepositoryMock,
+            objectMapper,
+            arbeidsgiverNotifikasjonKlient,
+        )
 
     @BeforeEach
     fun setup() {

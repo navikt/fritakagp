@@ -19,7 +19,7 @@ class ArbeidsgiverNotifikasjonProcessor(
     private val kroniskKravRepo: KroniskKravRepository,
     private val om: ObjectMapper,
     private val frontendAppBaseUrl: String = "https://arbeidsgiver.nav.no/fritak-agp",
-    private val arbeidsgiverNotifikasjonKlient: ArbeidsgiverNotifikasjonKlient
+    private val arbeidsgiverNotifikasjonKlient: ArbeidsgiverNotifikasjonKlient,
 ) : BakgrunnsjobbProsesserer {
     private val logger = this.logger()
 
@@ -33,35 +33,43 @@ class ArbeidsgiverNotifikasjonProcessor(
         logger.info("Prosesserer ${jobb.uuid} med type ${jobb.type}")
         val jobbData = om.readValue<JobbData>(jobb.data)
         val sak = map(jobbData)
-        val resultat = runBlocking {
-            arbeidsgiverNotifikasjonKlient.opprettNySak(
-                virksomhetsnummer = sak.virkomhetsnummer,
-                grupperingsid = sak.id.toString(),
-                merkelapp = "Fritak arbeidsgiverperiode",
-                lenke = sak.lenke,
-                tittel = sak.tittel,
-                statusTekst = "Mottatt",
-                tilleggsinfo = null,
-                initiellStatus = SaksStatus.UNDER_BEHANDLING,
-                hardDeleteOm = sak.hardDeleteOm
-            )
-        }
+        val resultat =
+            runBlocking {
+                arbeidsgiverNotifikasjonKlient.opprettNySak(
+                    virksomhetsnummer = sak.virkomhetsnummer,
+                    grupperingsid = sak.id.toString(),
+                    merkelapp = "Fritak arbeidsgiverperiode",
+                    lenke = sak.lenke,
+                    tittel = sak.tittel,
+                    statusTekst = "Mottatt",
+                    tilleggsinfo = null,
+                    initiellStatus = SaksStatus.UNDER_BEHANDLING,
+                    hardDeleteOm = sak.hardDeleteOm,
+                )
+            }
         updateSaksId(jobbData, resultat)
         logger.info("Opprettet sak i arbeidsgivernotifikasjon med ${sak.id} med ref $resultat")
     }
 
-    private fun genererTittel(navn: String?, identitetsnummer: String) =
-        "Fritak fra arbeidsgiverperioden: $navn - f. ${identitetsnummer.take(6)}"
+    private fun genererTittel(
+        navn: String?,
+        identitetsnummer: String,
+    ) = "Fritak fra arbeidsgiverperioden: $navn - f. ${identitetsnummer.take(6)}"
 
-    private fun updateSaksId(jobbData: JobbData, id: String) {
+    private fun updateSaksId(
+        jobbData: JobbData,
+        id: String,
+    ) {
         if (jobbData.skjemaType == JobbData.SkjemaType.KroniskKrav) {
-            val skjema = kroniskKravRepo.getById(jobbData.skjemaId)
-                ?: throw IllegalArgumentException("Fant ikke $jobbData")
+            val skjema =
+                kroniskKravRepo.getById(jobbData.skjemaId)
+                    ?: throw IllegalArgumentException("Fant ikke $jobbData")
             skjema.arbeidsgiverSakId = id
             kroniskKravRepo.update(skjema)
         } else {
-            val skjema = gravidKravRepo.getById(jobbData.skjemaId)
-                ?: throw IllegalArgumentException("Fant ikke $jobbData")
+            val skjema =
+                gravidKravRepo.getById(jobbData.skjemaId)
+                    ?: throw IllegalArgumentException("Fant ikke $jobbData")
             skjema.arbeidsgiverSakId = id
             gravidKravRepo.update(skjema)
         }
@@ -69,24 +77,26 @@ class ArbeidsgiverNotifikasjonProcessor(
 
     private fun map(jobbData: JobbData): SakParametere {
         if (jobbData.skjemaType == JobbData.SkjemaType.KroniskKrav) {
-            val skjema = kroniskKravRepo.getById(jobbData.skjemaId)
-                ?: throw IllegalArgumentException("Fant ikke $jobbData")
+            val skjema =
+                kroniskKravRepo.getById(jobbData.skjemaId)
+                    ?: throw IllegalArgumentException("Fant ikke $jobbData")
             return SakParametere(
                 skjema.id,
                 skjema.virksomhetsnummer,
                 genererTittel(skjema.navn, skjema.identitetsnummer),
                 "$frontendAppBaseUrl/nb/kronisk/krav/${skjema.id}",
-                (3 * 365).days
+                (3 * 365).days,
             )
         } else {
-            val skjema = gravidKravRepo.getById(jobbData.skjemaId)
-                ?: throw IllegalArgumentException("Fant ikke $jobbData")
+            val skjema =
+                gravidKravRepo.getById(jobbData.skjemaId)
+                    ?: throw IllegalArgumentException("Fant ikke $jobbData")
             return SakParametere(
                 skjema.id,
                 skjema.virksomhetsnummer,
                 genererTittel(skjema.navn, skjema.identitetsnummer),
                 "$frontendAppBaseUrl/nb/gravid/krav/${skjema.id}",
-                365.days
+                365.days,
             )
         }
     }
@@ -96,16 +106,16 @@ class ArbeidsgiverNotifikasjonProcessor(
         val virkomhetsnummer: String,
         val tittel: String,
         val lenke: String,
-        val hardDeleteOm: Duration
+        val hardDeleteOm: Duration,
     )
 
     data class JobbData(
         val skjemaId: UUID,
-        val skjemaType: SkjemaType
+        val skjemaType: SkjemaType,
     ) {
         enum class SkjemaType {
             KroniskKrav,
-            GravidKrav
+            GravidKrav,
         }
     }
 }

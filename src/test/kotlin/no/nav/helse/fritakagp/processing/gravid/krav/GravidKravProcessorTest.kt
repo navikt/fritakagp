@@ -25,8 +25,8 @@ import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.emptyJob
 import no.nav.helse.fritakagp.processing.BakgrunnsJobbUtils.testJob
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonJobbdata
 import no.nav.helse.fritakagp.processing.brukernotifikasjon.BrukernotifikasjonProcessorNy
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor.Companion.brevkode
-import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor.Companion.dokumentasjonBrevkode
+import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor.Companion.BREVKODE
+import no.nav.helse.fritakagp.processing.gravid.krav.GravidKravProcessor.Companion.DOKUMENTASJON_BREVKODE
 import no.nav.helse.fritakagp.readToObjectNode
 import no.nav.helsearbeidsgiver.dokarkiv.DokArkivClient
 import no.nav.helsearbeidsgiver.dokarkiv.domene.OpprettOgFerdigstillResponse
@@ -40,7 +40,6 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 class GravidKravProcessorTest {
-
     val joarkMock = mockk<DokArkivClient>(relaxed = true)
     val oppgaveMock = mockk<OppgaveKlient>(relaxed = true)
     val repositoryMock = mockk<GravidKravRepository>(relaxed = true)
@@ -106,14 +105,14 @@ class GravidKravProcessorTest {
 
         coVerify(exactly = 1) {
             joarkMock.opprettOgFerdigstillJournalpost(
-                GravidKrav.tittel,
+                GravidKrav.TITTEL,
                 any(),
                 any(),
                 any(),
                 withArg {
                     assertEquals(2, it.size)
-                    assertEquals(brevkode, it.first().brevkode)
-                    assertEquals(dokumentasjonBrevkode, it[1].brevkode)
+                    assertEquals(BREVKODE, it.first().brevkode)
+                    assertEquals(DOKUMENTASJON_BREVKODE, it[1].brevkode)
                     assertEquals("ARKIV", it[0].dokumentVarianter[0].variantFormat)
                     assertEquals("PDF", it[0].dokumentVarianter[0].filtype)
                     assertEquals("JSON", it[0].dokumentVarianter[1].filtype)
@@ -124,7 +123,7 @@ class GravidKravProcessorTest {
                 },
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -159,7 +158,7 @@ class GravidKravProcessorTest {
                         fail()
                     }
                 },
-                any()
+                any(),
             )
         }
 

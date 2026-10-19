@@ -1,32 +1,26 @@
 Fritak Arbeidsgiverperiode (AGP) 
 ================
 
-
 Backend for mottak av søknader om fritak fra AGP ved sykepenger.
+
 # Komme i gang
 
-For å kjøre lokalt kan du starte  `docker compose up` fra docker/local før du starter prosjektet. 
-
-http://localhost:8080/local/token-please?subject=12345678910
-
-Kopier token og sett som bearer token i feks Postman. 
-Deretter kan du kalle: 
-
-http://localhost:8080/fritak-agp-api/api/v1/arbeidsgivere
-
-# URL i dev
+## URL i dev
 
 https://arbeidsgiver.intern.dev.nav.no/fritak-agp/nb
 
 
-# Koble til Databasen i GCP
+## Koble til Databasen i GCP
 
 Følg oppskriften for Cloud SQL proxy her: https://doc.nais.io/reference/cli/postgres/
 
 For å koble til når du har personlig bruker:
+```
 CONNECTION_NAME=$(gcloud sql instances describe fritakagp --format="get(connectionName)" --project helsearbeidsgiver-dev-6d06);
 ./cloud_sql_proxy -instances=${CONNECTION_NAME}=tcp:5555
+
 gcloud auth print-access-token
+```
 
 Koble til localhost:5555 med nav epost og access tokenet som blir printa over 
 

@@ -1,0 +1,68 @@
+spec:
+  kafka:
+    pool: nav-prod
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_16
+        tier: db-custom-1-3840
+        diskAutoresize: true
+        databases:
+          - name: fritakagp-db
+        flags:
+          - name: cloudsql.enable_pgaudit
+            value: "on"
+          - name: pgaudit.log
+            value: "write,ddl,role"
+          - name: pgaudit.log_parameter
+            value: "on"
+          - name: pgaudit.log_relation
+            value: "on"
+    buckets:
+      - name: helse-arbeidsgiver-fritakagb-bucket-prod
+  ingresses:
+    - https://fritakagp-api.intern.nav.no
+  accessPolicy:
+    outbound:
+      external:
+        - host: aareg-services.prod-fss-pub.nais.io
+        - host: dokarkiv.prod-fss-pub.nais.io
+        - host: oppgave.prod-fss-pub.nais.io
+        - host: pdl-api.prod-fss-pub.nais.io
+        - host: kafka-schema-registry.nais.adeo.no
+        - host: api-gw.oera.no
+        - host: www.altinn.no
+  envFrom:
+    # servicebrukerens passord som er hentet fra vault og lagt inn slik: https://doc.nais.io/security/secrets/kubernetes-secrets/
+    - secret: service-user-password-prod
+    - secret: altinn-api-gw-keys-prod
+  env:
+    - name: KOIN_PROFILE
+      value: PROD
+    - name: GCP_PRJ_ID
+      value: helsearbeidsgiver-prod-8a1c
+    - name: GCP_BUCKET_NAME
+      value: helse-arbeidsgiver-fritakagb-bucket-prod
+    - name: AAREG_SCOPE
+      value: api://prod-fss.arbeidsforhold.aareg-services-nais/.default
+    - name: ALTINN_TILGANGER_SCOPE
+      value: prod-gcp:fager:arbeidsgiver-altinn-tilganger
+    - name: ARBEIDSGIVER_NOTIFIKASJON_SCOPE
+      value: api://prod-gcp.fager.notifikasjon-produsent-api/.default
+    - name: DOKARKIV_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: OPPGAVE_SCOPE
+      value: api://prod-fss.oppgavehandtering.oppgave/.default
+    - name: PDL_SCOPE
+      value: api://prod-fss.pdl.pdl-api/.default
+    - name: FRONTEND_URL
+      value: https://arbeidsgiver.nav.no/fritak-agp
+    - name: AAREG_URL
+      value: https://aareg-services.prod-fss-pub.nais.io
+    - name: ARBEIDSGIVER_NOTIFIKASJON_API_URL
+      value: http://notifikasjon-produsent-api.fager/api/graphql
+    - name: DOKARKIV_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1
+    - name: OPPGAVEBEHANDLING_URL
+      value: https://oppgave.prod-fss-pub.nais.io/api/v1/oppgaver
+    - name: PDL_URL
+      value: https://pdl-api.prod-fss-pub.nais.io/graphql

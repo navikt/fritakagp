@@ -45,24 +45,27 @@ class GravidSoknadRequestTest {
     @Test
     fun `Når tiltak inneholder ANNET må tiltaksbeskrivelse ha innhold`() {
         validationShouldFailFor(GravidSoknadRequest::tiltakBeskrivelse) {
-            GravidTestData.fullValidSoeknadRequest.copy(
-                tiltak = listOf(Tiltak.ANNET),
-                tiltakBeskrivelse = ""
-            ).validate(true)
+            GravidTestData.fullValidSoeknadRequest
+                .copy(
+                    tiltak = listOf(Tiltak.ANNET),
+                    tiltakBeskrivelse = "",
+                ).validate(true)
         }
 
-        GravidTestData.fullValidSoeknadRequest.copy(
-            tiltak = listOf(Tiltak.ANNET),
-            tiltakBeskrivelse = "dette går bra"
-        ).validate(true)
+        GravidTestData.fullValidSoeknadRequest
+            .copy(
+                tiltak = listOf(Tiltak.ANNET),
+                tiltakBeskrivelse = "dette går bra",
+            ).validate(true)
     }
 
     @Test
     fun `Om tiltak ikke inneholder ANNET er ikke tiltaksbeskrivelse påkrevd`() {
-        GravidTestData.fullValidSoeknadRequest.copy(
-            tiltak = listOf(Tiltak.TILPASSET_ARBEIDSTID),
-            tiltakBeskrivelse = null
-        ).validate(true)
+        GravidTestData.fullValidSoeknadRequest
+            .copy(
+                tiltak = listOf(Tiltak.TILPASSET_ARBEIDSTID),
+                tiltakBeskrivelse = null,
+            ).validate(true)
     }
 
     @Test
@@ -88,15 +91,17 @@ class GravidSoknadRequestTest {
     @Test
     fun `Dersom omplassering ikke er mulig må det finnes en årsak`() {
         validationShouldFailFor(GravidSoknadRequest::omplasseringAarsak) {
-            GravidTestData.fullValidSoeknadRequest.copy(
-                omplassering = Omplassering.IKKE_MULIG,
-                omplasseringAarsak = null
-            ).validate(true)
+            GravidTestData.fullValidSoeknadRequest
+                .copy(
+                    omplassering = Omplassering.IKKE_MULIG,
+                    omplasseringAarsak = null,
+                ).validate(true)
         }
 
-        GravidTestData.fullValidSoeknadRequest.copy(
-            omplassering = Omplassering.IKKE_MULIG,
-            omplasseringAarsak = OmplasseringAarsak.FAAR_IKKE_KONTAKT
-        ).validate(true)
+        GravidTestData.fullValidSoeknadRequest
+            .copy(
+                omplassering = Omplassering.IKKE_MULIG,
+                omplasseringAarsak = OmplasseringAarsak.FAAR_IKKE_KONTAKT,
+            ).validate(true)
     }
 }

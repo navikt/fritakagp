@@ -24,7 +24,7 @@ class BrukernotifikasjonServiceTest {
         mapOf(
             "NAIS_APP_NAME" to "test-app",
             "NAIS_NAMESPACE" to "test-namespace",
-            "NAIS_CLUSTER_NAME" to "dev"
+            "NAIS_CLUSTER_NAME" to "dev",
         ).let { naisEnv ->
             BuilderEnvironment.extend(naisEnv)
         }
@@ -33,13 +33,14 @@ class BrukernotifikasjonServiceTest {
     @Test
     fun `opprette varsel`() {
         val skjemaId = UUID.randomUUID()
-        val jobData = BrukernotifikasjonJobbdata(
-            skjemaId = skjemaId,
-            identitetsnummer = "20015001543",
-            virksomhetsnavn = "Bedrift",
-            skjemaType = SkjemaType.KroniskKrav,
-            notifikasjonsType = Oppretting
-        )
+        val jobData =
+            BrukernotifikasjonJobbdata(
+                skjemaId = skjemaId,
+                identitetsnummer = "20015001543",
+                virksomhetsnavn = "Bedrift",
+                skjemaType = SkjemaType.KroniskKrav,
+                notifikasjonsType = Oppretting,
+            )
         val jobDataString = objectMapper.writeValueAsString(jobData)
 
         val testJob = BakgrunnsJobbUtils.testJob(jobDataString)

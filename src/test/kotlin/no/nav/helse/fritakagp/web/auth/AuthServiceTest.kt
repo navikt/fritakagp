@@ -20,7 +20,6 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 
 class AuthServiceTest {
-
     val mockFnr = "mock-fnr"
     val mockGetTokenFn = { "mock-token" }
 
@@ -73,22 +72,24 @@ class AuthServiceTest {
     @Test
     fun `henter hierarki med tilganger`() {
         val mockOrgnr = Orgnr.genererGyldig().verdi
-        val forventetHierarki = listOf(
-            AltinnTilgang(
-                orgnr = mockOrgnr,
-                altinn3Tilganger = setOf("mock-tilgang-slottet"),
-                altinn2Tilganger = setOf("mock-tilgang-skaugum"),
-                underenheter = emptyList(),
-                navn = "Hans Kongelige Høyhet",
-                organisasjonsform = "Monarki"
+        val forventetHierarki =
+            listOf(
+                AltinnTilgang(
+                    orgnr = mockOrgnr,
+                    altinn3Tilganger = setOf("mock-tilgang-slottet"),
+                    altinn2Tilganger = setOf("mock-tilgang-skaugum"),
+                    underenheter = emptyList(),
+                    navn = "Hans Kongelige Høyhet",
+                    organisasjonsform = "Monarki",
+                ),
             )
-        )
 
-        coEvery { mockAltinnClient.hentHierarkiMedTilganger(mockFnr, mockGetTokenFn) } returns AltinnTilgangRespons(
-            isError = false,
-            hierarki = forventetHierarki,
-            tilgangTilOrgNr = emptyMap()
-        )
+        coEvery { mockAltinnClient.hentHierarkiMedTilganger(mockFnr, mockGetTokenFn) } returns
+            AltinnTilgangRespons(
+                isError = false,
+                hierarki = forventetHierarki,
+                tilgangTilOrgNr = emptyMap(),
+            )
 
         val hentetHierarki =
             runBlocking {

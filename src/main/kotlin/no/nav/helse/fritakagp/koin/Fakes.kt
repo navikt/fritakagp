@@ -19,6 +19,8 @@ import no.nav.helse.fritakagp.integration.kafka.BrukernotifikasjonSender
 import no.nav.helse.fritakagp.integration.kafka.MockBrukernotifikasjonBeskjedSender
 import no.nav.helse.fritakagp.integration.virusscan.MockVirusScanner
 import no.nav.helse.fritakagp.integration.virusscan.VirusScanner
+import no.nav.helse.fritakagp.kafka.DialogSender
+import no.nav.helse.fritakagp.kafka.MockDialogProducer
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverOppdaterNotifikasjonProcessor
 import no.nav.helse.fritakagp.web.auth.AuthClient
 import no.nav.helse.fritakagp.web.auth.IdentityProvider
@@ -35,28 +37,30 @@ import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.koin.core.module.Module
 import org.koin.dsl.bind
+import org.koin.dsl.onClose
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun Module.mockExternalDependencies() {
-    single { MockOAuth2Server().apply { start(port = 6668) } }
+    single { MockOAuth2Server().apply { start(port = 6668) } }.onClose { it?.shutdown() }
+
     single {
         spyk(
-            AuthClient("token-endpoint", "token-exchange-endpoint")
+            AuthClient("token-endpoint", "token-exchange-endpoint"),
         ) {
             val mockOAuth2Server: MockOAuth2Server = get()
             coEvery { exchange(IdentityProvider.TOKEN_X, any(), any()) } returns
                 mockOAuth2Server.issueToken(subject = "", issuerId = Issuers.TOKENX, audience = "").let {
                     TokenResponse.Success(
                         it.serialize(),
-                        3599
+                        3599,
                     )
                 }
             coEvery { token(IdentityProvider.AZURE_AD, any()) } answers {
                 mockOAuth2Server.issueToken(subject = "fritakagp", issuerId = "azure", audience = secondArg<String>()).let {
                     TokenResponse.Success(
                         it.serialize(),
-                        3599
+                        3599,
                     )
                 }
             }
@@ -80,11 +84,12 @@ fun Module.mockExternalDependencies() {
     single { MockBrukernotifikasjonBeskjedSender() } bind BrukernotifikasjonSender::class
     single {
         mockk<AaregClient> {
-            coEvery { hentAnsettelsesperioder(any(), any()) } returns mapOf(
-                Orgnr("810007842") to setOf(Periode(LocalDate.MIN, null)),
-                Orgnr("910098896") to setOf(Periode(LocalDate.MIN, null)),
-                Orgnr("917404437") to setOf(Periode(LocalDate.MIN, null))
-            )
+            coEvery { hentAnsettelsesperioder(any(), any()) } returns
+                mapOf(
+                    Orgnr("810007842") to setOf(Periode(LocalDate.MIN, null)),
+                    Orgnr("910098896") to setOf(Periode(LocalDate.MIN, null)),
+                    Orgnr("917404437") to setOf(Periode(LocalDate.MIN, null)),
+                )
         }
     }
 
@@ -98,35 +103,38 @@ fun Module.mockExternalDependencies() {
     single {
         mockk<PdlClient> {
             coEvery { personNavn(any()) } returns PersonNavn("Ola", "M", "Avsender")
-            coEvery { fullPerson(any()) } returns FullPerson(
-                navn = PersonNavn(fornavn = "Per", mellomnavn = "", etternavn = "Ulv"),
-                foedselsdato = LocalDate.of(1900, 1, 1),
-                ident = "aktør-id",
-                diskresjonskode = "SPSF",
-                geografiskTilknytning = "SWE"
-            )
+            coEvery { fullPerson(any()) } returns
+                FullPerson(
+                    navn = PersonNavn(fornavn = "Per", mellomnavn = "", etternavn = "Ulv"),
+                    foedselsdato = LocalDate.of(1900, 1, 1),
+                    ident = "aktør-id",
+                    diskresjonskode = "SPSF",
+                    geografiskTilknytning = "SWE",
+                )
         }
     }
 
     single {
         object : OppgaveKlient {
-            override suspend fun hentOppgave(oppgaveId: Int, callId: String): OppgaveResponse {
-                return OppgaveResponse(oppgaveId, 1, oppgavetype = "JFR", aktivDato = LocalDateTime.now().minusDays(3).toLocalDate(), prioritet = Prioritet.NORM.toString())
-            }
+            override suspend fun hentOppgave(
+                oppgaveId: Int,
+                callId: String,
+            ): OppgaveResponse = OppgaveResponse(oppgaveId, 1, oppgavetype = "JFR", aktivDato = LocalDateTime.now().minusDays(3).toLocalDate(), prioritet = Prioritet.NORM.toString())
 
             override suspend fun opprettOppgave(
                 opprettOppgaveRequest: OpprettOppgaveRequest,
-                callId: String
-            ): OpprettOppgaveResponse = OpprettOppgaveResponse(
-                1234,
-                "0100",
-                tema = "KON",
-                oppgavetype = "JFR",
-                versjon = 1,
-                aktivDato = LocalDate.now(),
-                Prioritet.NORM,
-                Status.UNDER_BEHANDLING
-            )
+                callId: String,
+            ): OpprettOppgaveResponse =
+                OpprettOppgaveResponse(
+                    1234,
+                    "0100",
+                    tema = "KON",
+                    oppgavetype = "JFR",
+                    versjon = 1,
+                    aktivDato = LocalDate.now(),
+                    Prioritet.NORM,
+                    Status.UNDER_BEHANDLING,
+                )
         }
     } bind OppgaveKlient::class
 
@@ -134,8 +142,7 @@ fun Module.mockExternalDependencies() {
     single { MockBucketStorage() } bind BucketStorage::class
 
     single { mockk<ArbeidsgiverOppdaterNotifikasjonProcessor>(relaxed = true) }
+    single { MockDialogProducer() } bind DialogSender::class
 }
 
-fun String.loadFromResources(): String {
-    return ClassLoader.getSystemResource(this).readText()
-}
+fun String.loadFromResources(): String = ClassLoader.getSystemResource(this).readText()

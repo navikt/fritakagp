@@ -8,7 +8,7 @@ import java.util.UUID
 
 class BrukernotifikasjonProcessorNy(
     private val brukerNotifikasjonProducerFactory: BrukernotifikasjonSender,
-    private val brukernotifikasjonService: BrukernotifikasjonService
+    private val brukernotifikasjonService: BrukernotifikasjonService,
 ) : BakgrunnsjobbProsesserer {
     override val type: String get() = JOB_TYPE
     private val logger = this.logger()

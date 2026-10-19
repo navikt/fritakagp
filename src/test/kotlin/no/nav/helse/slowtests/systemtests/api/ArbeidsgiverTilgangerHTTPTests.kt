@@ -17,35 +17,44 @@ class ArbeidsgiverTilgangerHTTPTests : SystemTestBase() {
     private val arbeidsgivereUrl = "/fritak-agp-api/api/v1/arbeidsgiver-tilganger"
 
     @Test
-    fun `Skal returnere 401 når man ikke er logget inn`() = suspendableTest {
-        val status = httpClient.get {
-            appUrl(arbeidsgivereUrl)
-            contentType(ContentType.Application.Json)
-        }.status
+    fun `Skal returnere 401 når man ikke er logget inn`() =
+        suspendableTest {
+            val status =
+                httpClient
+                    .get {
+                        appUrl(arbeidsgivereUrl)
+                        contentType(ContentType.Application.Json)
+                    }.status
 
-        Assertions.assertThat(status).isEqualTo(HttpStatusCode.Unauthorized)
-    }
-
-    @Test
-    fun `Skal returnere liste av arbeidsgivere når man er logget inn`() = suspendableTest {
-        val response: List<AltinnTilgang> = httpClient.get {
-            appUrl(arbeidsgivereUrl)
-            contentType(ContentType.Application.Json)
-            loggedInAs(KroniskTestData.validIdentitetsnummer)
-        }.body()
-        Assertions.assertThat(response.size).isGreaterThan(0)
-    }
+            Assertions.assertThat(status).isEqualTo(HttpStatusCode.Unauthorized)
+        }
 
     @Test
-    fun `Skal returnere liste med riktige json nøkler`() = suspendableTest {
-        val response = httpClient.get {
-            appUrl(arbeidsgivereUrl)
-            contentType(ContentType.Application.Json)
-            loggedInAs(KroniskTestData.validIdentitetsnummer)
-        }.bodyAsText()
-        val expectedKeys = setOf("orgnr", "altinn3Tilganger", "altinn2Tilganger", "underenheter", "navn", "organisasjonsform")
-        val result: List<Map<String, Any>> = customObjectMapper().readValue(response)
-        Assertions.assertThat(result.size).isGreaterThan(0)
-        Assertions.assertThat(result.first().keys).containsAll(expectedKeys)
-    }
+    fun `Skal returnere liste av arbeidsgivere når man er logget inn`() =
+        suspendableTest {
+            val response: List<AltinnTilgang> =
+                httpClient
+                    .get {
+                        appUrl(arbeidsgivereUrl)
+                        contentType(ContentType.Application.Json)
+                        loggedInAs(KroniskTestData.VALID_IDENTITETSNUMMER)
+                    }.body()
+            Assertions.assertThat(response.size).isGreaterThan(0)
+        }
+
+    @Test
+    fun `Skal returnere liste med riktige json nøkler`() =
+        suspendableTest {
+            val response =
+                httpClient
+                    .get {
+                        appUrl(arbeidsgivereUrl)
+                        contentType(ContentType.Application.Json)
+                        loggedInAs(KroniskTestData.VALID_IDENTITETSNUMMER)
+                    }.bodyAsText()
+            val expectedKeys = setOf("orgnr", "altinn3Tilganger", "altinn2Tilganger", "underenheter", "navn", "organisasjonsform")
+            val result: List<Map<String, Any>> = customObjectMapper().readValue(response)
+            Assertions.assertThat(result.size).isGreaterThan(0)
+            Assertions.assertThat(result.first().keys).containsAll(expectedKeys)
+        }
 }
