@@ -16,7 +16,7 @@ import no.nav.helse.fritakagp.GravidSoeknadMetrics
 import no.nav.helse.fritakagp.Log
 import no.nav.helse.fritakagp.db.GravidKravRepository
 import no.nav.helse.fritakagp.db.GravidSoeknadRepository
-import no.nav.helse.fritakagp.domain.BeloepBeregning
+import no.nav.helse.fritakagp.domain.BeloepService
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.decodeBase64File
 import no.nav.helse.fritakagp.integration.IBrregService
@@ -54,7 +54,7 @@ fun Route.gravidRoutes(
     authService: AuthService,
     brregService: IBrregService,
     pdlService: PdlService,
-    belopBeregning: BeloepBeregning,
+    beloepService: BeloepService,
     aaregClient: AaregClient,
     arbeidsgiverNotifikasjonKlient: ArbeidsgiverNotifikasjonKlient,
     gravidSoeknadRepo: GravidSoeknadRepository,
@@ -195,8 +195,15 @@ fun Route.gravidRoutes(
                 val sendtAvNavn = pdlService.hentNavn(innloggetFnr)
                 val navn = pdlService.hentNavn(request.identitetsnummer)
 
-                val krav = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeloepGravid(krav)
+                val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
+
+                val krav =
+                    request.tilKrav(
+                        sendtAv = innloggetFnr,
+                        sendtAvNavn = sendtAvNavn,
+                        navn = navn,
+                        perioder = perioder,
+                    )
 
                 gravidKravRepo.insert(krav)
                 bakgunnsjobbService.opprettJobb<GravidKravProcessor>(
@@ -242,8 +249,15 @@ fun Route.gravidRoutes(
                     return@patch call.respond(HttpStatusCode.Forbidden)
                 }
 
-                val kravTilOppdatering = request.toDomain(innloggetFnr, sendtAvNavn, navn)
-                belopBeregning.beregnBeloepGravid(kravTilOppdatering)
+                val perioder = beloepService.perioderMedDagsatsOgBeloep(request)
+
+                val kravTilOppdatering =
+                    request.tilKrav(
+                        sendtAv = innloggetFnr,
+                        sendtAvNavn = sendtAvNavn,
+                        navn = navn,
+                        perioder = perioder,
+                    )
 
                 if (forrigeKrav.isDuplicate(kravTilOppdatering)) {
                     return@patch call.respond(HttpStatusCode.Conflict)

@@ -205,4 +205,4 @@ fun genererePeriodeTable(perioder: List<Arbeidsgiverperiode>): String =
         }
     }.render(StringBuilder()).toString()
 
-fun Double.tilProsent(): String = multiplySafe(100.0).toString() + "%"
+fun Double.tilProsent(): String = multiplySafe(100).toDouble().toString() + "%"

@@ -19,7 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class ArbeidsgiverNotifikasjonProcessorTest {
+class ArbeidsgiverNotifikasjonProcessorTest {
     val arbeidsgiverNotifikasjonKlient = mockClientArbeidsgiverNotifikasjonKlient()
     val gravidKravRepositoryMock = mockk<GravidKravRepository>(relaxed = true)
     val kroniskKravRepositoryMock = mockk<KroniskKravRepository>(relaxed = true)

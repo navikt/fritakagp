@@ -7,8 +7,10 @@ import no.nav.helse.fritakagp.domain.KroniskSoeknad
 import no.nav.helse.fritakagp.integration.arbeidsgiver.OpprettOppgaveResponse
 import no.nav.helse.fritakagp.integration.arbeidsgiver.Prioritet
 import no.nav.helse.fritakagp.integration.arbeidsgiver.Status
+import no.nav.helse.fritakagp.web.api.resreq.ArbeidsgiverperiodeRequest
 import no.nav.helse.fritakagp.web.api.resreq.KroniskKravRequest
 import no.nav.helse.fritakagp.web.api.resreq.KroniskSoknadRequest
+import no.nav.helsearbeidsgiver.utils.test.date.januar
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -55,15 +57,7 @@ object KroniskTestData {
         KroniskKravRequest(
             virksomhetsnummer = VALID_ORGNR,
             identitetsnummer = VALID_IDENTITETSNUMMER,
-            perioder =
-                listOf(
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        2,
-                        månedsinntekt = 2590.8,
-                    ),
-                ),
+            perioder = listOf(mockArbeidsgiverperiodeRequest()),
             bekreftet = true,
             kontrollDager = null,
             antallDager = 4,
@@ -75,22 +69,22 @@ object KroniskTestData {
             identitetsnummer = GravidTestData.VALID_IDENTITETSNUMMER,
             perioder =
                 listOf(
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 15),
-                        LocalDate.of(2020, 1, 10),
-                        2,
+                    ArbeidsgiverperiodeRequest(
+                        fom = 15.januar(2020),
+                        tom = 10.januar(2020),
+                        antallDagerMedRefusjon = 2,
                         månedsinntekt = 2590.8,
                     ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 4),
-                        2,
+                    ArbeidsgiverperiodeRequest(
+                        fom = 5.januar(2020),
+                        tom = 4.januar(2020),
+                        antallDagerMedRefusjon = 2,
                         månedsinntekt = 3590.8,
                     ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 14),
-                        12,
+                    ArbeidsgiverperiodeRequest(
+                        fom = 5.januar(2020),
+                        tom = 14.januar(2020),
+                        antallDagerMedRefusjon = 12,
                         månedsinntekt = 1590.8,
                     ),
                 ),
@@ -108,10 +102,13 @@ object KroniskTestData {
             perioder =
                 listOf(
                     Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
+                        fom = 5.januar(2020),
+                        tom = 10.januar(2020),
+                        antallDagerMedRefusjon = 5,
                         månedsinntekt = 2590.8,
+                        gradering = 1.0,
+                        dagsats = 7772.4,
+                        belop = 38862.0,
                     ),
                 ),
             kontrollDager = null,
@@ -125,51 +122,7 @@ object KroniskTestData {
             sendtAv = VALID_IDENTITETSNUMMER,
             virksomhetsnummer = VALID_ORGNR,
             identitetsnummer = VALID_IDENTITETSNUMMER,
-            perioder =
-                listOf(
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
-                        månedsinntekt = 2590.8,
-                    ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
-                        månedsinntekt = 2590.8,
-                    ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
-                        månedsinntekt = 2590.8,
-                    ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
-                        månedsinntekt = 2590.8,
-                    ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
-                        månedsinntekt = 2590.8,
-                    ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
-                        månedsinntekt = 2590.8,
-                    ),
-                    Arbeidsgiverperiode(
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 10),
-                        5,
-                        månedsinntekt = 2590.8,
-                    ),
-                ),
+            perioder = List(7) { mockArbeidsgiverperiode() },
             kontrollDager = null,
             antallDager = 4,
             sendtAvNavn = VALID_SENDT_AV_NAVN,
