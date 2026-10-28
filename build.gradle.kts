@@ -128,7 +128,7 @@ dependencies {
     val valiktorVersion = project.property("valiktorVersion") as String
 
     constraints {
-        implementation("at.yawk.lz4:lz4-java:1.11.4") {
+        implementation("at.yawk.lz4:lz4-java:1.12.1") {
             because("org.apache.kafka:kafka-clients")
         }
     }
