@@ -127,6 +127,12 @@ dependencies {
     val utilsVersion = project.property("utilsVersion") as String
     val valiktorVersion = project.property("valiktorVersion") as String
 
+    constraints {
+        implementation("at.yawk.lz4:lz4-java:1.11.4") {
+            because("org.apache.kafka:kafka-clients")
+        }
+    }
+
     implementation("org.apache.commons:commons-text:$apacheCommonsTextVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
