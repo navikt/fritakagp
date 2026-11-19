@@ -7,18 +7,13 @@ import no.nav.helse.fritakagp.domain.GravidSoeknad
 import no.nav.helse.fritakagp.domain.Omplassering
 import no.nav.helse.fritakagp.domain.OmplasseringAarsak
 import no.nav.helse.fritakagp.domain.Tiltak
-import no.nav.helse.fritakagp.web.api.resreq.validation.datoerHarRiktigRekkefolge
 import no.nav.helse.fritakagp.web.api.resreq.validation.isAvStorrelse
 import no.nav.helse.fritakagp.web.api.resreq.validation.isGodkjentFiltype
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidIdentitetsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isValidOrganisasjonsnummer
 import no.nav.helse.fritakagp.web.api.resreq.validation.isVirksomhet
-import no.nav.helse.fritakagp.web.api.resreq.validation.maaHaAktivAnsettelsesperiode
-import no.nav.helse.fritakagp.web.api.resreq.validation.maanedsInntektErMellomNullOgTiMil
-import no.nav.helse.fritakagp.web.api.resreq.validation.refusjonsDagerIkkeOverstigerPeriodelengde
 import no.nav.helsearbeidsgiver.aareg.Periode
 import org.valiktor.functions.isGreaterThan
-import org.valiktor.functions.isGreaterThanOrEqualTo
 import org.valiktor.functions.isLessThanOrEqualTo
 import org.valiktor.functions.isNotEmpty
 import org.valiktor.functions.isNotNull
@@ -89,7 +84,7 @@ data class GravidSoknadRequest(
 data class GravidKravRequest(
     val virksomhetsnummer: String,
     val identitetsnummer: String,
-    val perioder: List<Arbeidsgiverperiode>,
+    val perioder: List<ArbeidsgiverperiodeRequest>,
     val bekreftet: Boolean,
     val kontrollDager: Int?,
     val antallDager: Int,
@@ -102,22 +97,15 @@ data class GravidKravRequest(
             validate(GravidKravRequest::identitetsnummer).isValidIdentitetsnummer()
             validate(GravidKravRequest::virksomhetsnummer).isValidOrganisasjonsnummer()
             validate(GravidKravRequest::bekreftet).isTrue()
-
-            validate(GravidKravRequest::perioder).validateForEach {
-                validate(Arbeidsgiverperiode::fom).datoerHarRiktigRekkefolge(it.tom)
-                validate(Arbeidsgiverperiode::antallDagerMedRefusjon).refusjonsDagerIkkeOverstigerPeriodelengde(it)
-                validate(Arbeidsgiverperiode::månedsinntekt).maanedsInntektErMellomNullOgTiMil()
-                validate(Arbeidsgiverperiode::fom).maaHaAktivAnsettelsesperiode(it, ansettelsesperioder)
-                validate(Arbeidsgiverperiode::gradering).isLessThanOrEqualTo(1.0)
-                validate(Arbeidsgiverperiode::gradering).isGreaterThanOrEqualTo(0.2)
-            }
+            validate(GravidKravRequest::perioder).validateForEach { it.validate(this, ansettelsesperioder) }
         }
     }
 
-    fun toDomain(
+    fun tilKrav(
         sendtAv: String,
         sendtAvNavn: String,
         navn: String,
+        perioder: List<Arbeidsgiverperiode>,
     ) = GravidKrav(
         identitetsnummer = identitetsnummer,
         navn = navn,

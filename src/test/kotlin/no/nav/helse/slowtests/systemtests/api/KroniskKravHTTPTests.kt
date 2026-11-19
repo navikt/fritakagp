@@ -10,11 +10,14 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.helse.KroniskTestData
 import no.nav.helse.fritakagp.db.KroniskKravRepository
-import no.nav.helse.fritakagp.domain.Arbeidsgiverperiode
 import no.nav.helse.fritakagp.domain.KravStatus
 import no.nav.helse.fritakagp.domain.KroniskKrav
+import no.nav.helse.fritakagp.web.api.resreq.ArbeidsgiverperiodeRequest
 import no.nav.helse.fritakagp.web.api.resreq.validation.Problem
 import no.nav.helse.fritakagp.web.api.resreq.validation.ValidationProblem
+import no.nav.helse.mockArbeidsgiverperiode
+import no.nav.helsearbeidsgiver.utils.test.date.februar
+import no.nav.helsearbeidsgiver.utils.test.date.januar
 import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
 import no.nav.helsearbeidsgiver.utils.wrapper.Fnr
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
@@ -22,7 +25,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.koin.test.inject
-import java.time.LocalDate
 
 class KroniskKravHTTPTests : SystemTestBase() {
     private val kravKroniskUrl = "/fritak-agp-api/api/v1/kronisk/krav"
@@ -175,22 +177,22 @@ class KroniskKravHTTPTests : SystemTestBase() {
                         KroniskTestData.kroniskKravRequestInValid.copy(
                             perioder =
                                 listOf(
-                                    Arbeidsgiverperiode(
-                                        LocalDate.of(2020, 2, 1),
-                                        LocalDate.of(2020, 1, 31),
-                                        29,
+                                    ArbeidsgiverperiodeRequest(
+                                        fom = 1.februar(2020),
+                                        tom = 31.januar(2020),
+                                        antallDagerMedRefusjon = 29,
                                         månedsinntekt = 34000000.0,
                                     ),
-                                    Arbeidsgiverperiode(
-                                        LocalDate.of(2020, 2, 3),
-                                        LocalDate.of(2020, 1, 31),
-                                        23,
+                                    ArbeidsgiverperiodeRequest(
+                                        fom = 3.februar(2020),
+                                        tom = 31.januar(2020),
+                                        antallDagerMedRefusjon = 23,
                                         månedsinntekt = -30.0,
                                     ),
-                                    Arbeidsgiverperiode(
-                                        LocalDate.of(2020, 1, 5),
-                                        LocalDate.of(2020, 1, 14),
-                                        12,
+                                    ArbeidsgiverperiodeRequest(
+                                        fom = 5.januar(2020),
+                                        tom = 14.januar(2020),
+                                        antallDagerMedRefusjon = 12,
                                         månedsinntekt = 2590.8,
                                     ),
                                 ),
@@ -220,7 +222,7 @@ class KroniskKravHTTPTests : SystemTestBase() {
         suspendableTest {
             val repo by inject<KroniskKravRepository>()
 
-            val krav = repo.insert(KroniskTestData.kroniskKravRequestValid.toDomain("hohoho", "god", "jul"))
+            val krav = repo.insert(KroniskTestData.kroniskKravRequestValid.tilKrav("hohoho", "god", "jul", listOf(mockArbeidsgiverperiode())))
 
             val response =
                 httpClient.patch {
