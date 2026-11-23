@@ -1,14 +1,11 @@
 package no.nav.helse.fritakagp
 
 import io.prometheus.client.Counter
-import no.nav.hag.utils.bakgrunnsjobb.Bakgrunnsvarsler
 
 const val METRICS_NS = "fritakagp"
 
-class MetrikkVarsler : Bakgrunnsvarsler {
-    override fun rapporterPermanentFeiletJobb() {
-        FEILET_JOBB_COUNTER.inc()
-    }
+fun rapporterPermanentFeiletJobb() {
+    FEILET_JOBB_COUNTER.inc()
 }
 
 val FEILET_JOBB_COUNTER: Counter =
