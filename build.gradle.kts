@@ -134,6 +134,7 @@ dependencies {
     }
 
     implementation("org.apache.commons:commons-text:$apacheCommonsTextVersion")
+    // TODO: Migrer til Jackson 3. Jackson 3 er allerede på classpath via hag-bakgrunnsjobb, logstash-logback-encoder og mock-oauth2-server.
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonModuleKotlinVersion")
