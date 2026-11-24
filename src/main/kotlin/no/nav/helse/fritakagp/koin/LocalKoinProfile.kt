@@ -14,7 +14,7 @@ import no.nav.helse.fritakagp.db.PostgresGravidSoeknadRepository
 import no.nav.helse.fritakagp.db.PostgresKroniskKravRepository
 import no.nav.helse.fritakagp.db.PostgresKroniskSoeknadRepository
 import no.nav.helse.fritakagp.db.createHikariConfig
-import no.nav.helse.fritakagp.domain.BeloepBeregning
+import no.nav.helse.fritakagp.domain.BeloepService
 import no.nav.helse.fritakagp.integration.GrunnbeloepClient
 import no.nav.helse.fritakagp.integration.PdlService
 import no.nav.helse.fritakagp.processing.arbeidsgivernotifikasjon.ArbeidsgiverNotifikasjonProcessor
@@ -54,7 +54,7 @@ fun localConfig(env: Env.Local): Module =
         mockExternalDependencies()
 
         single { GrunnbeloepClient(url = env.grunnbeloepUrl, httpClient = get()) }
-        single { BeloepBeregning(grunnbeloepClient = get()) }
+        single { BeloepService(grunnbeloepClient = get()) }
 
         single {
             HikariDataSource(

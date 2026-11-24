@@ -7,7 +7,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class KroniskSoknadRequestTest {
+class KroniskSoknadRequestTest {
     val navn = "Personliga Person"
     val sendtAv = "123"
     val sendtAvNavn = "Ola M Avsender"
@@ -34,7 +34,7 @@ internal class KroniskSoknadRequestTest {
     }
 
     @Test
-    internal fun `mapping til domenemodell tar med harVedleggflagg`() {
+    fun `mapping til domenemodell tar med harVedleggflagg`() {
         Assertions.assertThat(KroniskTestData.kroniskSoknadMedFil.toDomain(sendtAv, sendtAvNavn, navn).harVedlegg).isTrue()
         Assertions.assertThat(KroniskTestData.fullValidRequest.toDomain(sendtAv, sendtAvNavn, navn).harVedlegg).isFalse()
     }
